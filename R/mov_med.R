@@ -1,5 +1,5 @@
 
-mov_med <- function(data,
+mov_med <- function(dataa,
                     date,
                     pat_id,
                     width = as.difftime(12, units = "weeks")) {
