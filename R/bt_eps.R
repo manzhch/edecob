@@ -51,12 +51,8 @@ bt_eps <- function(bt_rep, med_pts, resid, ar_resid, date, med_win_size){
 
     # calculate Y* (the bootstrapped data points using the AR model)
     bt_Y <- sapply(1:length(date), function(x, bt_eta) {
-      return(
-        med_pts[as.logical(seq(min(date),
-                               max(date) - med_win_size/2 + as.difftime(1, units = "days"),
-                               as.difftime(1, units = "days"))
-                           == date[x])]
-        + bt_eta[x])
+      return(med_pts$med[as.logical(med_pts$date == date[x])] +
+               bt_eta[x])
     }, bt_eta)
 
     # calculate S_star (the bootstrapped median)
