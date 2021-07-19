@@ -1,43 +1,34 @@
 
-# function for calculating median
+# function for calculating median, needed for bt_eps
 fun_running_median <- function(win_beg_day, bt_rep, bt_Y, date, med_pts, med_win_size){
 
-  last_data_date <- max(date)
+
   window_ind <- as.logical(
     (date >= win_beg_day) *
       (date < win_beg_day + med_win_size))
-  # print(median(bt_Y[window_ind]))
+
   if (sum(window_ind) > 0) {
     return(list("value" = stats::median(bt_Y[window_ind]),
                 "date" = win_beg_day + med_win_size / 2,
-                "USUBJID" = my_patient,
-                "bt_rep" = bt_rep,
-                "diff_from_first_approx" = stats::median(bt_Y[window_ind]) -
-                  med_pts[as.logical(seq(min(date),
-                                        max(date) - med_win_size/2 + as.difftime(1, units = "days"),
-                                        as.difftime(1, units = "days"))
-                                     == win_beg_day + med_win_size / 2)])
+                "bt_rep" = bt_rep)
     )
   } else {
     return(list("value" = NA,
                 "date" = NA,
-                "USUBJID" = my_patient,
-                "bt_rep" = bt_rep,
-                "diff_from_first_approx" = NA))
+                "bt_rep" = bt_rep))
   }
 }
 
-
+# one bootstrap step
 # bootstrap the epsilon (error of AR) and then reconstruct smoother
-# using AR model and epsilon*
+# (currently the moving median) using AR model and epsilon*
 
-bt_eps <- function(med_pts, resid, ar_resid, date, med_win_size, bt_rep){
+bt_eps <- function(bt_rep, med_pts, resid, ar_resid, date, med_win_size){
 
   # bootstrap error
-  bt_Y <- numeric(length(patient_residual_ind[pt_ar_ind]))
-  bt_eta <- numeric(length(patient_residual_ind[pt_ar_ind]))
-  bt_epsilon <- numeric(length(patient_residual_ind[pt_ar_ind]))
-  # print(pt_ar_ind)
+  bt_Y <- numeric(length(date))
+  bt_eta <- numeric(length(date))
+  bt_epsilon <- numeric(length(date))
 
   # if an AR model was fitted (i.e. data had > 1 rows and non-zero variance)
   if (!is.na(ar_resid)) {
@@ -85,12 +76,19 @@ bt_eps <- function(med_pts, resid, ar_resid, date, med_win_size, bt_rep){
     } else {
       return(data.frame("value" = NA,
                         "date" = NA,
-                        "USUBJID" = my_patient,
-                        "bt_no" = bt_no,
-                        "diff_from_first_approx" = NA))
+                        "bt_rep" = bt_rep))
     }
   }
 
 
 
 }
+
+bt_S <- function(resid, ar_resid, date, med_win_size, bt_tot_rep) {
+  bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, resid, ar_resid, date, med_win_size))
+  return(bt_Y)
+}
+
+# S_star <- do.call(rbind, lapply(split(FUTT, factor(FUTT$USUBJID)), fun_S_star))
+# S_star <- S_star[!is.na(S_star$date),]
+# S_star$date <- as.Date(unlist(S_star$date), format = "%Y-%m-%d", origin = "1970-01-01")
