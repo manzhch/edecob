@@ -1,5 +1,4 @@
 
-# function for calculating median, needed for bt_eps
 fun_running_median <- function(win_beg_day, bt_rep, bt_Y, date, med_pts, med_win_size){
 
 
