@@ -1,14 +1,14 @@
 
-fun_running_median <- function(win_beg_day, bt_rep, bt_Y, date, smoother_pts, med_win_size){
+fun_running_median <- function(win_beg_day, bt_rep, bt_Y, date, smoother_pts, width){
 
 
   window_ind <- as.logical(
     (date >= win_beg_day) *
-      (date < win_beg_day + med_win_size))
+      (date < win_beg_day + width))
 
   if (sum(window_ind) > 0) {
     return(list("value" = stats::median(bt_Y[window_ind]),
-                "date" = win_beg_day + med_win_size / 2,
+                "date" = win_beg_day + width / 2,
                 "bt_rep" = bt_rep)
     )
   } else {
@@ -22,7 +22,7 @@ fun_running_median <- function(win_beg_day, bt_rep, bt_Y, date, smoother_pts, me
 # bootstrap the epsilon (error of AR) and then reconstruct smoother
 # (currently the moving median) using AR model and epsilon*
 
-bt_eps <- function(bt_rep, smoother_pts, resid, date, med_win_size){
+bt_eps <- function(bt_rep, smoother_pts, resid, date, width){
 
   # bootstrap error
   bt_Y <- numeric(length(date))
@@ -64,14 +64,14 @@ bt_eps <- function(bt_rep, smoother_pts, resid, date, med_win_size){
     win_beg_day <- min(date)
     last_data_date <- max(date)
 
-    if (last_data_date > win_beg_day + med_win_size) {
+    if (last_data_date > win_beg_day + width) {
       S_star_one_bt <- as.data.frame(do.call(rbind, lapply(
         seq(
           win_beg_day,
-          last_data_date - med_win_size - as.difftime(1, units = "days"),
+          last_data_date - width - as.difftime(1, units = "days"),
           as.difftime(1, units = "days")
         ),
-        fun_running_median, bt_rep, bt_Y, date, smoother_pts, med_win_size
+        fun_running_median, bt_rep, bt_Y, date, smoother_pts, width
       )))
       return(S_star_one_bt)
     } else {
@@ -85,7 +85,7 @@ bt_eps <- function(bt_rep, smoother_pts, resid, date, med_win_size){
 
 }
 
-bt_S <- function(resid, date, med_win_size, bt_tot_rep) {
-  bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, resid, date, med_win_size))
+bt_smoother <- function(resid, date, width, bt_tot_rep) {
+  bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, resid, date, width))
   return(bt_Y)
 }
