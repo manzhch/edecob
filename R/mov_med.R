@@ -1,7 +1,7 @@
 
 mov_med <- function(data,
                     date,
-                    pat_id,
+                    subj_id = "subj1",
                     width = as.difftime(12, units = "weeks")) {
 
   # check if data is sorted by time
@@ -17,7 +17,7 @@ mov_med <- function(data,
   med_pts_date <- as.Date(character(dur), "%Y-%m-%d")
   med_pts_win_beg <- as.Date(character(dur), "%Y-%m-%d")
   med_pts_win_end <- as.Date(character(dur), "%Y-%m-%d")
-  med_pts_pat_id <- character(dur)
+  med_pts_subj_id <- character(dur)
   ll <- 1 # index for the lists above
 
 
@@ -43,7 +43,7 @@ mov_med <- function(data,
       med_pts_date[ll] <- win_beg_day
       med_pts_win_beg[ll] <- win_beg_day
       med_pts_win_end[ll] <- win_beg_day + 2 * width - 1
-      med_pts_pat_id[ll] <- pat_id
+      med_pts_subj_id[ll] <- subj_id
 
       ll <- ll + 1
     }
@@ -68,7 +68,7 @@ mov_med <- function(data,
       med_pts_date[ll] <- win_beg_day + width / 2
       med_pts_win_beg[ll] <- win_beg_day
       med_pts_win_end[ll] <- win_beg_day + 2 * width - 1
-      med_pts_pat_id[ll] <- pat_id
+      med_pts_subj_id[ll] <- subj_id
 
       ll <- ll + 1
     }
@@ -83,7 +83,7 @@ mov_med <- function(data,
     "win_beg" = med_pts_win_beg,
     "win_end" = med_pts_win_end,
     "date" = med_pts_date,
-    "pat_id" = med_pts_pat_id,
+    "subj_id" = med_pts_subj_id,
     stringsAsFactors = FALSE
   )
   med_pts <- med_pts[!is.na(med_pts$date), ]
