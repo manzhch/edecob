@@ -1,5 +1,5 @@
 
-fun_running_median <- function(win_beg_day, bt_rep, bt_Y, date, med_pts, med_win_size){
+fun_running_median <- function(win_beg_day, bt_rep, bt_Y, date, smoother_pts, med_win_size){
 
 
   window_ind <- as.logical(
@@ -22,7 +22,7 @@ fun_running_median <- function(win_beg_day, bt_rep, bt_Y, date, med_pts, med_win
 # bootstrap the epsilon (error of AR) and then reconstruct smoother
 # (currently the moving median) using AR model and epsilon*
 
-bt_eps <- function(bt_rep, med_pts, resid, ar_resid, date, med_win_size){
+bt_eps <- function(bt_rep, smoother_pts, resid, ar_resid, date, med_win_size){
 
   # bootstrap error
   bt_Y <- numeric(length(date))
@@ -50,7 +50,7 @@ bt_eps <- function(bt_rep, med_pts, resid, ar_resid, date, med_win_size){
 
     # calculate Y* (the bootstrapped data points using the AR model)
     bt_Y <- sapply(1:length(date), function(x, bt_eta) {
-      return(med_pts$med[as.logical(med_pts$date == date[x])] +
+      return(smoother_pts$pts[as.logical(smoother_pts$date == date[x])] +
                bt_eta[x])
     }, bt_eta)
 
@@ -65,7 +65,7 @@ bt_eps <- function(bt_rep, med_pts, resid, ar_resid, date, med_win_size){
           last_data_date - med_win_size - as.difftime(1, units = "days"),
           as.difftime(1, units = "days")
         ),
-        fun_running_median, bt_rep, bt_Y, date, med_pts, med_win_size
+        fun_running_median, bt_rep, bt_Y, date, smoother_pts, med_win_size
       )))
       return(S_star_one_bt)
     } else {
@@ -83,7 +83,3 @@ bt_S <- function(resid, ar_resid, date, med_win_size, bt_tot_rep) {
   bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, resid, ar_resid, date, med_win_size))
   return(bt_Y)
 }
-
-# S_star <- do.call(rbind, lapply(split(FUTT, factor(FUTT$USUBJID)), fun_S_star))
-# S_star <- S_star[!is.na(S_star$date),]
-# S_star$date <- as.Date(unlist(S_star$date), format = "%Y-%m-%d", origin = "1970-01-01")

@@ -79,7 +79,7 @@ mov_med <- function(data,
 
   # compile median point data into dataframe
   med_pts <- data.frame(
-    "med" = med_pts_med,
+    "pts" = med_pts_med,
     "win_beg" = med_pts_win_beg,
     "win_end" = med_pts_win_end,
     "date" = med_pts_date,
@@ -89,14 +89,14 @@ mov_med <- function(data,
   med_pts <- med_pts[!is.na(med_pts$date), ]
 }
 
-mov_med_resid <- function(data, date, med_pts) {
+mov_med_resid <- function(data, date, smoother_pts) {
 
   resid <- numeric(length(data))
 
-  if (nrow(data) > 0 && nrow(med_pts) > 0) {
-    for (ii in 1:nrow(med_pts)) {
-      dataset_ind <- as.logical(date == med_pts$date[ii])
-      resid[dataset_ind] <- data[dataset_ind] - med_pts$med[ii]
+  if (nrow(data) > 0 && nrow(smoother_pts) > 0) {
+    for (ii in 1:nrow(smoother_pts)) {
+      dataset_ind <- as.logical(date == smoother_pts$date[ii])
+      resid[dataset_ind] <- data[dataset_ind] - smoother_pts$pts[ii]
     }
   }
 }
