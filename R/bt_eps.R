@@ -22,12 +22,18 @@ fun_running_median <- function(win_beg_day, bt_rep, bt_Y, date, smoother_pts, me
 # bootstrap the epsilon (error of AR) and then reconstruct smoother
 # (currently the moving median) using AR model and epsilon*
 
-bt_eps <- function(bt_rep, smoother_pts, resid, ar_resid, date, med_win_size){
+bt_eps <- function(bt_rep, smoother_pts, resid, date, med_win_size){
 
   # bootstrap error
   bt_Y <- numeric(length(date))
   bt_eta <- numeric(length(date))
   bt_epsilon <- numeric(length(date))
+
+  # fit autoregression model on residuals
+  data_ind <- !is.na(resid)
+  if (sum(data_ind) > 1 && stats::var(resid[data_ind]) != 0) {
+    ar_resid <- stats::ar(resid[data_ind])
+  }
 
   # if an AR model was fitted (i.e. data had > 1 rows and non-zero variance)
   if (!is.na(ar_resid)) {
@@ -79,7 +85,7 @@ bt_eps <- function(bt_rep, smoother_pts, resid, ar_resid, date, med_win_size){
 
 }
 
-bt_S <- function(resid, ar_resid, date, med_win_size, bt_tot_rep) {
-  bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, resid, ar_resid, date, med_win_size))
+bt_S <- function(resid, date, med_win_size, bt_tot_rep) {
+  bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, resid, date, med_win_size))
   return(bt_Y)
 }
