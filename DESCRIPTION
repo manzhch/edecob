@@ -1,11 +1,11 @@
-Package: temppkgname
+Package: edecob
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Zheng Chen",
            family = "Man",
            role = c("aut", "cre"),
-           email = "zheng_chen.man@roche.com")
+           email = "zheng_chen.man@alumni.ethz.ch")
 Description: What the package does (one paragraph).
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
