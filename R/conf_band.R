@@ -24,23 +24,23 @@ ratio_in_ci <- function(alpha_p,
   names(my_quantile_upper) <- uniq_date
 
   # determine for each data point whether it is between the quantiles
-  bt_smoother$in_interval <- logical(nrow(bt_smoother))
-  bt_smoother$in_interval <-
+  bt_smoother$in_intvl <- logical(nrow(bt_smoother))
+  bt_smoother$in_intvl <-
     as.logical(pmin(bt_smoother$init_est <= rep(my_quantile_upper, bt_tot_rep),
                     bt_smoother$value >= rep(my_quantile_lower, bt_tot_rep)))
 
   # determine for each bootstrap whether all data points are between the quantiles
-  bt_smoother$bt_in_interval <- logical(nrow(bt_smoother))
+  bt_smoother$bt_in_intvl <- logical(nrow(bt_smoother))
   for (ii in 1:bt_tot_rep) {
-    bt_smoother$bt_in_interval[bt_smoother$bt_no == ii] <-
-      as.logical(min(bt_smoother$in_interval[bt_smoother$bt_no == ii]))
+    bt_smoother$bt_in_intvl[bt_smoother$bt_no == ii] <-
+      as.logical(min(bt_smoother$in_intvl[bt_smoother$bt_no == ii]))
   }
 
-  bt_in_interval_ratio <-
-    sum(bt_smoother$bt_in_interval[bt_smoother$date == min(unlist(bt_smoother$date))]) /
+  bt_in_intvl_ratio <-
+    sum(bt_smoother$bt_in_intvl[bt_smoother$date == min(unlist(bt_smoother$date))]) /
     bt_tot_rep
 
-  return(bt_in_interval_ratio - 1 + alpha)
+  return(bt_in_intvl_ratio - 1 + alpha)
 }
 
 # looking for the right alpha_p such that 95% of the bootstrap curves
@@ -87,6 +87,9 @@ conf_band <- function(bt_smoother,
   dates <- sort(unlist(unique(bt_smoother$date)))
   my_quantile_lower <- numeric(length(dates))
   my_quantile_upper <- numeric(length(dates))
+  conf_band <- data.frame(upper = numeric(length(dates)),
+                          lower = numeric(length(dates)),
+                          date = dates)
 
   ptw_alpha <- find_ptw_alpha(bt_smoother, smoother_pts, bt_tot_rep, alpha)
 
@@ -126,11 +129,15 @@ conf_band <- function(bt_smoother,
 
     ii <- as.Date(ii, "%Y-%m-%d")
     current_ind <- smoother_pts$date == ii
-    smoother_pts$interval_upper[current_ind] <-
+    smoother_pts$intvl_upper[current_ind] <-
       smoother_pts$pts[current_ind] + my_quantile_upper[as.character(ii)]
-    smoother_pts$interval_lower[current_ind] <-
+    smoother_pts$intvl_lower[current_ind] <-
       smoother_pts$pts[current_ind] + my_quantile_lower[as.character(ii)]
-
   }
+
+  conf_band$upper <- smoother_pts$intvl_upper
+  conf_band$lower <- smoother_pts$intvl_lower
+
+  return(conf_band)
 }
 
