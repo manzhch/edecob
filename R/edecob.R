@@ -6,7 +6,7 @@ edecob <- function(data,
                    bt_tot_rep,
                    learn_dur,
                    basel_dur,
-                   event_min_dur,
+                   event_min_dur = as.difftime(12, units = "weeks"),
                    thresh_diff = 0.1,
                    smoother = "mov_med",
                    width = as.difftime(12, units = "weeks"),
@@ -15,8 +15,18 @@ edecob <- function(data,
 
   # check if date and data length match
   if (length(data) != length(date)) {
-    stop("Length mismatch between data and date.")
+    warning("Length mismatch between data and date. Truncating the longer vector.")
+
+    if (length(data) > length(date)) {
+      data <- data[1:length(date)]
+    } else if (length(date) > length(data)) {
+      date <- date[1:length(data)]
+    }
   }
+
+  # sort data by date
+  data <- data[order(date)]
+  date <- date[order(date)]
 
   # remove data for learning period
   data_non_learn <- data[date >= date[1] + learn_dur]

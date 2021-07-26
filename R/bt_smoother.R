@@ -33,13 +33,12 @@ bt_eps <- function(bt_rep, smoother_pts, resid, date, width){
   data_ind <- !is.na(resid)
   if (sum(data_ind) > 1 && stats::var(resid[data_ind]) != 0) {
     ar_resid <- stats::ar(resid[data_ind])
-  }
 
-  # if an AR model was fitted (i.e. data had > 1 rows and non-zero variance)
-  if (!is.na(ar_resid)) {
-    bt_epsilon <- sample(ar_resid$epsilon, length(ar_resid$epsilon), replace = T)
+    # remove NAs and bootstrap the residuals of the AR model
+    ar_resid_non_na <- ar_resid$resid[which(!is.na(ar_resid$resid))]
+    bt_epsilon <- sample(ar_resid_non_na, length(ar_resid$resid), replace = T)
 
-    # calculate residuals* with bootstrapped errors
+    # calculate residuals of the smoother with bootstrapped errors
     bt_eta <- sapply(1:length(date), function(x, ar_resid, resid) {
       # if first k data points where k order of AR (not enough previous data pts for AR)
       if (x <= ar_resid$order) {
@@ -56,8 +55,7 @@ bt_eps <- function(bt_rep, smoother_pts, resid, date, width){
 
     # calculate Y* (the bootstrapped data points using the AR model)
     bt_Y <- sapply(1:length(date), function(x, bt_eta) {
-      return(smoother_pts$pts[as.logical(smoother_pts$date == date[x])] +
-               bt_eta[x])
+      return(smoother_pts$pts[smoother_pts$date == date[x]] + bt_eta[x])
     }, bt_eta)
 
     # calculate S_star (the bootstrapped median)
@@ -79,13 +77,12 @@ bt_eps <- function(bt_rep, smoother_pts, resid, date, width){
                         "date" = NA,
                         "bt_rep" = bt_rep))
     }
+  } else {
+    warning("AR model cannot be fitted (variance of residuals is 0 or residuals are NA)")
   }
-
-
-
 }
 
-bt_smoother <- function(resid, date, width, bt_tot_rep) {
-  bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, resid, date, width))
+bt_smoother <- function(smoother_pts, resid, date, width, bt_tot_rep) {
+  bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, smoother_pts, resid, date, width))
   return(bt_Y)
 }

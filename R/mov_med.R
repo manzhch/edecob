@@ -6,10 +6,13 @@ mov_med <- function(data,
 
   # check if data is sorted by time
   # check if data and date same length
+  if (length(data) != length(date)) {
+    warning("Data and date length mismatch")
+  }
 
   dur <- as.numeric(
-    max(data)
-    - min(data)
+    max(date)
+    - min(date)
     + as.difftime(1, units = "days")
     - as.difftime(6, units = "weeks"),
     units = "days")
@@ -93,10 +96,18 @@ mov_med_resid <- function(data, date, smoother_pts) {
 
   resid <- numeric(length(data))
 
-  if (nrow(data) > 0 && nrow(smoother_pts) > 0) {
+  if (length(data) > 0 && nrow(smoother_pts) > 0) {
+
+    # calculate residuals for those dates where there is both a
+    # smoother and a data point
     for (ii in 1:nrow(smoother_pts)) {
       dataset_ind <- as.logical(date == smoother_pts$date[ii])
       resid[dataset_ind] <- data[dataset_ind] - smoother_pts$pts[ii]
     }
+
+    return(resid)
+
+  } else {
+    warning("Cannot calculate residuals (no data or smoother points)")
   }
 }
