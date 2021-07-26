@@ -32,11 +32,22 @@ edecob <- function(data,
   smoother_resid <- mov_med_resid(data_non_learn, date_non_learn, smoother_pts)
 
   # bootstrap the errors of the AR model fitted on the residuals
-  bt_smoother <- bt_smoother(smoother_resid, date, width, bt_tot_rep)
+  bt_smoother <- bt_smoother(smoother_resid, date_non_learn, width, bt_tot_rep)
 
   # calculate the confidence bands
   conf_band <- conf_band(bt_smoother, smoother_pts, bt_tot_rep, alpha)
 
   # detect events using confidence bands
+  event <- detect_event(data, date, conf_band, learn_dur, basel_dur, event_min_dur, thresh_diff)
 
+  # plot
+  if (plot == T) {
+    if (!requireNamespace("ggplot2", quietly = TRUE)) {
+      warning("Package \"gglot2\" needed for plots.", call. = FALSE)
+    } else {
+      #plot
+    }
+  }
+
+  return(event)
 }
