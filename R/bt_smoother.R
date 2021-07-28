@@ -2,12 +2,11 @@
 fun_running_median <- function(win_beg_day, bt_rep, bt_Y, date, smoother_pts, width){
 
 
-  window_ind <- as.logical(
-    (date >= win_beg_day) *
-      (date < win_beg_day + width))
+  window_ind <- as.logical((date >= win_beg_day) *
+                           (date < win_beg_day + width))
 
   if (sum(window_ind) > 0) {
-    return(list("value" = stats::median(bt_Y[window_ind]),
+    return(list("value" = stats::median(bt_Y[window_ind], na.rm = TRUE),
                 "date" = win_beg_day + width / 2,
                 "bt_rep" = bt_rep)
     )
@@ -54,15 +53,16 @@ bt_eps <- function(bt_rep, smoother_pts, resid, date, width){
     }, ar_resid, resid)
 
     # calculate Y* (the bootstrapped data points using the AR model)
-    bt_Y <- sapply(1:length(date), function(x, bt_eta) {
+    bt_Y <- vapply(1:max(which(date <= max(smoother_pts$date))), function(x, bt_eta) {
       return(smoother_pts$pts[smoother_pts$date == date[x]] + bt_eta[x])
-    }, bt_eta)
+    }, numeric(1), bt_eta)
 
     # calculate S_star (the bootstrapped median)
     win_beg_day <- min(date)
     last_data_date <- max(date)
 
     if (last_data_date > win_beg_day + width) {
+
       S_star_one_bt <- as.data.frame(do.call(rbind, lapply(
         seq(
           win_beg_day,
@@ -84,5 +84,9 @@ bt_eps <- function(bt_rep, smoother_pts, resid, date, width){
 
 bt_smoother <- function(smoother_pts, resid, date, width, bt_tot_rep) {
   bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, smoother_pts, resid, date, width))
+  bt_Y$date <- as.Date(unlist(bt_Y$date), origin = "1970-01-01")
+  bt_Y$value <- unlist(bt_Y$value)
+  bt_Y$bt_rep <- unlist(bt_Y$bt_rep)
+  bt_Y <- bt_Y[!is.na(bt_Y$value), ]
   return(bt_Y)
 }
