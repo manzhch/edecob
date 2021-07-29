@@ -42,7 +42,7 @@ edecob <- function(data,
   smoother_resid <- mov_med_resid(data_non_learn, date_non_learn, smoother_pts)
 
   # bootstrap the errors of the AR model fitted on the residuals
-  bt_smoother <- bt_smoother(smoother_resid, date_non_learn, width, bt_tot_rep)
+  bt_smoother <- bt_smoother(smoother_pts, smoother_resid, date_non_learn, width, bt_tot_rep)
 
   # calculate the confidence bands
   conf_band <- conf_band(bt_smoother, smoother_pts, bt_tot_rep, alpha)

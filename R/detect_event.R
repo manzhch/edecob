@@ -18,37 +18,45 @@ detect_event <- function(data,
   event_detected <- NA
   event_detect_date <- NA
   event_dur <- as.difftime(0, units = "days")
-  conf_band$is_below_thresh <- conf_band$intvl_upper < thresh
+  conf_band$is_below_thresh <- conf_band$upper < thresh
 
+  # if there is at least one time point at which the upper interval is below the threshold
+  if (sum(conf_band$is_below_thresh) > 0) {
 
-  # find sequences of consecutive days where CI below threshold
-  below_thresh_runs <- with(rle(conf_band$is_below_thresh), {
-    ok <- values == TRUE
-    ends <- cumsum(lengths)[ok]
-    starts <- ends - lengths[ok] + 1
-    dur <- ends - starts + 1
-    event <- dur >= as.numeric(event_min_dur, units = "days")
-    cbind(starts, ends, dur, event)
-  })
+    # find sequences of consecutive days where CI below threshold
+    below_thresh_runs <- with(rle(conf_band$is_below_thresh), {
+      ok <- values == TRUE
+      ends <- cumsum(lengths)[ok]
+      starts <- ends - lengths[ok] + 1
+      dur <- ends - starts + 1
+      event <- dur >= as.numeric(event_min_dur, units = "days")
+      cbind(starts, ends, dur, event)
+    })
 
-
-  # if events found
-  if (sum(below_thresh_runs[, "event"]) > 0) {
-    event_detected <- TRUE
-    event_detection_date <-
-      conf_band$date[below_thresh_runs[, "starts"][
-        which.max(below_thresh_runs[, "event"])]]
-    event_duration <-
-      as.difftime(below_thresh_runs[, "dur"]
-                  [which.max(below_thresh_runs[, "event"])],
-                  units = "days")
+    # if events found
+    if (sum(below_thresh_runs[, "event"]) > 0) {
+      event_detected <- TRUE
+      event_detection_date <-
+        conf_band$date[below_thresh_runs[, "starts"][
+          which.max(below_thresh_runs[, "event"])]]
+      event_duration <-
+        as.difftime(below_thresh_runs[, "dur"]
+                    [which.max(below_thresh_runs[, "event"])],
+                    units = "days")
+    } else {
+      event_detected <- FALSE
+      event_detection_date <- max(date) # censoring date
+      event_duration <- max(below_thresh_runs[, "dur"]) # longest sequence below threshold
+    }
   } else {
     event_detected <- FALSE
-    event_detection_date <- max(data$date) # censoring date
-    event_duration <- max(below_thresh_runs[, "dur"]) # longest sequence below threshold
+    event_detection_date <- max(date) # censoring date
+    event_duration <- 0 # longest sequence below threshold
   }
 
-  output <- list(event_detected, event_detection_date, event_duration)
+  output <- list(event_detected = event_detected,
+                 event_detection_date = event_detection_date,
+                 event_duration = event_duration)
   return(output)
 
 }
