@@ -45,7 +45,7 @@ mov_med <- function(data,
       med_pts_med[ll] <- stats::median(win)
       med_pts_date[ll] <- win_beg_day
       med_pts_win_beg[ll] <- win_beg_day
-      med_pts_win_end[ll] <- win_beg_day + 2 * width - 1
+      med_pts_win_end[ll] <- win_beg_day + width - 1
       med_pts_subj_id[ll] <- subj_id
 
       ll <- ll + 1
@@ -70,7 +70,7 @@ mov_med <- function(data,
       med_pts_med[ll] <- stats::median(win)
       med_pts_date[ll] <- win_beg_day + width / 2
       med_pts_win_beg[ll] <- win_beg_day
-      med_pts_win_end[ll] <- win_beg_day + 2 * width - 1
+      med_pts_win_end[ll] <- win_beg_day + width - 1
       med_pts_subj_id[ll] <- subj_id
 
       ll <- ll + 1
