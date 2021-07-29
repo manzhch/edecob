@@ -59,8 +59,6 @@ detect_event <- function(data,
     event_censored <- FALSE
   }
 
-
-
   output <- list(event_detected = event_detected,
                  event_detection_date = event_detection_date,
                  event_duration = event_duration,
