@@ -1,5 +1,27 @@
 # function to do everything
 
+#' Detects events in the data.
+#'
+#' @param data A vector containing the data.
+#' @param date A vector containing the dates at which the data points were collected
+#' @param subj_id A string containing an identifier for the data.
+#' @param bt_tot_rep The amount of bootstrap repetitions to be performed.
+#' @param learn_dur The amount of days where the data is to be ignored.
+#' @param basel_dur The width of the window from which the median is taken to use as baseline.
+#' @param event_min_dur The minimal duration the worsening needs to be sustained to define an event.
+#' @param thresh_diff The percentage difference between the baseline and threshold. A negative number indicates
+#' @param smoother Which smoother is to be used. Currently only "mov_med" for moving median available.
+#' @param width The width of the window for the moving median.
+#' @param alpha The confidence level for the simultaneous confidence bands.
+#' @param plot Whether a plot should be generated.
+#'
+#' @return A list of four values: `event_detected` gives whether an
+#'   event was detected, `event_detection_date` gives the date at which the
+#'   event was detected, `event_duration` gives the duration the event is
+#'   sustained, and `event_censored` gives whether the detected event is censored.
+#' @export
+#'
+#' @examples
 edecob <- function(data,
                    date,
                    subj_id = "subj1",

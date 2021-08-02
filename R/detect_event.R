@@ -22,8 +22,7 @@ detect_event <- function(data,
 
   # if there is at least one time point at which the upper interval is below the threshold
   if (sum(conf_band$is_below_thresh) > 0) {
-    print(conf_band$is_below_thresh)
-    print(rle(conf_band$is_below_thresh))
+
     # find sequences of consecutive days where CI below threshold
     below_thresh_runs <- with(rle(conf_band$is_below_thresh), {
       ok <- values == TRUE

@@ -6,7 +6,9 @@ Authors@R:
            family = "Man",
            role = c("aut", "cre"),
            email = "zheng_chen.man@alumni.ethz.ch")
-Description: What the package does (one paragraph).
+Description: Detects sustained worsening in digital biomarker data using 
+    simultaneous confidence bands. Accounts for noise using an 
+    autoregressive model. 
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
