@@ -1,18 +1,18 @@
 
-fun_running_median <- function(win_beg_day, bt_rep, bt_Y, date, smoother_pts, width){
+fun_running_median <- function(win_beg_day, bt_rep, bt_Y, study_day, smoother_pts, width){
 
 
-  window_ind <- as.logical((date >= win_beg_day) *
-                           (date < win_beg_day + width))
+  window_ind <- as.logical((study_day >= win_beg_day) *
+                           (study_day < win_beg_day + width))
 
   if (sum(window_ind) > 0) {
     return(list("value" = stats::median(bt_Y[window_ind], na.rm = TRUE),
-                "date" = win_beg_day + width / 2,
+                "study_day" = win_beg_day + width / 2,
                 "bt_rep" = bt_rep)
     )
   } else {
     return(list("value" = NA,
-                "date" = NA,
+                "study_day" = NA,
                 "bt_rep" = bt_rep))
   }
 }
@@ -21,12 +21,12 @@ fun_running_median <- function(win_beg_day, bt_rep, bt_Y, date, smoother_pts, wi
 # bootstrap the epsilon (error of AR) and then reconstruct smoother
 # (currently the moving median) using AR model and epsilon*
 
-bt_eps <- function(bt_rep, smoother_pts, resid, date, width){
+bt_eps <- function(bt_rep, smoother_pts, resid, study_day, width){
 
   # bootstrap error
-  bt_Y <- numeric(length(date))
-  bt_eta <- numeric(length(date))
-  bt_epsilon <- numeric(length(date))
+  bt_Y <- numeric(length(study_day))
+  bt_eta <- numeric(length(study_day))
+  bt_epsilon <- numeric(length(study_day))
 
   # fit autoregression model on residuals
   data_ind <- !is.na(resid)
@@ -38,7 +38,7 @@ bt_eps <- function(bt_rep, smoother_pts, resid, date, width){
     bt_epsilon <- sample(ar_resid_non_na, length(ar_resid$resid), replace = T)
 
     # calculate residuals of the smoother with bootstrapped errors
-    bt_eta <- sapply(1:length(date), function(x, ar_resid, resid) {
+    bt_eta <- sapply(1:length(study_day), function(x, ar_resid, resid) {
       # if first k data points where k order of AR (not enough previous data pts for AR)
       if (x <= ar_resid$order) {
         return(resid[min(which(!is.na(resid))) - 1 + x] + bt_epsilon[x])
@@ -53,28 +53,24 @@ bt_eps <- function(bt_rep, smoother_pts, resid, date, width){
     }, ar_resid, resid)
 
     # calculate Y* (the bootstrapped data points using the AR model)
-    bt_Y <- vapply(1:max(which(date <= max(smoother_pts$date))), function(x, bt_eta) {
-      return(smoother_pts$pts[smoother_pts$date == date[x]] + bt_eta[x])
+    bt_Y <- vapply(1:max(which(study_day <= max(smoother_pts$study_day))), function(x, bt_eta) {
+      return(smoother_pts$pts[smoother_pts$study_day == study_day[x]] + bt_eta[x])
     }, numeric(1), bt_eta)
 
     # calculate S_star (the bootstrapped median)
-    win_beg_day <- min(date)
-    last_data_date <- max(date)
+    win_beg_day <- min(study_day)
+    last_data_study_day <- max(study_day)
 
-    if (last_data_date > win_beg_day + width) {
+    if (last_data_study_day > win_beg_day + width) {
 
       S_star_one_bt <- as.data.frame(do.call(rbind, lapply(
-        seq(
-          win_beg_day,
-          last_data_date - width - as.difftime(1, units = "days"),
-          as.difftime(1, units = "days")
-        ),
-        fun_running_median, bt_rep, bt_Y, date, smoother_pts, width
+        seq(win_beg_day, last_data_study_day - width - 1, 1),
+        fun_running_median, bt_rep, bt_Y, study_day, smoother_pts, width
       )))
       return(S_star_one_bt)
     } else {
       return(data.frame("value" = NA,
-                        "date" = NA,
+                        "study_day" = NA,
                         "bt_rep" = bt_rep))
     }
   } else {
@@ -82,9 +78,9 @@ bt_eps <- function(bt_rep, smoother_pts, resid, date, width){
   }
 }
 
-bt_smoother <- function(smoother_pts, resid, date, width, bt_tot_rep) {
-  bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, smoother_pts, resid, date, width))
-  bt_Y$date <- as.Date(unlist(bt_Y$date), origin = "1970-01-01")
+bt_smoother <- function(smoother_pts, resid, study_day, width, bt_tot_rep) {
+  bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, smoother_pts, resid, study_day, width))
+  bt_Y$study_day <- unlist(bt_Y$study_day)
   bt_Y$value <- unlist(bt_Y$value)
   bt_Y$bt_rep <- unlist(bt_Y$bt_rep)
   bt_Y <- bt_Y[!is.na(bt_Y$value), ]

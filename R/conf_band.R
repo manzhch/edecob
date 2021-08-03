@@ -7,27 +7,27 @@ ratio_in_ci <- function(alpha_p,
                         bt_tot_rep,
                         alpha = 0.05) {
   # initialize variables
-  uniq_date <- unique(bt_smoother$date)
-  uniq_date <- uniq_date[!is.na(uniq_date)]
-  my_quantile_lower <- numeric(length(uniq_date))
-  my_quantile_upper <- numeric(length(uniq_date))
+  uniq_study_day <- unique(bt_smoother$study_day)
+  uniq_study_day <- uniq_study_day[!is.na(uniq_study_day)]
+  my_quantile_lower <- numeric(length(uniq_study_day))
+  my_quantile_upper <- numeric(length(uniq_study_day))
   bt_smoother$init_est <- numeric(nrow(bt_smoother))
 
   # calculate difference of bootstrapped smoother vs non-bootstrapped smoother
   bt_smoother$init_est <- bt_smoother$value -
-    rep(smoother_pts$pts[smoother_pts$date %in% uniq_date], bt_tot_rep)
+    rep(smoother_pts$pts[smoother_pts$study_day %in% uniq_study_day], bt_tot_rep)
 
   # calculate quantiles
-  for (ii in 1:length(uniq_date)) {
-    # print(bt_smoother$init_est[bt_smoother$date == uniq_date[[ii]]])
+  for (ii in 1:length(uniq_study_day)) {
+    # print(bt_smoother$init_est[bt_smoother$study_day == uniq_study_day[[ii]]])
     my_quantile_lower[ii] <-
-      stats::quantile(bt_smoother$init_est[bt_smoother$date == uniq_date[ii]], alpha_p)
+      stats::quantile(bt_smoother$init_est[bt_smoother$study_day == uniq_study_day[ii]], alpha_p)
     my_quantile_upper[ii] <-
-      stats::quantile(bt_smoother$init_est[bt_smoother$date == uniq_date[ii]],
+      stats::quantile(bt_smoother$init_est[bt_smoother$study_day == uniq_study_day[ii]],
                1 - alpha_p)
   }
-  names(my_quantile_lower) <- uniq_date
-  names(my_quantile_upper) <- uniq_date
+  names(my_quantile_lower) <- uniq_study_day
+  names(my_quantile_upper) <- uniq_study_day
 
   # determine for each data point whether it is between the quantiles
   bt_smoother$in_intvl <- logical(nrow(bt_smoother))
@@ -43,7 +43,7 @@ ratio_in_ci <- function(alpha_p,
   }
 
   bt_in_intvl_ratio <-
-    sum(bt_smoother$bt_in_intvl[bt_smoother$date == min(bt_smoother$date)]) /
+    sum(bt_smoother$bt_in_intvl[bt_smoother$study_day == min(bt_smoother$study_day)]) /
     bt_tot_rep
 
 
@@ -90,18 +90,18 @@ conf_band <- function(bt_smoother,
                       bt_tot_rep,
                       alpha){
 
-  #bt_smoother$date <- as.Date(unlist(bt_smoother$date), format = "%Y-%m-%d", origin = "1970-01-01")
+  #bt_smoother$study_day <- as.Date(unlist(bt_smoother$study_day), format = "%Y-%m-%d", origin = "1970-01-01")
 
   # calculate pointwise quantile
-  dates <- sort(unique(bt_smoother$date))
-  my_quantile_lower <- numeric(length(dates))
-  my_quantile_upper <- numeric(length(dates))
+  study_days <- sort(unique(bt_smoother$study_day))
+  my_quantile_lower <- numeric(length(study_days))
+  my_quantile_upper <- numeric(length(study_days))
   width <- smoother_pts$win_end[1] - smoother_pts$win_beg[1] + 1
 
   ptw_alpha <- find_ptw_alpha(bt_smoother, smoother_pts, bt_tot_rep, alpha)
   init_est <- bt_smoother$value -
-    rep(smoother_pts$pts[smoother_pts$date %in% bt_smoother$date], bt_tot_rep)
-  names(init_est) <- bt_smoother$date
+    rep(smoother_pts$pts[smoother_pts$study_day %in% bt_smoother$study_day], bt_tot_rep)
+  names(init_est) <- bt_smoother$study_day
 
   # calculate quantiles
   if (nrow(bt_smoother) > 0) {
@@ -127,19 +127,18 @@ conf_band <- function(bt_smoother,
     my_quantile_upper <- both_quantiles[2, ]
   })
 
-  if (!is.null(date)) {
-    names(my_quantile_lower) <- as.Date(dates, format = "%Y-%m-%d", origin = "1970-01-01")
-    names(my_quantile_upper) <- as.Date(dates, format = "%Y-%m-%d", origin = "1970-01-01")
+  if (!is.null(study_days)) {
+    names(my_quantile_lower) <- study_days
+    names(my_quantile_upper) <- study_days
 
   }
 
-  dates_matching <- unique(as.character(sort(smoother_pts$date[
-    smoother_pts$date %in% unique(bt_smoother$date)])))
-  dates_matching <- dates_matching[dates_matching <= max(smoother_pts$date) - width/2]
+  study_days_matching <- unique(sort(smoother_pts$study_day[
+    smoother_pts$study_day %in% unique(bt_smoother$study_day)]))
+  study_days_matching <- study_days_matching[study_days_matching <= max(smoother_pts$study_day) - width/2]
 
-  for (ii in dates_matching) {
-    ii <- as.Date(ii, "%Y-%m-%d")
-    current_ind <- smoother_pts$date == ii
+  for (ii in study_days_matching) {
+    current_ind <- smoother_pts$study_day == ii
     smoother_pts$intvl_upper[current_ind] <-
       smoother_pts$pts[current_ind] + my_quantile_upper[as.character(ii)]
     smoother_pts$intvl_lower[current_ind] <-
@@ -149,7 +148,7 @@ conf_band <- function(bt_smoother,
   conf_band <- data.frame(
     upper = smoother_pts$intvl_upper[!is.na(smoother_pts$intvl_upper)],
     lower = smoother_pts$intvl_lower[!is.na(smoother_pts$intvl_lower)],
-    date = as.Date(dates_matching, format = "%Y-%m-%d"))
+    study_day = study_days_matching)
 
   return(conf_band)
 }
