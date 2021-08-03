@@ -39,7 +39,7 @@ edecob_plot <- function(data,
     basel <- stats::median(data[as.logical(
       (study_day >= min(study_day) + learn_dur) *
         (study_day < min(study_day) + learn_dur + basel_dur))])
-    thresh <- basel * (1 - thresh_diff)
+    thresh <- basel * (1 + thresh_diff)
 
 
     # plotting data points, baseline, and threshold
@@ -66,7 +66,7 @@ edecob_plot <- function(data,
       ggplot2::labs(x = "Study Day", y = "5UTT Average Turn Speed (rad/s)") +
       ggplot2::geom_hline(ggplot2::aes(yintercept = basel, color = "Baseline")) +
       # geom_hline(aes(yintercept = threshold, color = "threshold")) +
-      ggplot2::geom_hline(ggplot2::aes(yintercept = basel*(1 - thresh_diff), color = "Threshold")) +
+      ggplot2::geom_hline(ggplot2::aes(yintercept = thresh, color = "Threshold")) +
       ggplot2::geom_vline(ggplot2::aes(xintercept = min(subj_data$study_day) + learn_dur,
                                        linetype = "Baseline Period"),
                           color = "blue") +

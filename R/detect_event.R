@@ -1,17 +1,31 @@
 
+#' Title
+#'
+#' @param data
+#' @param study_day
+#' @param conf_band
+#' @param learn_dur
+#' @param basel_dur
+#' @param event_min_dur
+#' @param thresh_diff
+#'
+#' @return
+#' @export
+#'
+#' @examples
 detect_event <- function(data,
                          study_day,
                          conf_band,
                          learn_dur,
                          basel_dur,
                          event_min_dur,
-                         thresh_diff = 0.1) {
+                         thresh_diff = -0.1) {
 
   # calculate baseline and threshold
   basel <- stats::median(data[as.logical(
     (study_day >= min(study_day) + learn_dur) *
       (study_day < min(study_day) + learn_dur + basel_dur))])
-  thresh <- basel * (1 - thresh_diff)
+  thresh <- basel * (1 + thresh_diff)
 
 
   # initialize variables
