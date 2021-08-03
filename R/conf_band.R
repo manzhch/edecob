@@ -149,7 +149,7 @@ conf_band <- function(bt_smoother,
   conf_band <- data.frame(
     upper = smoother_pts$intvl_upper[!is.na(smoother_pts$intvl_upper)],
     lower = smoother_pts$intvl_lower[!is.na(smoother_pts$intvl_lower)],
-    date = dates_matching)
+    date = as.Date(dates_matching, format = "%Y-%m-%d"))
 
   return(conf_band)
 }
