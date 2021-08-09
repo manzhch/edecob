@@ -1,6 +1,13 @@
 
 # takes the bootstrapped smoother and checks what the ratio is of
 # bootstrapped smoothers in the pointwise alpha_p quantiles
+
+#' Title
+#'
+#'
+#' @return
+#'
+#'
 ratio_in_ci <- function(alpha_p,
                         bt_smoother,
                         smoother_pts, # bt_smoother/bt_tot_rep and smoother_pts should have the same size
@@ -52,6 +59,13 @@ ratio_in_ci <- function(alpha_p,
 
 # looking for the right alpha_p such that 95% of the bootstrap curves
 # are within CI
+
+#' Title
+#'
+#'
+#' @return
+#'
+#'
 find_ptw_alpha <- function(bt_smoother,
                            smoother_pts,
                            bt_tot_rep,
@@ -85,12 +99,42 @@ find_ptw_alpha <- function(bt_smoother,
 
 
 
+#' Confidence Bounds of the Smoother
+#'
+#' Calculate the confidence bounds of the smoother function using the bootstrap.
+#'
+#' The procedure is as follows:
+#' \enumerate{
+#'   \item We compute the quantiles \deqn{ qₓ(tᵢ), q₁₋ₓ(tᵢ) i = 1,\dots, N}
+#'
+#'     where \deqn{qₓ(tᵢ) = inf {u; P*[S(tᵢ)*ᵦ - S(tᵢ) \le u] \ge x} } is a
+#'     pointwise bootstrap quantile, \eqn{S(tᵢ)*ᵦ the bootstrapped smoother},
+#'     and \eqn{N} the number of measurements.
+#'   \item We vary the pointwise error \eqn{2x} until \deqn{P*[qₓ(tᵢ) \le S(tᵢ)*ᵦ - S(tᵢ) \le q₁₋ₓ(tᵢ) ⩝ i = 1,\dots, N] ≈ 1-\alpha.}
+#'     In other words, until the ratio of bootstrap curves that have all their points within
+#'     \eqn{[qₓ(tᵢ), q₁₋ₓ(tᵢ)]} is approximately \eqn{1-\alpha}.
+#'   \item We let
+#'   \deqn{ Iₙ(tᵢ) = [S(tᵢ) +  qₓ(tᵢ), S(tᵢ) + q₁₋ₓ(tᵢ)] ⩝ i = 1, \dots, N}
+#'   confidence bounds. Then \eqn{{Iₙ(tᵢ); i = 1,\dots, N}} is a consistent simultaneous confidence band of level \eqn{1-\alpha}.
+#'
+#'}
+#'
+#'
+#' @inheritParams edecob
+#' @param bt_smoother The bootstrapped smoother. Use the output of \code{bt_smoother()}.
+#'
+#' @return A data frame containing the upper confidence bound, the lower confidence bound,
+#'   and the study day corresponding to the bounds.
+#' @export
+#'
+#' @references Bühlmann, P. (1998). Sieve Bootstrap for Smoothing in
+#'   Nonstationary Time Series. \emph{The Annals of Statistics}, 26(1), 48-83.
+#'
+#' @examples
 conf_band <- function(bt_smoother,
                       smoother_pts,
                       bt_tot_rep,
                       alpha){
-
-  #bt_smoother$study_day <- as.Date(unlist(bt_smoother$study_day), format = "%Y-%m-%d", origin = "1970-01-01")
 
   # calculate pointwise quantile
   study_days <- sort(unique(bt_smoother$study_day))

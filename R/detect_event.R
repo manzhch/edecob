@@ -1,15 +1,21 @@
 
-#' Title
+#' Detect Events
 #'
-#' @param data
-#' @param study_day
-#' @param conf_band
-#' @param learn_dur
-#' @param basel_dur
-#' @param event_min_dur
-#' @param thresh_diff
+#' Detect events using the confidence bounds. In the case where the threshold is
+#' below the baseline, an event is detected if all the points of the upper bound of the
+#' confidence band are below the threshold for \code{event_min_dur}
+#' consecutive days.
 #'
-#' @return
+#' @inheritParams edecob
+#' @param conf_band A data frame containing the confidence bounds. Ideally the output of \code{\link{conf_band}}.
+#'
+#' @return A list of four values: \describe{ \item{\code{event_detected}}{gives
+#'   whether an event was detected}
+#'   \item{\code{event_detection_study_day}}{gives the study_day at which the
+#'   event was detected} \item{\code{event_duration}}{gives the duration the
+#'   event is sustained} \item{\code{event_censored}}{gives whether the detected
+#'   event is censored}
+#'   }
 #' @export
 #'
 #' @examples
@@ -28,8 +34,15 @@ detect_event <- function(data,
   thresh <- basel * (1 + thresh_diff)
 
 
-  # initialize variables
-  conf_band$is_below_thresh <- conf_band$upper < thresh
+  # check if threshold above or below baseline
+  if (thresh_diff > 0) {
+    conf_band$is_below_thresh <- conf_band$upper > thresh
+  } else if (thresh_diff < 0) {
+    conf_band$is_below_thresh <- conf_band$upper < thresh
+  } else if (thresh_diff == 0) {
+    warning("Threshold equal to baseline. Detecting events if data points below threshold.")
+    conf_band$is_below_thresh <- conf_band$upper < thresh
+  }
 
   # if there is at least one time point at which the upper interval is below the threshold
   if (sum(conf_band$is_below_thresh) > 0) {
@@ -43,6 +56,8 @@ detect_event <- function(data,
       event <- dur >= event_min_dur
       cbind(starts, ends, dur, event)
     })
+    print(rle(conf_band$is_below_thresh))
+    print(below_thresh_runs)
 
     # if events found
     if (sum(below_thresh_runs[, "event"]) > 0) {

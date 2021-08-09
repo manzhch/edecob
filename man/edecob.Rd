@@ -2,19 +2,19 @@
 % Please edit documentation in R/edecob.R
 \name{edecob}
 \alias{edecob}
-\title{edecob}
+\title{Event Detection using Confidence Bounds}
 \usage{
 edecob(
   data,
-  date,
+  study_day,
   subj_id = "subj1",
   bt_tot_rep,
   learn_dur,
   basel_dur,
-  event_min_dur = as.difftime(12, units = "weeks"),
-  thresh_diff = 0.1,
+  event_min_dur = 12 * 7,
+  thresh_diff = -0.1,
   smoother = "mov_med",
-  width = as.difftime(12, units = "weeks"),
+  width = 12 * 7,
   alpha = 0.05,
   plot = TRUE
 )
@@ -22,7 +22,8 @@ edecob(
 \arguments{
 \item{data}{A vector containing the data.}
 
-\item{date}{A vector containing the dates at which the data points were collected}
+\item{study_day}{A vector containing the study days at which the data points
+were collected}
 
 \item{subj_id}{A string containing an identifier for the data.}
 
@@ -30,26 +31,48 @@ edecob(
 
 \item{learn_dur}{The amount of days where the data is to be ignored.}
 
-\item{basel_dur}{The width of the window from which the median is taken to use as baseline.}
+\item{basel_dur}{The width of the window in days from which the median is
+taken to use as baseline.}
 
-\item{event_min_dur}{The minimal duration the worsening needs to be sustained to define an event.}
+\item{event_min_dur}{The minimal duration the worsening needs to be sustained
+to define an event in days.}
 
-\item{thresh_diff}{The percentage difference between the baseline and threshold. A negative number indicates}
+\item{thresh_diff}{The percentage difference between the baseline and
+threshold. A negative number indicates a threshold below the baseline and
+vice versa.}
 
-\item{smoother}{Which smoother is to be used. Currently only "mov_med" for moving median available.}
+\item{smoother}{Which smoother is to be used. Currently only \code{mov_med} for
+moving median available.}
 
-\item{width}{The width of the window for the moving median.}
+\item{width}{The width of the window for the moving median in days.}
 
 \item{alpha}{The confidence level for the simultaneous confidence bands.}
 
 \item{plot}{Whether a plot should be generated.}
 }
 \value{
-A list of four values: \code{event_detected} gives whether an
-event was detected, \code{event_detection_date} gives the date at which the
-event was detected, \code{event_duration} gives the duration the event is
-sustaind and \code{event_censored} gives whether the detected event is censored.
+A list of four values: \describe{ \item{\code{event_detected}}{gives
+whether an event was detected}
+\item{\code{event_detection_study_day}}{gives the study_day at which the
+event was detected} \item{\code{event_duration}}{gives the duration the
+event is sustained} \item{\code{event_censored}}{gives whether the detected
+event is censored} }
 }
 \description{
-edecob
+Calculate a smoother of the data and bootstrap it to form simultaneous
+confidence bounds. Define an event if the confidence bound is below the
+threshold for a predefined amount of time.
+}
+\details{
+Runs the following functions in this order: \enumerate{
+\item The smoother depending on choice: \code{\link{mov_med}}
+\item \code{\link{smoother_resid}}
+\item \code{\link{bt_smoother}}
+\item \code{\link{conf_band}}
+\item \code{\link{detect_event}}
+}
+}
+\references{
+Bühlmann, P. (1998). Sieve Bootstrap for Smoothing in
+Nonstationary Time Series. \emph{The Annals of Statistics}, 26(1), 48-83.
 }

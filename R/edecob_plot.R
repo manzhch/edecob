@@ -1,16 +1,20 @@
-#' Title
+#' Plot Event Data
 #'
-#' @param data
-#' @param study_day
-#' @param smoother_pts
-#' @param conf_band
-#' @param event
-#' @param subj_id
-#' @param learn_dur
-#' @param basel_dur
-#' @param thresh_diff
+#' Generates a ggplot2 visualizing the data and event if any detected.
 #'
-#' @return A `ggplot2` that visualizes the data.
+#' The data points are plotted on the x-axis with the study day on the y-axis.
+#' The data from the learning period are gray. The baseline period is outlined
+#' by two vertical blue lines. The smoother is plotted in orange. The confidence
+#' bound  is the blue area. If an event is detected, a red triangle will mark
+#' the detection day.
+#'
+#' @inheritParams detect_event
+
+#' @param smoother_pts A data frame containing the smoother. Preferably the
+#'   output of one of the smoother functions included in this package.
+#' @param event A list containing the events. Preferably the output of \code{\link{detect_event()}}
+#'
+#' @return A `ggplot2` object that visualizes the data.
 #' @export
 #'
 #' @examples
@@ -24,7 +28,7 @@ edecob_plot <- function(data,
                         subj_id = "subj1",
                         learn_dur,
                         basel_dur,
-                        thresh_diff = 0.1,
+                        thresh_diff = -0.1,
                         width) {
 
   # if ggplot2 was not imported
@@ -32,8 +36,12 @@ edecob_plot <- function(data,
     warning("Package \"gglot2\" needed for plots.", call. = FALSE)
   } else {
 
-    # plot
+    # initialize variables
     subj_data <- data.frame(data = data, study_day = study_day)
+    dot_size <- 2.5
+    smo_size <- 2
+    eve_size <- 4
+    txt_size <- 12
 
     # calculate baseline and threshold
     basel <- stats::median(data[as.logical(
@@ -55,13 +63,13 @@ edecob_plot <- function(data,
         show.legend = FALSE,
         shape = 21,
         color = "grey",
-        size = 4
+        size = dot_size
       ) +
       ggplot2::geom_point(
         data = subj_data[which(subj_data$study_day < min(subj_data$study_day) + learn_dur), ],
         ggplot2::aes(x = .data$study_day, y = .data$data),
         color = "grey70",
-        size = 3.8
+        size = dot_size*0.95
       ) +
       ggplot2::labs(x = "Study Day", y = "5UTT Average Turn Speed (rad/s)") +
       ggplot2::geom_hline(ggplot2::aes(yintercept = basel, color = "Baseline")) +
@@ -70,7 +78,7 @@ edecob_plot <- function(data,
       ggplot2::geom_vline(ggplot2::aes(xintercept = min(subj_data$study_day) + learn_dur,
                                        linetype = "Baseline Period"),
                           color = "blue") +
-      ggplot2::geom_vline(ggplot2::aes(xintercept = min(subj_data$study_day) + learn_dur + width - 1, linetype = "Baseline Period"),
+      ggplot2::geom_vline(ggplot2::aes(xintercept = min(subj_data$study_day) + learn_dur + basel_dur, linetype = "Baseline Period"),
                           color = "blue") +
       # ggplot2::geom_vline(ggplot2::aes(xintercept = my_patient_devices$RETDT),
       #            color = "grey75") +
@@ -100,13 +108,13 @@ edecob_plot <- function(data,
           data = smoother_pts,
           ggplot2::aes(x = .data$study_day, y = .data$pts, pch = "Moving Median"),
           color = "orange",
-          size = 3
+          size = smo_size
         )
 
       plot_colors <- append(plot_colors, "orange")
       plot_shape <- append(plot_shape, 16)
       plot_fill <- append(plot_fill, "orange")
-      plot_size <- append(plot_size, 5)
+      plot_size <- append(plot_size, smo_size + 1)
 
     }
 
@@ -117,12 +125,12 @@ edecob_plot <- function(data,
           data = data.frame(study_day = event[[2]], data1 = smoother_pts$pts[which(smoother_pts$study_day == event[[2]])]),
           ggplot2::aes(x = .data$study_day, y = .data$data1, shape = "Moving Median Event Onset"),
           color = "red",
-          size = 9
+          size = eve_size
         )
       plot_colors <- append(plot_colors, "red")
       plot_shape <- append(plot_shape, 17)
       plot_fill <- append(plot_fill, "red")
-      plot_size <- append(plot_size, 8)
+      plot_size <- append(plot_size, eve_size)
 
     }
 
@@ -133,9 +141,9 @@ edecob_plot <- function(data,
                                   guide = ggplot2::guide_legend(
                                     override.aes = list(color = plot_colors, size = plot_size, fill = plot_fill)
                                   )) +
-      ggplot2::geom_hline(ggplot2::aes(yintercept = basel*(1 - thresh_diff)), color = "red") +
+      ggplot2::geom_hline(ggplot2::aes(yintercept = thresh), color = "red") +
       ggplot2::geom_hline(ggplot2::aes(yintercept = basel), color = "black") +
-      ggplot2::theme(text = ggplot2::element_text(size = 25),
+      ggplot2::theme(text = ggplot2::element_text(size = txt_size),
                      axis.title.y.right = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 0, b = 0, l = 20)),
                      axis.title.y.left = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 10, b = 0, l = 0)))
 
@@ -152,7 +160,7 @@ edecob_plot <- function(data,
           data = data.frame(study_day = event[[2]], data1 = smoother_pts$pts[which(smoother_pts$study_day == event[[2]])]),
           ggplot2::aes(x = .data$study_day, y = .data$data1, shape = "Moving Median Event Onset"),
           color = "red",
-          size = 9
+          size = eve_size
         )
     }
 

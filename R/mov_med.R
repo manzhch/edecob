@@ -1,4 +1,29 @@
 
+#' Moving Median over a Time Window
+#'
+#' Calculates the moving median over a time window around a time point for the
+#' all time points between the first and last study day provided.
+#'
+#' For the initial time points where the time difference between the first data
+#' point and the time point for which we are calculating the median is less than
+#' half the \code{width}, we do not have enough data points to form a window
+#' which has the same size to both sides of the time point. In this case fewer
+#' data points are used to calculate the median and the time window is not
+#' symmetric around the time point for which we are calculating the median.
+#'
+#' No median is calculated if the time difference between the last data point
+#' and the current time point for which we are calculating the median is less
+#' than half the \code{width}. We do not calculate the median using a smaller
+#' time window so that the values do not change upon receiving new data.
+#'
+#' @inheritParams edecob
+#'
+#' @return A data frame containing the values of the moving median, the study
+#'   day to which it corresponds, the time window from which it was calculated,
+#'   and the subject id corresponding to the data.
+#' @export
+#'
+#' @examples
 mov_med <- function(data,
                     study_day,
                     subj_id = "subj1",
@@ -86,24 +111,4 @@ mov_med <- function(data,
     stringsAsFactors = FALSE
   )
   med_pts <- med_pts[med_pts$subj_id != "", ]
-}
-
-mov_med_resid <- function(data, study_day, smoother_pts) {
-
-  resid <- numeric(length(data))
-
-  if (length(data) > 0 && nrow(smoother_pts) > 0) {
-
-    # calculate residuals for those study_days where there is both a
-    # smoother and a data point
-    for (ii in 1:nrow(smoother_pts)) {
-      dataset_ind <- as.logical(study_day == smoother_pts$study_day[ii])
-      resid[dataset_ind] <- data[dataset_ind] - smoother_pts$pts[ii]
-    }
-
-    return(resid)
-
-  } else {
-    warning("Cannot calculate residuals (no data or smoother points)")
-  }
 }
