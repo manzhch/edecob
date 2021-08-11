@@ -29,7 +29,8 @@ edecob_plot <- function(data,
                         learn_dur,
                         basel_dur,
                         thresh_diff = -0.1,
-                        width) {
+                        width,
+                        label = "Data") {
 
   # if ggplot2 was not imported
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
@@ -37,11 +38,12 @@ edecob_plot <- function(data,
   } else {
 
     # initialize variables
-    subj_data <- data.frame(data = data, study_day = study_day)
-    dot_size <- 2.5
-    smo_size <- 2
-    eve_size <- 4
+    dot_size <- 1.8
+    smo_size <- 1
+    eve_size <- 3
     txt_size <- 12
+    subj_data <- data.frame(data = data, study_day = study_day)
+
 
     # calculate baseline and threshold
     basel <- stats::median(data[as.logical(
@@ -62,59 +64,72 @@ edecob_plot <- function(data,
         fill = "black",
         show.legend = FALSE,
         shape = 21,
-        color = "grey",
-        size = dot_size
+        color = "transparent",
+        size = dot_size,
+        alpha = 0.8
       ) +
       ggplot2::geom_point(
         data = subj_data[which(subj_data$study_day < min(subj_data$study_day) + learn_dur), ],
         ggplot2::aes(x = .data$study_day, y = .data$data),
         color = "grey70",
-        size = dot_size*0.95
+        size = dot_size*0.9
       ) +
-      ggplot2::labs(x = "Study Day", y = "5UTT Average Turn Speed (rad/s)") +
+      ggplot2::labs(x = "Study Day", y = label) +
       ggplot2::geom_hline(ggplot2::aes(yintercept = basel, color = "Baseline")) +
       # geom_hline(aes(yintercept = threshold, color = "threshold")) +
       ggplot2::geom_hline(ggplot2::aes(yintercept = thresh, color = "Threshold")) +
+      # ggplot2::geom_vline(ggplot2::aes(xintercept = min(subj_data$study_day) + learn_dur,
+      #                                  color = "Baseline Period"),
+      #                     linetype = "dashed", key_glyph = "path") +
       ggplot2::geom_vline(ggplot2::aes(xintercept = min(subj_data$study_day) + learn_dur,
                                        linetype = "Baseline Period"),
                           color = "blue") +
-      ggplot2::geom_vline(ggplot2::aes(xintercept = min(subj_data$study_day) + learn_dur + basel_dur, linetype = "Baseline Period"),
-                          color = "blue") +
+      ggplot2::geom_vline(ggplot2::aes(xintercept = min(subj_data$study_day) + learn_dur + basel_dur
+                                       ),
+                          color = "blue", show.legend = F, linetype = "dashed") +
       # ggplot2::geom_vline(ggplot2::aes(xintercept = my_patient_devices$RETDT),
       #            color = "grey75") +
       ggplot2::scale_color_manual(
         "",
         aesthetics  = "color",
-        values = c("Baseline" = "black", "Threshold" = "red")
+        values = c("Baseline" = "black", "Threshold" = "red",
+                   "Smoother" = "orange")
       ) +
       ggplot2::scale_color_manual("",
                                   aesthetics = "linetype",
                                   values = c("Baseline Period" = "dashed")) +
-      ggplot2::scale_color_manual(
-        "",
+      ggplot2::scale_color_manual("",
         aesthetics = "fill",
-        breaks = c("TRUE", "FALSE"),
-        values = c("red", "black")
+        values = c("Confidence Band" = "blue")
       ) +
       ggplot2::ggtitle(subj_id) +
       ggplot2::theme(legend.title = ggplot2::element_blank())
 
 
     # plotting median points for the moving median
-    if (!is.null(nrow(smoother_pts)) &&
-        nrow(smoother_pts) > 0) {
+    if (!is.null(nrow(smoother_pts)) && nrow(smoother_pts) > 0) {
+
+      # create new data frame but containing NA values when no smoother point
+      smoother_na <- data.frame(
+        pts = rep(NA, max(smoother_pts$study_day) - min(smoother_pts$study_day) + 1),
+        study_day = min(smoother_pts$study_day):max(smoother_pts$study_day))
+
+      smoother_na$pts[smoother_na$study_day %in% smoother_pts$study_day] <-
+        smoother_pts$pts
+
       patient_plot <- patient_plot +
-        ggplot2::geom_point(
-          data = smoother_pts,
-          ggplot2::aes(x = .data$study_day, y = .data$pts, pch = "Moving Median"),
-          color = "orange",
-          size = smo_size
+        ggplot2::geom_line(
+          data = smoother_na,
+          ggplot2::aes(x = .data$study_day,
+                       y = .data$pts,
+                       color = "Smoother"),
+          size = smo_size, linetype = "solid"
         )
 
-      plot_colors <- append(plot_colors, "orange")
-      plot_shape <- append(plot_shape, 16)
-      plot_fill <- append(plot_fill, "orange")
-      plot_size <- append(plot_size, smo_size + 1)
+      # plot_colors <- append(plot_colors, "orange")
+      # plot_shape <- append(plot_shape, 16)
+      # plot_fill <- append(plot_fill, "orange")
+      # plot_size <- append(plot_size, smo_size + 1)
 
     }
 
@@ -150,8 +165,8 @@ edecob_plot <- function(data,
 
     # CI
     patient_plot <- patient_plot +
-      ggplot2::geom_ribbon(data = conf_band, ggplot2::aes(x = .data$study_day, ymin = .data$lower, ymax = .data$upper),
-                           alpha = 0.4, color = "transparent", fill = "blue")
+      ggplot2::geom_ribbon(data = conf_band, ggplot2::aes(x = .data$study_day, ymin = .data$lower, ymax = .data$upper, fill = "Confidence Band"),
+                           alpha = 0.45, color = "transparent")
 
 
     if (event[[1]]) {
