@@ -21,6 +21,8 @@
 NULL
 #> NULL
 
+
+
 #' Event Detection using Confidence Bounds
 #'
 #' Calculate a smoother of the data and bootstrap it to form simultaneous
@@ -51,7 +53,7 @@ NULL
 #' @param smoother Which smoother is to be used. Currently only `mov_med` for
 #'   moving median available.
 #' @param width The width of the window for the moving median in days.
-#' @param alpha The confidence level for the simultaneous confidence bands.
+#' @param conf_band_lvl The confidence level for the simultaneous confidence bands.
 #' @param plot Whether a plot should be generated.
 #'
 #' @return A list of four values: \describe{ \item{\code{event_detected}}{gives
@@ -77,7 +79,7 @@ edecob <- function(data,
                    thresh_diff = -0.1,
                    smoother = "mov_med",
                    width = 12*7,
-                   alpha = 0.05,
+                   conf_band_lvl = 0.95,
                    plot = TRUE) {
 
   # check if study_day and data length match
@@ -112,10 +114,27 @@ edecob <- function(data,
   bt_smoother <- bt_smoother(smoother_pts, smoother_resid, study_day_non_learn, width, bt_tot_rep)
 
   # calculate the confidence bands
-  conf_band <- conf_band(bt_smoother, smoother_pts, bt_tot_rep, alpha)
+  conf_band <- conf_band(bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)
 
   # detect events using confidence bands
   event <- detect_event(data, study_day, conf_band, learn_dur, basel_dur, event_min_dur, thresh_diff)
+
+  output <- list(
+    "data" = data,
+    "study_day" = study_day,
+    "subj_id" = subj_id,
+    "bt_tot_rep" = bt_tot_rep,
+    "learn_dur" = learn_dur,
+    "basel_dur" = basel_dur,
+    "event_min_dur" = event_min_dur,
+    "thresh_diff" = thresh_diff,
+    "smoother" = smoother,
+    "width" = width,
+    "conf_band_lvl" = conf_band_lvl,
+    "smoother_pts" = smoother_pts,
+    "conf_band" = conf_band,
+    "event" = event
+  )
 
   # plot
   if (plot == T) {
@@ -123,8 +142,21 @@ edecob <- function(data,
       warning("Package \"gglot2\" needed for plots.", call. = FALSE)
     } else {
       #plot
+      output[["plot"]] <- edecob_plot(data,
+                                      study_day,
+                                      smoother_pts,
+                                      conf_band,
+                                      event,
+                                      subj_id,
+                                      learn_dur,
+                                      basel_dur,
+                                      thresh_diff,
+                                      width,
+                                      label = "Data")
     }
   }
 
-  return(event)
+  class(output) <- "edecob"
+
+  return(output)
 }

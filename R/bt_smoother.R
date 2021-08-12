@@ -1,12 +1,5 @@
 
-#' Moving Median
-#'
-#' Helper function for the bootstrap step.
-#'
-#'
-#' @return
-#'
-#'
+# Moving Median; Helper function for the bootstrap step.
 fun_running_median <- function(win_beg_day, bt_rep, bt_Y, study_day, smoother_pts, width){
 
 
@@ -26,16 +19,11 @@ fun_running_median <- function(win_beg_day, bt_rep, bt_Y, study_day, smoother_pt
 }
 
 
-#' Perform one Bootstrap Step
-#'
-#' Helper function to bootstrap the epsilon (error of AR) and then reconstruct
-#' smoother (currently the moving median) using AR model and bootstrapped
-#' epsilon
-#'
-#'
-#' @return
-#'
-#'
+# Perform one Bootstrap Step
+#
+# Helper function to bootstrap the epsilon (error of AR) and then reconstruct
+# smoother (currently the moving median) using AR model and bootstrapped
+# epsilon
 bt_eps <- function(bt_rep, smoother_pts, resid, study_day, width){
 
   # bootstrap error

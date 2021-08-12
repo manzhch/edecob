@@ -1,18 +1,11 @@
 
 # takes the bootstrapped smoother and checks what the ratio is of
 # bootstrapped smoothers in the pointwise alpha_p quantiles
-
-#' Title
-#'
-#'
-#' @return
-#'
-#'
 ratio_in_ci <- function(alpha_p,
                         bt_smoother,
                         smoother_pts, # bt_smoother/bt_tot_rep and smoother_pts should have the same size
                         bt_tot_rep,
-                        alpha = 0.05) {
+                        conf_band_lvl) {
   # initialize variables
   uniq_study_day <- unique(bt_smoother$study_day)
   uniq_study_day <- uniq_study_day[!is.na(uniq_study_day)]
@@ -54,36 +47,29 @@ ratio_in_ci <- function(alpha_p,
     bt_tot_rep
 
 
-  return(bt_in_intvl_ratio - 1 + alpha)
+  return(bt_in_intvl_ratio - conf_band_lvl)
 }
 
 # looking for the right alpha_p such that 95% of the bootstrap curves
 # are within CI
-
-#' Title
-#'
-#'
-#' @return
-#'
-#'
-find_ptw_alpha <- function(bt_smoother,
+find_ptw_conf_band_lvl <- function(bt_smoother,
                            smoother_pts,
                            bt_tot_rep,
-                           alpha){
-  # print(ratio_in_ci(0, bt_smoother, smoother_pts, bt_tot_rep, alpha))
-  # print(ratio_in_ci(0.05, bt_smoother, smoother_pts, bt_tot_rep, alpha))
+                           conf_band_lvl){
+  # print(ratio_in_ci(0, bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl))
+  # print(ratio_in_ci(0.05, bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl))
   if (nrow(bt_smoother) > bt_tot_rep &&
       nrow(bt_smoother[!is.na(bt_smoother$value), ]) > 0 &&
-      sign(ratio_in_ci(0, bt_smoother, smoother_pts, bt_tot_rep, alpha)) !=
-      sign(ratio_in_ci(0.05, bt_smoother, smoother_pts, bt_tot_rep, alpha))) {
+      sign(ratio_in_ci(0, bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)) !=
+      sign(ratio_in_ci(0.05, bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl))) {
 
     return(stats::uniroot(ratio_in_ci, c(0,0.05),#lower = 0, upper = 0.05,
-                          bt_smoother, smoother_pts, bt_tot_rep, alpha))
+                          bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl))
 
   } else if (nrow(bt_smoother) > bt_tot_rep &&
              nrow(bt_smoother[!is.na(bt_smoother$value), ]) > 0 &&
-             sign(ratio_in_ci(0, bt_smoother, smoother_pts, bt_tot_rep, alpha)) ==
-             sign(ratio_in_ci(0.05, bt_smoother, smoother_pts, bt_tot_rep, alpha))) {
+             sign(ratio_in_ci(0, bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)) ==
+             sign(ratio_in_ci(0.05, bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl))) {
     # print(2)
     return(NA)
     # print("sign same")
@@ -134,7 +120,7 @@ find_ptw_alpha <- function(bt_smoother,
 conf_band <- function(bt_smoother,
                       smoother_pts,
                       bt_tot_rep,
-                      alpha){
+                      conf_band_lvl){
 
   # calculate pointwise quantile
   study_days <- sort(unique(bt_smoother$study_day))
@@ -142,7 +128,7 @@ conf_band <- function(bt_smoother,
   my_quantile_upper <- numeric(length(study_days))
   width <- smoother_pts$win_end[1] - smoother_pts$win_beg[1] + 1
 
-  ptw_alpha <- find_ptw_alpha(bt_smoother, smoother_pts, bt_tot_rep, alpha)
+  ptw_conf_band_lvl <- find_ptw_conf_band_lvl(bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)
   init_est <- bt_smoother$value -
     rep(smoother_pts$pts[smoother_pts$study_day %in% bt_smoother$study_day], bt_tot_rep)
   names(init_est) <- bt_smoother$study_day
@@ -153,11 +139,11 @@ conf_band <- function(bt_smoother,
       sapply(split(init_est, factor(names(init_est))),
              function(x){
                if (sum(!is.na(x)) > 0 &&
-                   !is.na(ptw_alpha) &&
-                   !is.null(ptw_alpha$root)) {
+                   !is.na(ptw_conf_band_lvl) &&
+                   !is.null(ptw_conf_band_lvl$root)) {
 
-                 return(c(stats::quantile(x, ptw_alpha$root),
-                          stats::quantile(x, 1 - ptw_alpha$root)))
+                 return(c(stats::quantile(x, ptw_conf_band_lvl$root),
+                          stats::quantile(x, 1 - ptw_conf_band_lvl$root)))
                } else {
                   return(NA)
                }
