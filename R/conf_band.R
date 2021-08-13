@@ -107,7 +107,9 @@ find_ptw_conf_band_lvl <- function(bt_smoother,
 #'
 #'
 #' @inheritParams edecob
-#' @param bt_smoother The bootstrapped smoother. Use the output of \code{bt_smoother()}.
+#' @param smoother_pts A data frame containing the smoother. Preferably the
+#'   output of one of the smoother functions included in this package.
+#' @param bt_smoother A data frame containing the bootstrapped smoother. Use the output of \code{bt_smoother}.
 #'
 #' @return A data frame containing the upper confidence bound, the lower confidence bound,
 #'   and the study day corresponding to the bounds.

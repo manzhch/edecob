@@ -5,13 +5,12 @@
 \alias{edecob-package}
 \title{edecob: Event Detection Using Confidence Bounds}
 \description{
-Detect sustained worsening/improvement in time-dependent data.
+Detect sustained change in time-dependent data.
 }
-\section{Main functions}{
+\section{Main function}{
 
 \describe{
-\item{\code{edecob}}{Detects event in the data provided}
-\item{\code{edecob_plot}}{Generates a ggplot to visualize the data}
+\item{\code{edecob}}{Detects events in the data provided and visualizes the data}
 }
 }
 
@@ -23,6 +22,7 @@ Detect sustained worsening/improvement in time-dependent data.
 \item{\code{bt_smoother}}{Bootstraps the smoother}
 \item{\code{conf_band}}{Calculates the confidence bounds}
 \item{\code{detect_event}}{Detects events using the confidence bounds}
+\item{\code{edecob_plot}}{Generates a ggplot to visualize the data}
 }
 }
 

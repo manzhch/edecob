@@ -6,38 +6,44 @@
 \usage{
 edecob_plot(
   data,
-  study_day,
+  basel,
+  thresh,
   smoother_pts,
   conf_band,
   event,
   subj_id = "subj1",
-  learn_dur,
-  basel_dur,
-  thresh_diff = -0.1,
-  width
+  basel_start,
+  basel_end,
+  width,
+  label = "Data"
 )
 }
 \arguments{
-\item{data}{A vector containing the data.}
+\item{data}{A data frame containing the data. The values should be in the
+first column, the study days in the second column, and the subject
+identifier in the third column. The study days are expected to be integes
+numbers. Study day zero may be the randomization date, the first day
+after baseline, or whatever is preferred. The subject identifier is expected
+to be a string.}
 
-\item{study_day}{A vector containing the study days at which the data points
-were collected}
+\item{basel}{The baseline for the data.}
+
+\item{thresh}{The threshold for the data.}
 
 \item{smoother_pts}{A data frame containing the smoother. Preferably the
 output of one of the smoother functions included in this package.}
 
 \item{conf_band}{A data frame containing the confidence bounds. Ideally the output of \code{\link{conf_band}}.}
 
-\item{event}{A list containing the events. Preferably the output of \code{\link{detect_event()}}}
+\item{event}{A list containing the events. Preferably the output of \code{\link{detect_event}}}
 
-\item{learn_dur}{The amount of days where the data is to be ignored.}
+\item{basel_start}{The study day of first data point to be used for the
+baseline. Defaults to the first study day at which a data point is present.}
 
-\item{basel_dur}{The width of the window in days from which the median is
-taken to use as baseline.}
+\item{basel_end}{The study day of last data point to be used for the
+baseline.}
 
-\item{thresh_diff}{The percentage difference between the baseline and
-threshold. A negative number indicates a threshold below the baseline and
-vice versa.}
+\item{label}{The name of the y-axis in the plot.}
 }
 \value{
 A \code{ggplot2} object that visualizes the data.

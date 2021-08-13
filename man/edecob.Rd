@@ -2,76 +2,138 @@
 % Please edit documentation in R/edecob.R
 \name{edecob}
 \alias{edecob}
-\title{Event Detection using Confidence Bounds}
+\title{Event DEtection using COnfidence Bounds}
 \usage{
 edecob(
   data,
-  study_day,
-  subj_id = "subj1",
   bt_tot_rep,
-  learn_dur,
-  basel_dur,
-  event_min_dur = 12 * 7,
-  thresh_diff = -0.1,
+  basel_start = min(data[, 2]),
+  basel_end,
+  basel_method = "median",
+  thresh_diff = 0,
+  thresh_method = "absolute",
+  min_change_dur = 12 * 7,
   smoother = "mov_med",
-  width = 12 * 7,
-  alpha = 0.05,
-  plot = TRUE
+  conf_band_lvl = 0.95,
+  plot = FALSE,
+  ...
 )
 }
 \arguments{
-\item{data}{A vector containing the data.}
+\item{data}{A data frame containing the data. The values should be in the
+first column, the study days in the second column, and the subject
+identifier in the third column. The study days are expected to be integes
+numbers. Study day zero may be the randomization date, the first day
+after baseline, or whatever is preferred. The subject identifier is expected
+to be a string.}
 
-\item{study_day}{A vector containing the study days at which the data points
-were collected}
+\item{bt_tot_rep}{The number of bootstrap repetitions to be performed.}
 
-\item{subj_id}{A string containing an identifier for the data.}
+\item{basel_start}{The study day of first data point to be used for the
+baseline. Defaults to the first study day at which a data point is present.}
 
-\item{bt_tot_rep}{The amount of bootstrap repetitions to be performed.}
+\item{basel_end}{The study day of last data point to be used for the
+baseline.}
 
-\item{learn_dur}{The amount of days where the data is to be ignored.}
-
-\item{basel_dur}{The width of the window in days from which the median is
-taken to use as baseline.}
-
-\item{event_min_dur}{The minimal duration the worsening needs to be sustained
-to define an event in days.}
+\item{basel_method}{How the baseline should be calculated. Can take any of
+the following values: \code{median, mean, quantile}. When using quantile,
+an additional argument \code{quantile} needs to be given. Defaults to
+median.}
 
 \item{thresh_diff}{The percentage difference between the baseline and
 threshold. A negative number indicates a threshold below the baseline and
-vice versa.}
+similarly with a positive number. If it is zero, the algorithm will detect events below the
+baseline. Defaults to zero. To detect events above the baseline with threshold
+equal to baseline, use a very small number, i.e. 1e-10.}
 
-\item{smoother}{Which smoother is to be used. Currently only \code{mov_med} for
-moving median available.}
+\item{thresh_method}{Whether the threshold is a percentage or absolute
+difference from the baseline. Use \code{percentage} or \code{absolute}.
+Defaults to absolute.}
 
-\item{width}{The width of the window for the moving median in days.}
+\item{min_change_dur}{The minimal duration the change needs to be sustained
+before an event is detected. In other words, the smallest amount of
+consecutive days the change needs to persist to define an event. Given in
+days. Defaults to 84, i.e. 12 weeks.}
 
-\item{alpha}{The confidence level for the simultaneous confidence bands.}
+\item{smoother}{Which smoother is to be used. Use \code{mov_med} for the
+moving median. When using the moving median, the parameter \code{width} must
+be given specifying the size of the window over which the moving median is
+to be taken. Note that the width is the total size of the window, meaning
+that for a day x the measurements from day x - \code{width}/2 to x +
+\code{width}/2 will be used for the calculation of the median. Defaults to the moving median.}
 
-\item{plot}{Whether a plot should be generated.}
+\item{conf_band_lvl}{The confidence level for the simultaneous confidence
+bands. Defaults to 0.95.}
+
+\item{plot}{Whether a plot should be generated. Defaults to FALSE.}
+
+\item{...}{Additional parameters to be given to the function.}
 }
 \value{
 A list of four values: \describe{ \item{\code{event_detected}}{gives
 whether an event was detected}
 \item{\code{event_detection_study_day}}{gives the study_day at which the
-event was detected} \item{\code{event_duration}}{gives the duration the
-event is sustained} \item{\code{event_censored}}{gives whether the detected
-event is censored} }
+event was detected. It is defined as the first day the upper or lower bound
+of the confidence band stays below or above the threshold, and after which it
+stays below or above the threshold for at least \code{min_change_dur} days.}
+\item{\code{event_duration}}{gives the duration the
+event is sustained, i.e. the number of days the upper or lower bound
+of the confidence band stays below or above the threshold.}
+\item{\code{event_stop}}{gives whether the detected change is sustained until
+the last day at which we can calculate the confidence bound or not. } }
 }
 \description{
 Calculate a smoother of the data and bootstrap it to form simultaneous
-confidence bounds. Define an event if the confidence bound is below the
-threshold for a predefined amount of time.
+confidence bounds. Define an event if the confidence bound is below or above
+the threshold for a predefined amount of time.
 }
-\details{
-Runs the following functions in this order: \enumerate{
-\item The smoother depending on choice: \code{\link{mov_med}}
-\item \code{\link{smoother_resid}}
-\item \code{\link{bt_smoother}}
-\item \code{\link{conf_band}}
-\item \code{\link{detect_event}}
+\section{The Model}{
+
+An autoregressive (AR) model is used for the residuals of the smoother:
+\deqn{Y(t) = S(t) + \eta(t)}
+\deqn{\eta(t) = \sum^{p}_{j = 1} \phiⱼ \eta(t - j) + \epsilon}
+where \eqn{t} is the point in time, \eqn{Y(t)} the data point,
+\eqn{S(t)} a smoother, \eqn{\eta(t)} the residual of the smoother, \eqn{p}
+the order of the AR model, \eqn{\phiⱼ} the coefficients of the AR model, and
+\eqn{\epsilon} the error of the AR model.
+}
+
+\section{Bootstrap}{
+
+The bootstrap procedure is as follows:
+\enumerate{
+\item Compute the smoother \eqn{S(t)}.
+\item Compute the residuals \eqn{\eta(tᵢ) = Y(tᵢ) - S(tᵢ)}.
+  \item Fit an AR(p) model to \eqn{\eta(tᵢ)} to obtain the coefficients
+\eqn{\phi₁, \dots, \phiₚ} and residuals \eqn{\epsilon(tᵢ) = \eta(tᵢ) -
+    \sum^{p}_{j = 1} \phiⱼ \eta(tᵢ - tᵢ₋ⱼ)}.
+  \item Resample \eqn{\epsilon(tᵢ)*} from \eqn{\epsilon(tₚ₊₁), \dots,
+    \epsilon(tₙ)} to obtain \deqn{Y(tᵢ)* = S(tᵢ) + \eta(tᵢ)*,} where  \deqn{\eta(tᵢ)* = \sum^{p}_{j=1} \phiⱼ \eta(tᵢ₋ⱼ)*+ \epsilon(tᵢ₋ⱼ)*.}
+  \item Compute \eqn{S(.)* = g(Y(t₁), \dots, Y(tₙ))} where \eqn{g} is the
+function with which the smoother is calculated.
+\item Repeat steps 4 and 5 \code{bt_tot_rep} times.
 }
 }
+
+\section{Calculation of the Confidence Bounds}{
+
+The confidence bounds are calculated as follows:
+\enumerate{
+\item We compute the quantiles \deqn{ qₓ(tᵢ), q₁₋ₓ(tᵢ) i = 1,\dots, N}
+
+    where \deqn{qₓ(tᵢ) = inf {u; P*[S(tᵢ)*ᵦ - S(tᵢ) \le u] \ge x} } is a
+    pointwise bootstrap quantile, \eqn{S(tᵢ)*ᵦ} the bootstrapped smoother,
+and \eqn{N} the number of measurements.
+\item We vary the pointwise error \eqn{x} until \deqn{P*[qₓ(tᵢ) \le S(tᵢ)*ᵦ - S(tᵢ) \le q₁₋ₓ(tᵢ) ⩝ i = 1,\dots, N] ≈ 1-\alpha.}
+    In other words, until the ratio of bootstrap curves that have all their points within
+\eqn{[qₓ(tᵢ), q₁₋ₓ(tᵢ)]} is approximately \eqn{1-\alpha}.
+\item We let
+\deqn{ Iₙ(tᵢ) = [S(tᵢ) +  qₓ(tᵢ), S(tᵢ) + q₁₋ₓ(tᵢ)] ⩝ i = 1, \dots, N}
+  confidence bounds. Then \eqn{{Iₙ(tᵢ); i = 1,\dots, N}} is a consistent simultaneous confidence band of level \eqn{1-\alpha}.
+
+}
+}
+
 \references{
 Bühlmann, P. (1998). Sieve Bootstrap for Smoothing in
 Nonstationary Time Series. \emph{The Annals of Statistics}, 26(1), 48-83.

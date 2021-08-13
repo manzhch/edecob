@@ -4,14 +4,18 @@
 \alias{conf_band}
 \title{Confidence Bounds of the Smoother}
 \usage{
-conf_band(bt_smoother, smoother_pts, bt_tot_rep, alpha)
+conf_band(bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)
 }
 \arguments{
-\item{bt_smoother}{The bootstrapped smoother. Use the output of \code{bt_smoother()}.}
+\item{bt_smoother}{A data frame containing the bootstrapped smoother. Use the output of \code{bt_smoother}.}
 
-\item{bt_tot_rep}{The amount of bootstrap repetitions to be performed.}
+\item{smoother_pts}{A data frame containing the smoother. Preferably the
+output of one of the smoother functions included in this package.}
 
-\item{alpha}{The confidence level for the simultaneous confidence bands.}
+\item{bt_tot_rep}{The number of bootstrap repetitions to be performed.}
+
+\item{conf_band_lvl}{The confidence level for the simultaneous confidence
+bands. Defaults to 0.95.}
 }
 \value{
 A data frame containing the upper confidence bound, the lower confidence bound,

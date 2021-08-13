@@ -7,10 +7,15 @@
 smoother_resid(data, study_day, smoother_pts)
 }
 \arguments{
-\item{data}{A vector containing the data.}
+\item{data}{A data frame containing the data. The values should be in the
+first column, the study days in the second column, and the subject
+identifier in the third column. The study days are expected to be integes
+numbers. Study day zero may be the randomization date, the first day
+after baseline, or whatever is preferred. The subject identifier is expected
+to be a string.}
 
-\item{study_day}{A vector containing the study days at which the data points
-were collected}
+\item{smoother_pts}{A data frame containing the smoother. Preferably the
+output of one of the smoother functions included in this package.}
 }
 \value{
 A vector of the same length as \code{data} containing the residuals.

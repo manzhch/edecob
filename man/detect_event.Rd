@@ -4,48 +4,31 @@
 \alias{detect_event}
 \title{Detect Events}
 \usage{
-detect_event(
-  data,
-  study_day,
-  conf_band,
-  learn_dur,
-  basel_dur,
-  event_min_dur,
-  thresh_diff = -0.1
-)
+detect_event(conf_band, basel, thresh, min_change_dur)
 }
 \arguments{
-\item{data}{A vector containing the data.}
-
-\item{study_day}{A vector containing the study days at which the data points
-were collected}
-
 \item{conf_band}{A data frame containing the confidence bounds. Ideally the output of \code{\link{conf_band}}.}
 
-\item{learn_dur}{The amount of days where the data is to be ignored.}
+\item{basel}{The baseline for the data.}
 
-\item{basel_dur}{The width of the window in days from which the median is
-taken to use as baseline.}
+\item{thresh}{The threshold for the data.}
 
-\item{event_min_dur}{The minimal duration the worsening needs to be sustained
-to define an event in days.}
-
-\item{thresh_diff}{The percentage difference between the baseline and
-threshold. A negative number indicates a threshold below the baseline and
-vice versa.}
+\item{min_change_dur}{The minimal duration the change needs to be sustained
+before an event is detected. In other words, the smallest amount of
+consecutive days the change needs to persist to define an event. Given in
+days. Defaults to 84, i.e. 12 weeks.}
 }
 \value{
 A list of four values: \describe{ \item{\code{event_detected}}{gives
 whether an event was detected}
 \item{\code{event_detection_study_day}}{gives the study_day at which the
 event was detected} \item{\code{event_duration}}{gives the duration the
-event is sustained} \item{\code{event_censored}}{gives whether the detected
+event is sustained} \item{\code{event_stop}}{gives whether the detected
 event is censored}
 }
 }
 \description{
-Detect events using the confidence bounds. In the case where the threshold is
-below the baseline, an event is detected if all the points of the upper bound of the
-confidence band are below the threshold for \code{event_min_dur}
-consecutive days.
+Detect events using the confidence bounds. An event is detected if all the
+points of the upper or lower bound of the confidence band are below or above
+the threshold for \code{min_change_dur} consecutive days.
 }

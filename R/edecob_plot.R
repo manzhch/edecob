@@ -9,10 +9,11 @@
 #' the detection day.
 #'
 #' @inheritParams detect_event
-
+#' @inheritParams edecob
 #' @param smoother_pts A data frame containing the smoother. Preferably the
 #'   output of one of the smoother functions included in this package.
-#' @param event A list containing the events. Preferably the output of \code{\link{detect_event()}}
+#' @param event A list containing the events. Preferably the output of \code{\link{detect_event}}
+#' @param label The name of the y-axis in the plot.
 #'
 #' @return A `ggplot2` object that visualizes the data.
 #' @export
@@ -21,14 +22,14 @@
 #'
 #' @importFrom rlang .data
 edecob_plot <- function(data,
-                        study_day,
+                        basel,
+                        thresh,
                         smoother_pts,
                         conf_band,
                         event,
                         subj_id = "subj1",
-                        learn_dur,
-                        basel_dur,
-                        thresh_diff = -0.1,
+                        basel_start,
+                        basel_end,
                         width,
                         label = "Data") {
 
@@ -42,15 +43,9 @@ edecob_plot <- function(data,
     smo_size <- 1
     eve_size <- 3
     txt_size <- 12
-    subj_data <- data.frame(data = data, study_day = study_day)
-
-
-    # calculate baseline and threshold
-    basel <- stats::median(data[as.logical(
-      (study_day >= min(study_day) + learn_dur) *
-        (study_day < min(study_day) + learn_dur + basel_dur))])
-    thresh <- basel * (1 + thresh_diff)
-
+    subj_data <- data.frame(
+      data = data$value[data$subj_id == subj_id],
+      study_day = data$study_day[data$subj_id == subj_id])
 
     # plotting data points, baseline, and threshold
     plot_colors <- character()
@@ -69,7 +64,7 @@ edecob_plot <- function(data,
         alpha = 0.8
       ) +
       ggplot2::geom_point(
-        data = subj_data[which(subj_data$study_day < min(subj_data$study_day) + learn_dur), ],
+        data = subj_data[which(subj_data$study_day < basel_start), ],
         ggplot2::aes(x = .data$study_day, y = .data$data),
         color = "grey70",
         size = dot_size*0.9
@@ -81,10 +76,10 @@ edecob_plot <- function(data,
       # ggplot2::geom_vline(ggplot2::aes(xintercept = min(subj_data$study_day) + learn_dur,
       #                                  color = "Baseline Period"),
       #                     linetype = "dashed", key_glyph = "path") +
-      ggplot2::geom_vline(ggplot2::aes(xintercept = min(subj_data$study_day) + learn_dur,
+      ggplot2::geom_vline(ggplot2::aes(xintercept = basel_start,
                                        linetype = "Baseline Period"),
                           color = "blue") +
-      ggplot2::geom_vline(ggplot2::aes(xintercept = min(subj_data$study_day) + learn_dur + basel_dur
+      ggplot2::geom_vline(ggplot2::aes(xintercept = basel_end
                                        ),
                           color = "blue", show.legend = F, linetype = "dashed") +
       # ggplot2::geom_vline(ggplot2::aes(xintercept = my_patient_devices$RETDT),

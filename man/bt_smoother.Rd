@@ -4,27 +4,29 @@
 \alias{bt_smoother}
 \title{Bootstrap the Smoother}
 \usage{
-bt_smoother(smoother_pts, resid, study_day, width, bt_tot_rep)
+bt_smoother(data, smoother_pts, resid, width, bt_tot_rep)
 }
 \arguments{
+\item{data}{A data frame containing the data. The values should be in the
+first column, the study days in the second column, and the subject
+identifier in the third column. The study days are expected to be integes
+numbers. Study day zero may be the randomization date, the first day
+after baseline, or whatever is preferred. The subject identifier is expected
+to be a string.}
+
 \item{smoother_pts}{A data frame containing the smoother. Preferably the
 output of one of the smoother functions included in this package.}
 
 \item{resid}{A vector containing the residuals of the smoother to the data
 points.}
 
-\item{study_day}{A vector containing the study days at which the data points
-were collected}
-
-\item{width}{The width of the window for the moving median in days.}
-
-\item{bt_tot_rep}{The amount of bootstrap repetitions to be performed.}
+\item{bt_tot_rep}{The number of bootstrap repetitions to be performed.}
 }
 \value{
-
+A data frame containing the bootstrap repetitions of the smoother.
 }
 \description{
-Fit an autoregressive model on the residuals of the smoother, then bootstrap
+Fit an autoregressive model on the residuals of the smoother and bootstrap
 the error of the autoregressive model. Reconstruct the smoother by adding the
 bootstrapped error, the fitted autoregressive model, and the smoother to form
 the bootstrapped smoother.
@@ -32,23 +34,22 @@ the bootstrapped smoother.
 \details{
 An autoregressive (AR) model is used for the residuals of the smoother:
 \deqn{Y(t) = S(t) + \eta(t)}
-\deqn{\eta(t) = \sum^{p}_{j = 1} \phi_j \eta(t - j) + \epsilon}
+\deqn{\eta(t) = \sum^{p}_{j = 1} \phiⱼ \eta(t - j) + \epsilon}
 where \eqn{t} is the point in time, \eqn{Y(t)} the data point,
 \eqn{S(t)} a smoother, \eqn{\eta(t)} the residual of the smoother, \eqn{p}
-the order of the AR model, \eqn{\phi_j} the coefficients of the AR model, and
+the order of the AR model, \eqn{\phiⱼ} the coefficients of the AR model, and
 \eqn{\epsilon} the error of the AR model.
 
 The bootstrap procedure is as follows:
 \enumerate{
 \item Compute the smoother \eqn{S(t)}.
-\item Compute the residuals \eqn{\eta(t_i) = Y(t_i) - S(t_i)}.
-\item Fit an AR(p) model to \eqn{\eta(t_i)} to obtain the coefficients
-\eqn{\phi_1, \dots, \phi_p} and residuals \eqn{\epsilon(t_i) = \eta(t_i) -
-    \sum^{p}_{j = 1} \phi_j \eta(t_{i} - t_{i-j})}.
-\item Resample \eqn{\epsilon(t_i)*} from \eqn{\epsilon(t_{p+1}), \dots,
-    \epsilon(t_n)} to obtain \deqn{\eta(t_i)* = \sum^{p}_{j =1} \phi_j \eta(t_{i-j})*
-    + \epsilon(t_{i - j})*} \deqn{Y(t_i)* = S(t_i) + \eta(t_i)*.}
-\item Compute \eqn{S(.)* = g(Y(t_1), \dots, Y(t_n))} where \eqn{g} is the
+\item Compute the residuals \eqn{\eta(tᵢ) = Y(tᵢ) - S(tᵢ)}.
+  \item Fit an AR(p) model to \eqn{\eta(tᵢ)} to obtain the coefficients
+\eqn{\phi₁, \dots, \phiₚ} and residuals \eqn{\epsilon(tᵢ) = \eta(tᵢ) -
+    \sum^{p}_{j = 1} \phiⱼ \eta(tᵢ - tᵢ₋ⱼ)}.
+  \item Resample \eqn{\epsilon(tᵢ)*} from \eqn{\epsilon(tₚ₊₁), \dots,
+    \epsilon(tₙ)} to obtain \deqn{Y(tᵢ)* = S(tᵢ) + \eta(tᵢ)*,} where  \deqn{\eta(tᵢ)* = \sum^{p}_{j=1} \phiⱼ \eta(tᵢ₋ⱼ)*+ \epsilon(tᵢ₋ⱼ)*.}
+  \item Compute \eqn{S(.)* = g(Y(t₁), \dots, Y(tₙ))} where \eqn{g} is the
 function with which the smoother is calculated.
 \item Repeat steps 4 and 5 \code{bt_tot_rep} times.
 }

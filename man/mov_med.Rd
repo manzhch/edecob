@@ -4,17 +4,15 @@
 \alias{mov_med}
 \title{Moving Median over a Time Window}
 \usage{
-mov_med(data, study_day, subj_id = "subj1", width = 12 * 7)
+mov_med(data, width = 12 * 7)
 }
 \arguments{
-\item{data}{A vector containing the data.}
-
-\item{study_day}{A vector containing the study days at which the data points
-were collected}
-
-\item{subj_id}{A string containing an identifier for the data.}
-
-\item{width}{The width of the window for the moving median in days.}
+\item{data}{A data frame containing the data. The values should be in the
+first column, the study days in the second column, and the subject
+identifier in the third column. The study days are expected to be integes
+numbers. Study day zero may be the randomization date, the first day
+after baseline, or whatever is preferred. The subject identifier is expected
+to be a string.}
 }
 \value{
 A data frame containing the values of the moving median, the study

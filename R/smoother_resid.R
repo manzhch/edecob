@@ -4,6 +4,8 @@
 #' Calculate the residuals of the smoother to the data points.
 #'
 #' @inheritParams edecob
+#' @param smoother_pts A data frame containing the smoother. Preferably the
+#'   output of one of the smoother functions included in this package.
 #'
 #' @return A vector of the same length as \code{data} containing the residuals.
 #' @export
