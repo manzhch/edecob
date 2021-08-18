@@ -13,10 +13,9 @@ detect_event(conf_band, basel, thresh, min_change_dur)
 
 \item{thresh}{The threshold for the data.}
 
-\item{min_change_dur}{The minimal duration the change needs to be sustained
-before an event is detected. In other words, the smallest amount of
-consecutive days the change needs to persist to define an event. Given in
-days. Defaults to 84, i.e. 12 weeks.}
+\item{min_change_dur}{The minimal number of days that the confidence bounds
+need to stay below or above the threshold in order for an event to be
+detected. Defaults to 84, i.e. 12 weeks.}
 }
 \value{
 A list of four values: \describe{ \item{\code{event_detected}}{gives
