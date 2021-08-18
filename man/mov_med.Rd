@@ -7,9 +7,10 @@
 mov_med(data, width = 12 * 7)
 }
 \arguments{
-\item{data}{A data frame containing the data. The values should be in the
+\item{data}{A data frame or matrix containing the data. The data points should be in the
 first column, the study days in the second column, and the subject
-identifier in the third column. The study days are expected to be integes
+identifier in the third column. If a matrix is used, the subject identifier
+is to be specified in the row names. The study days are expected to be integer
 numbers. Study day zero may be the randomization date, the first day
 after baseline, or whatever is preferred. The subject identifier is expected
 to be a string.}

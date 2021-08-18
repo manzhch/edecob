@@ -19,9 +19,10 @@ edecob_plot(
 )
 }
 \arguments{
-\item{data}{A data frame containing the data. The values should be in the
+\item{data}{A data frame or matrix containing the data. The data points should be in the
 first column, the study days in the second column, and the subject
-identifier in the third column. The study days are expected to be integes
+identifier in the third column. If a matrix is used, the subject identifier
+is to be specified in the row names. The study days are expected to be integer
 numbers. Study day zero may be the randomization date, the first day
 after baseline, or whatever is preferred. The subject identifier is expected
 to be a string.}
@@ -38,7 +39,7 @@ output of one of the smoother functions included in this package.}
 \item{event}{A list containing the events. Preferably the output of \code{\link{detect_event}}}
 
 \item{basel_start}{The study day of first data point to be used for the
-baseline. Defaults to the first study day at which a data point is present.}
+baseline. Defaults to the smallest available study day.}
 
 \item{basel_end}{The study day of last data point to be used for the
 baseline.}
