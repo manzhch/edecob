@@ -21,7 +21,11 @@ output of one of the smoother functions included in this package.}
 \item{resid}{A vector containing the residuals of the smoother to the data
 points.}
 
+<<<<<<< HEAD
 \item{bt_tot_rep}{The number of times we perform the bootstrap. Defaults to 100.}
+=======
+\item{bt_tot_rep}{The number of times we perform the bootstrap.}
+>>>>>>> 60718f09160e415e469ee291034d2d73fd371445
 }
 \value{
 A data frame containing the bootstrap repetitions of the smoother.

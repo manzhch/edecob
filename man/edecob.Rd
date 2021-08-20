@@ -7,14 +7,24 @@
 edecob(
   data,
   smoother = "mov_med",
+<<<<<<< HEAD
+=======
+  bt_tot_rep,
+>>>>>>> 60718f09160e415e469ee291034d2d73fd371445
   basel_start = min(data[, 2]),
   basel_end = basel_start + 41,
   basel_method = "median",
   thresh_diff = -20,
+<<<<<<< HEAD
   thresh_method = "percentage",
   min_change_dur = 12 * 7,
   conf_band_lvl = 0.95,
   bt_tot_rep = 100,
+=======
+  thresh_method = "absolute",
+  min_change_dur = 12 * 7,
+  conf_band_lvl = 0.95,
+>>>>>>> 60718f09160e415e469ee291034d2d73fd371445
   ...
 )
 }
@@ -31,6 +41,11 @@ to be a string.}
 moving median. When using the moving median, the parameter \code{width} must
 be given to specify the size of the window over which the moving median is
 to be taken. Defaults to the moving median.}
+<<<<<<< HEAD
+=======
+
+\item{bt_tot_rep}{The number of times we perform the bootstrap.}
+>>>>>>> 60718f09160e415e469ee291034d2d73fd371445
 
 \item{basel_start}{The study day of first data point to be used for the
 baseline. Defaults to the smallest available study day.}
@@ -62,8 +77,11 @@ detected. Defaults to 84, i.e. 12 weeks.}
 \item{conf_band_lvl}{The confidence level for the simultaneous confidence
 bands. Defaults to 0.95.}
 
+<<<<<<< HEAD
 \item{bt_tot_rep}{The number of times we perform the bootstrap. Defaults to 100.}
 
+=======
+>>>>>>> 60718f09160e415e469ee291034d2d73fd371445
 \item{...}{Additional parameters to be given to the function. When the moving
 median is used, a \code{width} parameter is expected. When using the quantile
 for baseline method, a \code{quantile} parameter is expected.}
@@ -143,7 +161,11 @@ The confidence bounds are calculated as follows:
 
     where \deqn{qₓ(tᵢ) = inf{u; P*[S(tᵢ)*ᵦ - S(tᵢ) \le u] \ge x} } is a
     pointwise bootstrap quantile, \eqn{S(tᵢ)*ᵦ} the bootstrapped smoother,
+<<<<<<< HEAD
 and \eqn{N} the number of measurements or rows in \code{data}, in our case the number of rows.
+=======
+and \eqn{N} the number of measurements in \code{data}, in our case the number of rows.
+>>>>>>> 60718f09160e415e469ee291034d2d73fd371445
 \item We vary the pointwise error \eqn{x} until \deqn{P*[qₓ(tᵢ) \le S(tᵢ)*ᵦ - S(tᵢ) \le q₁₋ₓ(tᵢ) ⩝ i = 1,\dots, N] ≈ 1-\alpha.}
     In other words, until the ratio of bootstrap curves that have all their points within
 \eqn{[qₓ(tᵢ), q₁₋ₓ(tᵢ)]} is approximately \eqn{1-\alpha}.
@@ -166,7 +188,11 @@ of the median.
 Bühlmann, P. (1998). Sieve Bootstrap for Smoothing in
 Nonstationary Time Series. \emph{The Annals of Statistics}, 26(1), 48-83.
 
+<<<<<<< HEAD
 Hogg, R., McKean, J. and Craig, A. (2014).
+=======
+Hogg, R., McKean, J. and Craig, A., 2014.
+>>>>>>> 60718f09160e415e469ee291034d2d73fd371445
 \emph{Introduction to mathematical statistics.} Harlow: Pearson Education.
 }
 \seealso{
