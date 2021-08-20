@@ -159,8 +159,20 @@ edecob_plot <- function(data,
 
 
     # CI
+
+    # create new data frame but containing NA values when no CI points
+    conf_band_na <- data.frame(
+      upper = rep(NA, max(conf_band$study_day) - min(conf_band$study_day) + 1),
+      lower = rep(NA, max(conf_band$study_day) - min(conf_band$study_day) + 1),
+      study_day = min(conf_band$study_day):max(conf_band$study_day))
+
+    conf_band_na$upper[conf_band_na$study_day %in% conf_band$study_day] <-
+      conf_band$upper
+    conf_band_na$lower[conf_band_na$study_day %in% conf_band$study_day] <-
+      conf_band$lower
+
     patient_plot <- patient_plot +
-      ggplot2::geom_ribbon(data = conf_band, ggplot2::aes(x = .data$study_day, ymin = .data$lower, ymax = .data$upper, fill = "Confidence Band"),
+      ggplot2::geom_ribbon(data = conf_band_na, ggplot2::aes(x = .data$study_day, ymin = .data$lower, ymax = .data$upper, fill = "Confidence Band"),
                            alpha = 0.45, color = "transparent")
 
 

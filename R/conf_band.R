@@ -15,7 +15,7 @@ ratio_in_ci <- function(alpha_p,
 
   # calculate difference of bootstrapped smoother vs non-bootstrapped smoother
   bt_smoother$init_est <- bt_smoother$value -
-    rep(smoother_pts$pts[smoother_pts$study_day %in% uniq_study_day], bt_tot_rep)
+    rep(smoother_pts$value[smoother_pts$study_day %in% uniq_study_day], bt_tot_rep)
 
   # calculate quantiles
   for (ii in 1:length(uniq_study_day)) {
@@ -132,7 +132,7 @@ conf_band <- function(bt_smoother,
 
   ptw_conf_band_lvl <- find_ptw_conf_band_lvl(bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)
   init_est <- bt_smoother$value -
-    rep(smoother_pts$pts[smoother_pts$study_day %in% bt_smoother$study_day], bt_tot_rep)
+    rep(smoother_pts$value[smoother_pts$study_day %in% bt_smoother$study_day], bt_tot_rep)
   names(init_est) <- bt_smoother$study_day
 
   # calculate quantiles
@@ -172,15 +172,16 @@ conf_band <- function(bt_smoother,
   for (ii in study_days_matching) {
     current_ind <- smoother_pts$study_day == ii
     smoother_pts$intvl_upper[current_ind] <-
-      smoother_pts$pts[current_ind] + my_quantile_upper[as.character(ii)]
+      smoother_pts$value[current_ind] + my_quantile_upper[as.character(ii)]
     smoother_pts$intvl_lower[current_ind] <-
-      smoother_pts$pts[current_ind] + my_quantile_lower[as.character(ii)]
+      smoother_pts$value[current_ind] + my_quantile_lower[as.character(ii)]
   }
 
   conf_band <- data.frame(
     upper = smoother_pts$intvl_upper[!is.na(smoother_pts$intvl_upper)],
     lower = smoother_pts$intvl_lower[!is.na(smoother_pts$intvl_lower)],
-    study_day = study_days_matching)
+    study_day = study_days_matching,
+    subj_id = rep(smoother_pts$subj_id[1], length(study_days_matching)))
 
   return(conf_band)
 }

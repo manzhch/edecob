@@ -42,7 +42,7 @@ output of one of the smoother functions included in this package.}
 baseline. Defaults to the smallest available study day.}
 
 \item{basel_end}{The study day of last data point to be used for the
-baseline.}
+baseline. Defaults to six weeks after \code{basel_start}.}
 
 \item{label}{The name of the y-axis in the plot.}
 }

@@ -14,6 +14,9 @@ is to be specified in the row names. The study days are expected to be integer
 numbers. Study day zero may be the randomization date, the first day
 after baseline, or whatever is preferred. The subject identifier is expected
 to be a string.}
+
+\item{width}{The width of the window over which the moving median is taken in
+number of days.}
 }
 \value{
 A data frame containing the values of the moving median, the study

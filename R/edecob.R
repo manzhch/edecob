@@ -129,8 +129,8 @@ NULL
 #'   an additional argument \code{quantile} specifying the quantile needs to be
 #'   given. Defaults to median.
 #' @param thresh_method Whether the threshold is a percentage or absolute
-#'   difference from the baseline. Use \code{percentage} or \code{absolute}.
-#'   Defaults to percentage.
+#'   difference from the baseline. Use \code{percent} or \code{absolute}.
+#'   Defaults to percent.
 #' @param ... Additional parameters to be given to the function. When the moving
 #'   median is used, a \code{width} parameter is expected. When using the quantile
 #'   for baseline method, a \code{quantile} parameter is expected.
@@ -162,13 +162,15 @@ edecob <- function(data,
                    basel_end = basel_start + 41,
                    basel_method = "median",
                    thresh_diff = -20,
-                   thresh_method = "percentage",
+                   thresh_method = "percent",
                    min_change_dur = 12*7,
                    conf_band_lvl = 0.95,
                    bt_tot_rep = 100,
                    ...) {
 
   # EXTRACT ... !!!!!!!! may contain quantile or width.
+
+  # may be matrix!!!
   colnames(data) <- c("value", "study_day", "subj_id")
   # print(data)
   width <- 12*7
@@ -200,19 +202,19 @@ edecob <- function(data,
     basel <- stats::quantile(data$value[as.logical(
       (data$study_day >= basel_start) * (data$study_day <= basel_end))], quantile)
   } else {
-    warning("Baseline method not recognized. Default to median.")
+    warning("Baseline method not recognized. Defaulting to median.")
     basel <- stats::median(data$value[as.logical(
       (data$study_day >= basel_start) * (data$study_day <= basel_end))])
   }
 
   # calculate threshold
-  if (thresh_method == "percentage") {
+  if (thresh_method == "percent") {
     thresh <- basel * (1 + thresh_diff/100)
   } else if (thresh_method == "absolute") {
     thresh <- basel + thresh_diff
   } else {
-    warning("Threshold method not recognized. Default to absolute.")
-    thresh <- basel + thresh_diff
+    warning("Threshold method not recognized. Defaulting to percent.")
+    thresh <- basel * (1 + thresh_diff/100)
   }
 
 
@@ -224,8 +226,13 @@ edecob <- function(data,
   # calculate residuals of the smoother
   smoother_resid <- smoother_resid(data_non_learn, smoother_pts)
 
+
   # bootstrap the errors of the AR model fitted on the residuals
-  bt_smoother <- bt_smoother(data_non_learn, smoother_pts, smoother_resid, width, bt_tot_rep)
+  if (smoother == "mov_med") {
+
+    bt_smoother <- bt_smoother(data_non_learn, smoother, smoother_pts, smoother_resid, bt_tot_rep, width)
+
+  }
 
   # calculate the confidence bands
   conf_band <- conf_band(bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)
@@ -234,39 +241,41 @@ edecob <- function(data,
   event <- detect_event(conf_band, basel, thresh, min_change_dur)
 
   output <- list(
+    "event" = event,
+    "conf_band" = conf_band,
+    "smoother_pts" = smoother_pts,
     "data" = data,
     "baseline" = basel,
     "threshold" = thresh,
-    "bt_tot_rep" = bt_tot_rep,
+    "smoother" = smoother,
     "basel_start" = basel_start,
     "basel_end" = basel_end,
-    "min_change_dur" = min_change_dur,
+    "basel_method" = basel_method,
     "thresh_diff" = thresh_diff,
-    "smoother" = smoother,
+    "thresh_method" = thresh_method,
+    "min_change_dur" = min_change_dur,
     "conf_band_lvl" = conf_band_lvl,
-    "smoother_pts" = smoother_pts,
-    "conf_band" = conf_band,
-    "event" = event
+    "bt_tot_rep" = bt_tot_rep
   )
 
   # plot
-  if (plot == T) {
-    if (!requireNamespace("ggplot2", quietly = TRUE)) {
-      warning("Package \"gglot2\" needed for plots.", call. = FALSE)
-    } else {
-      #plot
-      output[["plot"]] <- edecob_plot(data,
-                                      basel,
-                                      thresh,
-                                      smoother_pts,
-                                      conf_band,
-                                      event,
-                                      basel_start,
-                                      basel_end,
-                                      width,
-                                      label = "Data")
-    }
-  }
+  # if (plot == T) {
+  #   if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  #     warning("Package \"gglot2\" needed for plots.", call. = FALSE)
+  #   } else {
+  #     #plot
+  #     output[["plot"]] <- edecob_plot(data,
+  #                                     basel,
+  #                                     thresh,
+  #                                     smoother_pts,
+  #                                     conf_band,
+  #                                     event,
+  #                                     basel_start,
+  #                                     basel_end,
+  #                                     width,
+  #                                     label = "Data")
+  #   }
+  # }
 
   class(output) <- "edecob"
 

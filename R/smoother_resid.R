@@ -11,16 +11,16 @@
 #' @export
 #'
 #' @examples
-smoother_resid <- function(data, study_day, smoother_pts) {
+smoother_resid <- function(data, smoother_pts) {
 
-  resid <- numeric(length(data))
+  resid <- numeric(nrow(data))
 
-  if (length(data) > 0 && nrow(smoother_pts) > 0) {
+  if (nrow(data) > 0 && nrow(smoother_pts) > 0) {
     # calculate residuals for those study_days where there is both a
     # smoother and a data point
     for (ii in 1:nrow(smoother_pts)) {
-      dataset_ind <- as.logical(study_day == smoother_pts$study_day[ii])
-      resid[dataset_ind] <- data[dataset_ind] - smoother_pts$pts[ii]
+      dataset_ind <- as.logical(data$study_day == smoother_pts$study_day[ii])
+      resid[dataset_ind] <- data$value[dataset_ind] - smoother_pts$value[ii]
     }
 
     return(resid)

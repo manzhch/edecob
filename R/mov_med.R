@@ -17,6 +17,8 @@
 #' time window so that the values do not change upon receiving new data.
 #'
 #' @inheritParams edecob
+#' @param width The width of the window over which the moving median is taken in
+#'   number of days.
 #'
 #' @return A data frame containing the values of the moving median, the study
 #'   day to which it corresponds, the time window from which it was calculated,
@@ -30,6 +32,7 @@ mov_med <- function(data,
 
   subj_id <- data$subj_id[1]
 
+  # the number of days for which the moving median will be calculated
   dur <- max(data$study_day) - min(data$study_day) + 1 - width/2
 
   med_pts_med <- numeric(dur)
@@ -37,7 +40,7 @@ mov_med <- function(data,
   med_pts_win_beg <- numeric(dur)
   med_pts_win_end <- numeric(dur)
   med_pts_subj_id <- character(dur)
-  ll <- 1 # index for the lists above
+  ll <- 1 # index for the vectors above
 
 
 
@@ -53,6 +56,7 @@ mov_med <- function(data,
     # determine window
     win_ind <- as.logical((data$study_day >= first_study_day) *
       (data$study_day < win_beg_day + width / 2))
+
     win <- data$value[win_ind]
 
     if (sum(win_ind) > 0) {
@@ -98,11 +102,11 @@ mov_med <- function(data,
 
   # compile median point data into dataframe
   med_pts <- data.frame(
-    "pts" = med_pts_med,
+    "value" = med_pts_med,
+    "study_day" = med_pts_study_day,
+    "subj_id" = med_pts_subj_id,
     "win_beg" = med_pts_win_beg,
     "win_end" = med_pts_win_end,
-    "data$study_day" = med_pts_study_day,
-    "subj_id" = med_pts_subj_id,
     stringsAsFactors = FALSE
   )
   med_pts <- med_pts[med_pts$subj_id != "", ]

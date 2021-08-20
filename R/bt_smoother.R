@@ -1,30 +1,10 @@
 
-# Moving Median; Helper function for the bootstrap step.
-fun_running_median <- function(data, win_beg_day, bt_rep, bt_Y, smoother_pts, width){
-
-
-  window_ind <- as.logical((data$study_day >= win_beg_day) *
-                           (data$study_day < win_beg_day + width))
-
-  if (sum(window_ind) > 0) {
-    return(list("value" = stats::median(bt_Y[window_ind], na.rm = TRUE),
-                "study_day" = win_beg_day + width / 2,
-                "bt_rep" = bt_rep)
-    )
-  } else {
-    return(list("value" = NA,
-                "study_day" = NA,
-                "bt_rep" = bt_rep))
-  }
-}
-
-
 # Perform one Bootstrap Step
 #
 # Helper function to bootstrap the epsilon (error of AR) and then reconstruct
 # smoother (currently the moving median) using AR model and bootstrapped
 # epsilon
-bt_eps <- function(data, bt_rep, smoother_pts, resid, width){
+bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, width){
 
   # bootstrap error
   bt_Y <- numeric(nrow(data))
@@ -57,27 +37,39 @@ bt_eps <- function(data, bt_rep, smoother_pts, resid, width){
 
     # calculate Y* (the bootstrapped data points using the AR model)
     bt_Y <- vapply(1:max(which(data$study_day <= max(smoother_pts$study_day))), function(x, bt_eta) {
-      return(smoother_pts$pts[smoother_pts$study_day == data$study_day[x]] + bt_eta[x])
+      return(smoother_pts$value[smoother_pts$study_day == data$study_day[x]] + bt_eta[x])
     }, numeric(1), bt_eta)
 
-    # calculate S_star (the bootstrapped median)
+    # calculate bootstrapped smoother S*
     win_beg_day <- min(data$study_day)
     last_data_study_day <- max(data$study_day)
 
     if (last_data_study_day > win_beg_day + width) {
 
-      S_star_one_bt <- as.data.frame(do.call(rbind, lapply(
-        seq(win_beg_day, last_data_study_day - width - 1, 1),
-        fun_running_median, data, bt_rep, bt_Y, smoother_pts, width
-      )))
+      if (smoother == "mov_med") {
+        S_star_one_bt <-
+          mov_med(data.frame(value = bt_Y,
+                             study_day = data$study_day[which(data$study_day <= max(smoother_pts$study_day))],
+                             subj_id = rep(data$subj_id[1], length(bt_Y))),
+                  width)
+        S_star_one_bt <- S_star_one_bt[, c("value", "study_day", "subj_id")]
+        S_star_one_bt$bt_rep <- rep(bt_rep, nrow(S_star_one_bt))
+        # S_star_one_bt <- S_star_one_bt[, c(1,2,4,3)]
+      }
+
       return(S_star_one_bt)
     } else {
       return(data.frame("value" = NA,
                         "study_day" = NA,
-                        "bt_rep" = bt_rep))
+                        "bt_rep" = bt_rep,
+                        "subj_id" = data$subj_id[1]))
     }
   } else {
     warning("AR model cannot be fitted (variance of residuals is 0 or residuals are NA)")
+    return(data.frame("value" = NA,
+                      "study_day" = NA,
+                      "bt_rep" = bt_rep,
+                      "subj_id" = data$subj_id[1]))
   }
 }
 
@@ -124,11 +116,12 @@ bt_eps <- function(data, bt_rep, smoother_pts, resid, width){
 #'   Nonstationary Time Series. \emph{The Annals of Statistics}, 26(1), 48-83.
 #'
 #' @examples
-bt_smoother <- function(data, smoother_pts, resid, width, bt_tot_rep) {
-  bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, data, smoother_pts, resid, width))
-  bt_Y$study_day <- unlist(bt_Y$study_day)
-  bt_Y$value <- unlist(bt_Y$value)
-  bt_Y$bt_rep <- unlist(bt_Y$bt_rep)
+bt_smoother <- function(data, smoother, smoother_pts, resid, bt_tot_rep, ...) {
+  bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, data, smoother, smoother_pts, resid, ...))
+  # print(bt_Y)
+  # bt_Y$study_day <- unlist(bt_Y$study_day)
+  # bt_Y$value <- unlist(bt_Y$value)
+  # bt_Y$bt_rep <- unlist(bt_Y$bt_rep)
   bt_Y <- bt_Y[!is.na(bt_Y$value), ]
   return(bt_Y)
 }
