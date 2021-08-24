@@ -169,7 +169,7 @@ edecob <- function(data,
     smoother_pts <- mov_med(data, width)
   } else {
     warning("Smoother not recognized. Defaulting to moving median.")
-    smoother_pts <- mov_med(data, width)
+
   }
 
   # calculate residuals of the smoother
