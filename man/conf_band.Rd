@@ -12,11 +12,7 @@ conf_band(bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)
 \item{smoother_pts}{A data frame containing the smoother. Preferably the
 output of one of the smoother functions included in this package.}
 
-<<<<<<< HEAD
 \item{bt_tot_rep}{The number of times we perform the bootstrap. Defaults to 100.}
-=======
-\item{bt_tot_rep}{The number of times we perform the bootstrap.}
->>>>>>> 60718f09160e415e469ee291034d2d73fd371445
 
 \item{conf_band_lvl}{The confidence level for the simultaneous confidence
 bands. Defaults to 0.95.}

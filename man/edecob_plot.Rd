@@ -4,47 +4,17 @@
 \alias{edecob_plot}
 \title{Plot Event Data}
 \usage{
-edecob_plot(
-  data,
-  basel,
-  thresh,
-  smoother_pts,
-  conf_band,
-  event,
-  subj_id = "subj1",
-  basel_start,
-  basel_end,
-  width,
-  label = "Data"
-)
+edecob_plot(event_data, label = "Data", ...)
 }
 \arguments{
-\item{data}{A data frame or matrix containing the data. The data points should be in the
-first column, the study days in the second column, and the subject
-identifier in the third column. If a matrix is used, the subject identifier
-is to be specified in the row names. The study days are expected to be integer
-numbers. Study day zero may be the randomization date, the first day
-after baseline, or whatever is preferred. The subject identifier is expected
-to be a string.}
-
-\item{basel}{The baseline for the data.}
-
-\item{thresh}{The threshold for the data.}
-
-\item{smoother_pts}{A data frame containing the smoother. Preferably the
+\item{event_data}{A data frame containing the smoother. Preferably the
 output of one of the smoother functions included in this package.}
 
-\item{conf_band}{A data frame containing the confidence bounds. Ideally the output of \code{\link{conf_band}}.}
-
-\item{event}{A list containing the events. Preferably the output of \code{\link{detect_event}}}
-
-\item{basel_start}{The study day of first data point to be used for the
-baseline. Defaults to the smallest available study day.}
-
-\item{basel_end}{The study day of last data point to be used for the
-baseline. Defaults to six weeks after \code{basel_start}.}
-
 \item{label}{The name of the y-axis in the plot.}
+
+\item{...}{If data from more than one subject is included in
+\code{event_data}, specify \code{subj_id}. Defaults to the first subject
+found in \code{event_data$data}.}
 }
 \value{
 A \code{ggplot2} object that visualizes the data.

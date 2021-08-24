@@ -8,12 +8,10 @@
 #' bound  is the blue area. If an event is detected, a red triangle will mark
 #' the detection day.
 #'
-#' @inheritParams detect_event
-#' @inheritParams edecob
-#' @param smoother_pts A data frame containing the smoother. Preferably the
-#'   output of one of the smoother functions included in this package.
-#' @param event A list containing the events. Preferably the output of \code{\link{detect_event}}
+#' @param event_data The output of the \code{edecob} function. It is an object
+#'   of class \code{edecob} containing the data and the event information.
 #' @param label The name of the y-axis in the plot.
+
 #'
 #' @return A `ggplot2` object that visualizes the data.
 #' @export
@@ -21,28 +19,33 @@
 #' @examples
 #'
 #' @importFrom rlang .data
-edecob_plot <- function(data,
-                        basel,
-                        thresh,
-                        smoother_pts,
-                        conf_band,
-                        event,
-                        subj_id = "subj1",
-                        basel_start,
-                        basel_end,
-                        width,
-                        label = "Data") {
+edecob_plot <- function(event_data,
+                        label = "Data",
+                        ...) {
 
   # if ggplot2 was not imported
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    warning("Package \"gglot2\" needed for plots.", call. = FALSE)
+    stop("Package \"gglot2\" needed for plots.", call. = FALSE)
   } else {
+
 
     # initialize variables
     dot_size <- 1.8
     smo_size <- 1
     eve_size <- 3
     txt_size <- 12
+
+    data <- event_data$data
+    basel <- event_data$baseline
+    thresh <- event_data$threshold
+    smoother_pts <- event_data$smoother_pts
+    conf_band <- event_data$conf_band
+    event <- event_data$event
+    subj_id <- event_data$data$subj_id[1]
+    basel_start <- event_data$basel_start
+    basel_end <- event_data$basel_end
+    # width <- event_data$width
+
     subj_data <- data.frame(
       data = data$value[data$subj_id == subj_id],
       study_day = data$study_day[data$subj_id == subj_id])
@@ -110,7 +113,7 @@ edecob_plot <- function(data,
         study_day = min(smoother_pts$study_day):max(smoother_pts$study_day))
 
       smoother_na$pts[smoother_na$study_day %in% smoother_pts$study_day] <-
-        smoother_pts$pts
+        smoother_pts$value
 
       patient_plot <- patient_plot +
         ggplot2::geom_line(
@@ -132,7 +135,7 @@ edecob_plot <- function(data,
     if (event[[1]]) {
       patient_plot <- patient_plot +
         ggplot2::geom_point(
-          data = data.frame(study_day = event[[2]], data1 = smoother_pts$pts[which(smoother_pts$study_day == event[[2]])]),
+          data = data.frame(study_day = event[[2]], data1 = smoother_pts$value[which(smoother_pts$study_day == event[[2]])]),
           ggplot2::aes(x = .data$study_day, y = .data$data1, shape = "Moving Median Event Onset"),
           color = "red",
           size = eve_size
@@ -179,7 +182,7 @@ edecob_plot <- function(data,
     if (event[[1]]) {
       patient_plot <- patient_plot +
         ggplot2::geom_point(
-          data = data.frame(study_day = event[[2]], data1 = smoother_pts$pts[which(smoother_pts$study_day == event[[2]])]),
+          data = data.frame(study_day = event[[2]], data1 = smoother_pts$value[which(smoother_pts$study_day == event[[2]])]),
           ggplot2::aes(x = .data$study_day, y = .data$data1, shape = "Moving Median Event Onset"),
           color = "red",
           size = eve_size
