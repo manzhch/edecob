@@ -4,7 +4,7 @@
 \alias{bt_smoother}
 \title{Bootstrap the Smoother}
 \usage{
-bt_smoother(data, smoother_pts, resid, width, bt_tot_rep)
+bt_smoother(data, smoother, smoother_pts, resid, bt_tot_rep, ...)
 }
 \arguments{
 \item{data}{A data frame or matrix containing the data. The data points should be in the
@@ -15,17 +15,22 @@ numbers. Study day zero may be the randomization date, the first day
 after baseline, or whatever is preferred. The subject identifier is expected
 to be a string.}
 
+\item{smoother}{Which smoother is to be used. Use \code{mov_med} for the
+moving median. When using the moving median, the parameter \code{width} must
+be given to specify the size of the window over which the moving median is
+to be taken. Defaults to the moving median.}
+
 \item{smoother_pts}{A data frame containing the smoother. Preferably the
 output of one of the smoother functions included in this package.}
 
 \item{resid}{A vector containing the residuals of the smoother to the data
 points.}
 
-<<<<<<< HEAD
 \item{bt_tot_rep}{The number of times we perform the bootstrap. Defaults to 100.}
-=======
-\item{bt_tot_rep}{The number of times we perform the bootstrap.}
->>>>>>> 60718f09160e415e469ee291034d2d73fd371445
+
+\item{...}{Additional parameters to be given to the function. When the moving
+median is used, a \code{width} parameter is expected. When using the quantile
+for baseline method, a \code{quantile} parameter is expected.}
 }
 \value{
 A data frame containing the bootstrap repetitions of the smoother.

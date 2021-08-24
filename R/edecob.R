@@ -89,6 +89,9 @@ NULL
 #'}
 #'
 #' @section Notes:
+#' The term study day is not to be taken too seriously; it only needs to be a
+#' number specifying the time point at which the measurement was taken.
+#'
 #' For the moving median, the width is the total size of the window, meaning
 #' that for the value corresponding to day x, the data points from day
 #' x - \code{width}/2 to x + \code{width}/2 will be used for the calculation
@@ -96,44 +99,35 @@ NULL
 #'
 #' @seealso \code{\link{summary.edecob}}, \code{\link{plot.edecob}}
 #'
-#' @param data A data frame or matrix containing the data. The data points should be in the
-#'   first column, the study days in the second column, and the subject
-#'   identifier in the third column. If a matrix is used, the subject identifier
-#'   is to be specified in the row names. The study days are expected to be integer
-#'   numbers. Study day zero may be the randomization date, the first day
-#'   after baseline, or whatever is preferred. The subject identifier is expected
-#'   to be a string.
+#' @param data A data frame in long format containing the data for which events
+#'   is to be detected. The first column
+#'   contains stings specifying the subject identifier, the second column contains
+#'   numbers specifying the study day, and the third column contains the numerical
+#'   values of the measurements.
 #' @param smoother Which smoother is to be used. Use \code{mov_med} for the
 #'   moving median. When using the moving median, the parameter \code{width} must
 #'   be given to specify the size of the window over which the moving median is
 #'   to be taken. Defaults to the moving median.
-#' @param bt_tot_rep The number of times we perform the bootstrap. Defaults to 100.
+#' @param baseline A number specifying the baseline.
+#' @param threshold A number specifying the threshold. If the threshold is smaller
+#'   than the than the baseline, an event will be detected
+#'   when the confidence band stays below the threshold for \code{min_change_dur}
+#'   days. Similarly, if the threshold is larger than baseline, an event will be detected
+#'   when the confidence band stays above the threshold for \code{min_change_dur}
+#'   days. If the threshold is equal to the baseline, events below the threshold
+#'   will be detected. For detection of events above the threshold with the
+#'   threshold equal to the baseline, choose a threshold minimally larger than
+#'   the baseline.
+#' @param bt_tot_rep The number of times we perform the bootstrap. Because of
+#'   run time, it is recommended to keep this number below 500, especially with
+#'   large data sets. Defaults to 100.
 #' @param min_change_dur The minimal number of days that the confidence bounds
 #'   need to stay below or above the threshold in order for an event to be
 #'   detected. Defaults to 84, i.e. 12 weeks.
-#' @param thresh_diff The absolute or percentage (depending on \code{thresh_method})
-#'   difference between the baseline and
-#'   threshold. A negative number indicates a threshold below the baseline and
-#'   similarly a positive number indicates a threshold above the baseline. If it
-#'   is zero, the algorithm will detect events below the baseline.
-#'   Defaults to -20%. To detect events above the baseline with threshold
-#'   equal to baseline, use a very small number like 1e-10.
 #' @param conf_band_lvl The confidence level for the simultaneous confidence
 #'   bands. Defaults to 0.95.
-#' @param basel_start The study day of first data point to be used for the
-#'   baseline. Defaults to the smallest available study day.
-#' @param basel_end The study day of last data point to be used for the
-#'   baseline. Defaults to six weeks after \code{basel_start}.
-#' @param basel_method How the baseline should be calculated. Can take any of
-#'   the following values: \code{median, mean, quantile}. When using quantile,
-#'   an additional argument \code{quantile} specifying the quantile needs to be
-#'   given. Defaults to median.
-#' @param thresh_method Whether the threshold is a percentage or absolute
-#'   difference from the baseline. Use \code{percent} or \code{absolute}.
-#'   Defaults to percent.
 #' @param ... Additional parameters to be given to the function. When the moving
-#'   median is used, a \code{width} parameter is expected. When using the quantile
-#'   for baseline method, a \code{quantile} parameter is expected.
+#'   median is used, a \code{width} parameter is expected.
 #'
 #' @return A list of four variables: \describe{ \item{\code{event_detected}}{gives
 #'   whether an event was detected}
@@ -156,126 +150,54 @@ NULL
 #'   \emph{Introduction to mathematical statistics.} Harlow: Pearson Education.
 #'
 #' @examples
+#'   edecob(data.frame(data = LakeHuron, year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2], subject = "LakeHuron"))
 edecob <- function(data,
                    smoother = "mov_med",
-                   basel_start = min(data[, 2]),
-                   basel_end = basel_start + 41,
-                   basel_method = "median",
-                   thresh_diff = -20,
-                   thresh_method = "percent",
+                   baseline,
+                   threshold,
                    min_change_dur = 12*7,
                    conf_band_lvl = 0.95,
                    bt_tot_rep = 100,
                    ...) {
 
-  # EXTRACT ... !!!!!!!! may contain quantile or width.
-
-  # may be matrix!!!
-  colnames(data) <- c("value", "study_day", "subj_id")
-  # print(data)
+  # EXTRACT ... !!!!!!!! may contain width.
+  colnames(data) <- c("subj_id", "study_day", "value")
   width <- 12*7
-  # check if study_day and data length match
-  # if (length(data) != length(study_day)) {
-  #   warning("Length mismatch between data and study_day. Truncating the longer vector.")
-  #
-  #   if (length(data) > length(study_day)) {
-  #     data <- data[1:length(study_day)]
-  #   } else if (length(study_day) > length(data)) {
-  #     study_day <- study_day[1:length(data)]
-  #   }
-  # }
-
-  # sort data by study_day
-  # data <- data[order(data$study_day), ]
-
-  # remove data for learning period
-  data_non_learn <- data[data$study_day >= basel_start, ]
-
-  # calculate baseline
-  if (basel_method == "median") {
-    basel <- stats::median(data$value[as.logical(
-      (data$study_day >= basel_start) * (data$study_day <= basel_end))])
-  } else if (basel_method == "mean") {
-    basel <- mean(data$value[as.logical(
-      (data$study_day >= basel_start) * (data$study_day <= basel_end))])
-  } else if (basel_method == "quantile") {
-    basel <- stats::quantile(data$value[as.logical(
-      (data$study_day >= basel_start) * (data$study_day <= basel_end))], quantile)
-  } else {
-    warning("Baseline method not recognized. Defaulting to median.")
-    basel <- stats::median(data$value[as.logical(
-      (data$study_day >= basel_start) * (data$study_day <= basel_end))])
-  }
-
-  # calculate threshold
-  if (thresh_method == "percent") {
-    thresh <- basel * (1 + thresh_diff/100)
-  } else if (thresh_method == "absolute") {
-    thresh <- basel + thresh_diff
-  } else {
-    warning("Threshold method not recognized. Defaulting to percent.")
-    thresh <- basel * (1 + thresh_diff/100)
-  }
-
 
   # calculate the smoother
   if (smoother == "mov_med") {
-    smoother_pts <- mov_med(data_non_learn, width)
+    smoother_pts <- mov_med(data, width)
+  } else {
+    warning("Smoother not recognized. Defaulting to moving median.")
+    smoother_pts <- mov_med(data, width)
   }
 
   # calculate residuals of the smoother
-  smoother_resid <- smoother_resid(data_non_learn, smoother_pts)
-
+  smoother_resid <- smoother_resid(data, smoother_pts)
 
   # bootstrap the errors of the AR model fitted on the residuals
   if (smoother == "mov_med") {
-
-    bt_smoother <- bt_smoother(data_non_learn, smoother, smoother_pts, smoother_resid, bt_tot_rep, width)
-
+    bt_smoother <- bt_smoother(data, smoother, smoother_pts, smoother_resid, bt_tot_rep, width)
   }
 
   # calculate the confidence bands
   conf_band <- conf_band(bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)
 
   # detect events using confidence bands
-  event <- detect_event(conf_band, basel, thresh, min_change_dur)
+  event <- detect_event(conf_band, baseline, threshold, min_change_dur)
 
   output <- list(
     "event" = event,
     "conf_band" = conf_band,
     "smoother_pts" = smoother_pts,
     "data" = data,
-    "baseline" = basel,
-    "threshold" = thresh,
+    "baseline" = baseline,
+    "threshold" = threshold,
     "smoother" = smoother,
-    "basel_start" = basel_start,
-    "basel_end" = basel_end,
-    "basel_method" = basel_method,
-    "thresh_diff" = thresh_diff,
-    "thresh_method" = thresh_method,
     "min_change_dur" = min_change_dur,
     "conf_band_lvl" = conf_band_lvl,
     "bt_tot_rep" = bt_tot_rep
   )
-
-  # plot
-  # if (plot == T) {
-  #   if (!requireNamespace("ggplot2", quietly = TRUE)) {
-  #     warning("Package \"gglot2\" needed for plots.", call. = FALSE)
-  #   } else {
-  #     #plot
-  #     output[["plot"]] <- edecob_plot(data,
-  #                                     basel,
-  #                                     thresh,
-  #                                     smoother_pts,
-  #                                     conf_band,
-  #                                     event,
-  #                                     basel_start,
-  #                                     basel_end,
-  #                                     width,
-  #                                     label = "Data")
-  #   }
-  # }
 
   class(output) <- "edecob"
 
