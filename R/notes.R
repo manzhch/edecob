@@ -96,6 +96,17 @@
 #'   found in \code{event_data$data}.
 
 
+# summary
+# cat("Baseline of", object$basel, "calculated using the", object$basel_method,
+#     "using data from study day", object$basel_start,
+#     "to", object$basel_end, "\n")
+# if (object$thresh_method == "percentage") {
+#   cat("Threshold of", object$thresh, "is", object$thresh*10, "%", "difference from baseline", "\n")
+# } else if (object$thresh_method == "absolute") {
+#   cat("Threshold of", object$thresh, "is", object$thresh, object$thresh_method, "difference from baseline", "\n")
+# }
+
+
 
 # doc edecob --------
 
@@ -384,3 +395,4 @@
 #'   and the subject id corresponding to the data.
 #' @export
 #'
+

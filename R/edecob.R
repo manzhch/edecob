@@ -172,25 +172,43 @@ NULL
 #'
 #' @examples
 #' # We look at the level of Lake Huron
-#' LakeHuron_event <-
-#'   edecob(data.frame(Subject = "LakeHuron",
+#' LakeHuron_event1 <-
+#'   edecob(data.frame(Subject = "Lake Huron",
 #'                     Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
 #'                     Data = LakeHuron),
 #'          baseline = 580.5, threshold = 579.7, width = 10, min_change_dur = 20)
-#' summary(LakeHuron_event)
+#' summary(LakeHuron_event1)
+#'
 #' # Notice in the plot that the event onset does not happen the first time the
 #' # confidence bands drop below the threshold as the change is not sutained for long enough
-#' plot(LakeHuron_event)
+#' plot(LakeHuron_event1)
+#'
+#'
+#' # Suppose we chose a smaller threshold.
+#' LakeHuron_event2 <-
+#'   edecob(data.frame(Subject = "Lake Huron",
+#'                     Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                     Data = LakeHuron),
+#'          baseline = 580.5, threshold = 578.7, width = 10, min_change_dur = 20)
+#' summary.edecob(LakeHuron_event2)
+#'
+#' # Then we do not detect an event as the confidence bound does not stay below
+#' # the threshold for a sufficient amount of time.
+#' plot.edecob(LakeHuron_event2)
+#'
 #'
 #' # Let us see what happens when we introduce a gap into the data
-#' LakeHuron_event2 <-
-#'   edecob(data.frame(Subject = "LakeHuron",
+#' LakeHuron_event3 <-
+#'   edecob(data.frame(Subject = "Lake Huron",
 #'                     Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
 #'                     Data = c(LakeHuron[1:25], rep(NA, 20), LakeHuron[46:98])),
 #'          baseline = 580.5, threshold = 579.7, width = 10, min_change_dur = 10)
-#' summary(LakeHuron_event2)
+#' summary(LakeHuron_event3)
+#'
 #' # Notice that the confidence bounds become wider around the gap
-#' plot(LakeHuron_event2)
+#' plot(LakeHuron_event3)
+#'
+#'
 edecob <- function(data,
                    smoother = "mov_med",
                    baseline,
