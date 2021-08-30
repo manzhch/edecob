@@ -7,13 +7,11 @@
 mov_med(data, width = 12 * 7)
 }
 \arguments{
-\item{data}{A data frame or matrix containing the data. The data points should be in the
-first column, the study days in the second column, and the subject
-identifier in the third column. If a matrix is used, the subject identifier
-is to be specified in the row names. The study days are expected to be integer
-numbers. Study day zero may be the randomization date, the first day
-after baseline, or whatever is preferred. The subject identifier is expected
-to be a string.}
+\item{data}{A data frame in long format containing the data for which events
+is to be detected. The first column
+contains stings specifying the subject identifier, the second column contains
+numbers specifying the study day, and the third column contains the numerical
+values of the measurements.}
 
 \item{width}{The width of the window over which the moving median is taken in
 number of days.}
@@ -28,6 +26,18 @@ Calculates the moving median over a time window around a time point for the
 all time points between the first and last study day provided.
 }
 \details{
+Consider a sample \eqn{X₁,\dots, Xₙ} of size \eqn{n} and the
+reordering 2KLSjtMrK335REPxY9yJT1jFv2U9F9eq-3\eqn{X₍₁₎ \le X₍₂₎ \le \dots \le X₍ₙ₎}, commonly
+called the order statistic. Then for \eqn{n} even the median usually
+defined as \deqn{median(X₁,\dots, Xₙ) = X₍ₖ₎, where k = n/2.} In the
+case where \eqn{n} is odd the median is
+defined as \deqn{median(X₁,\dots, Xₙ) = 1/2(X₍ₖ₎ + X₍ₖ₊₁₎), where k = n/2.} Let the
+study days at which the measurements \eqn{X₁, \dots, Xₙ} were taken
+be \eqn{t₁, \dots, tₙ}.
+Let \eqn{T} a fixed positive amount of time. Then the moving median at time
+point \eqn{t} with window size \eqn{T} is defined as
+\deqn{S(t) = median({Xⱼ | t - T/2 \le tⱼ \le t + T/2}).}
+
 For the initial time points where the time difference between the first data
 point and the time point for which we are calculating the median is less than
 half the \code{width}, we do not have enough data points to form a window

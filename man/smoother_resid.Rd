@@ -7,13 +7,11 @@
 smoother_resid(data, smoother_pts)
 }
 \arguments{
-\item{data}{A data frame or matrix containing the data. The data points should be in the
-first column, the study days in the second column, and the subject
-identifier in the third column. If a matrix is used, the subject identifier
-is to be specified in the row names. The study days are expected to be integer
-numbers. Study day zero may be the randomization date, the first day
-after baseline, or whatever is preferred. The subject identifier is expected
-to be a string.}
+\item{data}{A data frame in long format containing the data for which events
+is to be detected. The first column
+contains stings specifying the subject identifier, the second column contains
+numbers specifying the study day, and the third column contains the numerical
+values of the measurements.}
 
 \item{smoother_pts}{A data frame containing the smoother. Preferably the
 output of one of the smoother functions included in this package.}

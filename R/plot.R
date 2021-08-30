@@ -1,3 +1,8 @@
+
+# plot <- function(object) {
+#   UseMethod("plot", object)
+# }
+
 #' Plot Event Data
 #'
 #' Generates a ggplot2 visualizing the data and event if any detected.
@@ -10,17 +15,14 @@
 #'
 #' @param event_data The output of the \code{edecob} function. It is an object
 #'   of class \code{edecob} containing the data and the event information.
-#' @param label The name of the y-axis in the plot.
-
+#' @param ... Additional parameters to be given to the function.
 #'
 #' @return A `ggplot2` object that visualizes the data.
 #' @export
 #'
-#' @examples
 #'
 #' @importFrom rlang .data
-edecob_plot <- function(event_data,
-                        label = "Data",
+plot.edecob <- function(event_data,
                         ...) {
 
   # if ggplot2 was not imported
@@ -42,8 +44,8 @@ edecob_plot <- function(event_data,
     conf_band <- event_data$conf_band
     event <- event_data$event
     subj_id <- event_data$data$subj_id[1]
-    basel_start <- event_data$basel_start
-    basel_end <- event_data$basel_end
+    # basel_start <- event_data$basel_start
+    # basel_end <- event_data$basel_end
     # width <- event_data$width
 
     subj_data <- data.frame(
@@ -66,25 +68,25 @@ edecob_plot <- function(event_data,
         size = dot_size,
         alpha = 0.8
       ) +
-      ggplot2::geom_point(
-        data = subj_data[which(subj_data$study_day < basel_start), ],
-        ggplot2::aes(x = .data$study_day, y = .data$data),
-        color = "grey70",
-        size = dot_size*0.9
-      ) +
-      ggplot2::labs(x = "Study Day", y = label) +
+      # ggplot2::geom_point(
+      #   data = subj_data[which(subj_data$study_day < basel_start), ],
+      #   ggplot2::aes(x = .data$study_day, y = .data$data),
+      #   color = "grey70",
+      #   size = dot_size*0.9
+      # ) +
+      ggplot2::labs(x = event_data$colnames[2], y = event_data$colnames[3]) +
       ggplot2::geom_hline(ggplot2::aes(yintercept = basel, color = "Baseline")) +
       # geom_hline(aes(yintercept = threshold, color = "threshold")) +
       ggplot2::geom_hline(ggplot2::aes(yintercept = thresh, color = "Threshold")) +
       # ggplot2::geom_vline(ggplot2::aes(xintercept = min(subj_data$study_day) + learn_dur,
       #                                  color = "Baseline Period"),
       #                     linetype = "dashed", key_glyph = "path") +
-      ggplot2::geom_vline(ggplot2::aes(xintercept = basel_start,
-                                       linetype = "Baseline Period"),
-                          color = "blue") +
-      ggplot2::geom_vline(ggplot2::aes(xintercept = basel_end
-                                       ),
-                          color = "blue", show.legend = F, linetype = "dashed") +
+      # ggplot2::geom_vline(ggplot2::aes(xintercept = basel_start,
+      #                                  linetype = "Baseline Period"),
+      #                     color = "blue") +
+      # ggplot2::geom_vline(ggplot2::aes(xintercept = basel_end
+      #                                  ),
+      #                     color = "blue", show.legend = F, linetype = "dashed") +
       # ggplot2::geom_vline(ggplot2::aes(xintercept = my_patient_devices$RETDT),
       #            color = "grey75") +
       ggplot2::scale_color_manual(
@@ -93,9 +95,9 @@ edecob_plot <- function(event_data,
         values = c("Baseline" = "black", "Threshold" = "red",
                    "Smoother" = "orange")
       ) +
-      ggplot2::scale_color_manual("",
-                                  aesthetics = "linetype",
-                                  values = c("Baseline Period" = "dashed")) +
+      # ggplot2::scale_color_manual("",
+      #                             aesthetics = "linetype",
+      #                             values = c("Baseline Period" = "dashed")) +
       ggplot2::scale_color_manual("",
         aesthetics = "fill",
         values = c("Confidence Band" = "blue")
@@ -136,7 +138,7 @@ edecob_plot <- function(event_data,
       patient_plot <- patient_plot +
         ggplot2::geom_point(
           data = data.frame(study_day = event[[2]], data1 = smoother_pts$value[which(smoother_pts$study_day == event[[2]])]),
-          ggplot2::aes(x = .data$study_day, y = .data$data1, shape = "Moving Median Event Onset"),
+          ggplot2::aes(x = .data$study_day, y = .data$data1, shape = "Event Onset"),
           color = "red",
           size = eve_size
         )
@@ -183,7 +185,7 @@ edecob_plot <- function(event_data,
       patient_plot <- patient_plot +
         ggplot2::geom_point(
           data = data.frame(study_day = event[[2]], data1 = smoother_pts$value[which(smoother_pts$study_day == event[[2]])]),
-          ggplot2::aes(x = .data$study_day, y = .data$data1, shape = "Moving Median Event Onset"),
+          ggplot2::aes(x = .data$study_day, y = .data$data1, shape = "Event Onset"),
           color = "red",
           size = eve_size
         )

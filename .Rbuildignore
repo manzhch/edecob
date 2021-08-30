@@ -1,2 +1,5 @@
 ^edecob\.Rproj$
 ^\.Rproj\.user$
+^edecob\R\notes.R$
+^R_latex$
+^notes$

@@ -4,6 +4,19 @@
 #' Calculates the moving median over a time window around a time point for the
 #' all time points between the first and last study day provided.
 #'
+#' Consider a sample \eqn{X₁,\dots, Xₙ} of size \eqn{n} and the
+#' reordering \eqn{X₍₁₎,\dots, X₍ₙ₎} such
+#' that \eqn{X₍₁₎ \le X₍₂₎ \le \dots \le X₍ₙ₎}, commonly
+#' called the order statistic. Then for \eqn{n} even the median usually
+#' defined as \deqn{median(X₁,\dots, Xₙ) = X₍ₖ₎, where k = n/2.} In the
+#' case where \eqn{n} is odd the median is
+#' defined as \deqn{median(X₁,\dots, Xₙ) = 1/2(X₍ₖ₎ + X₍ₖ₊₁₎), where k = n/2.} Let the
+#' study days at which the measurements \eqn{X₁, \dots, Xₙ} were taken
+#' be \eqn{t₁, \dots, tₙ}.
+#' Let \eqn{T} a fixed positive amount of time. Then the moving median at time
+#' point \eqn{t} with window size \eqn{T} is defined as
+#' \deqn{S(t) = median({Xⱼ | t - T/2 \le tⱼ \le t + T/2}).}
+#'
 #' For the initial time points where the time difference between the first data
 #' point and the time point for which we are calculating the median is less than
 #' half the \code{width}, we do not have enough data points to form a window
@@ -25,7 +38,6 @@
 #'   and the subject id corresponding to the data.
 #' @export
 #'
-#' @examples
 mov_med <- function(data,
                     width = 12*7) {
 
@@ -88,7 +100,7 @@ mov_med <- function(data,
 
       # saving the values for the win
       med_pts_med[ll] <- stats::median(win)
-      med_pts_study_day[ll] <- win_beg_day + width / 2
+      med_pts_study_day[ll] <- ceiling(win_beg_day + width / 2)
       med_pts_win_beg[ll] <- win_beg_day
       med_pts_win_end[ll] <- win_beg_day + width - 1
       med_pts_subj_id[ll] <- subj_id
@@ -102,9 +114,9 @@ mov_med <- function(data,
 
   # compile median point data into dataframe
   med_pts <- data.frame(
-    "value" = med_pts_med,
-    "study_day" = med_pts_study_day,
     "subj_id" = med_pts_subj_id,
+    "study_day" = med_pts_study_day,
+    "value" = med_pts_med,
     "win_beg" = med_pts_win_beg,
     "win_end" = med_pts_win_end,
     stringsAsFactors = FALSE

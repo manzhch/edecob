@@ -53,17 +53,18 @@ NULL
 #' and the measurement at study day \eqn{t}, \eqn{p}
 #' the order of the AR model, \eqn{\phiⱼ} the coefficients of the AR model, and
 #' \eqn{\epsilon} the error of the AR model. The order is calculated using the
-#' Akaike information criterion (AIC).
+#' Akaike information criterion (AIC) if it was not given in the function call.
 #'
 #' @section Bootstrap:
-#' The bootstrap procedure is as follows:
+#' In the following, the star * denotes a bootstrapped value. The bootstrap
+#' procedure is as follows:
 #' \enumerate{
 #'   \item Compute the smoother \eqn{S(t)}.
 #'   \item Compute the residuals \eqn{\eta(tᵢ) = Y(tᵢ) - S(tᵢ)}.
 #'   \item Fit an AR(p) model to \eqn{\eta(tᵢ)} to obtain the coefficients
 #'     \eqn{\phi₁,\dots, \phiₚ} and \eqn{\epsilon(tᵢ) = \eta(tᵢ) -
 #'     \sumᵖⱼ₌₁ \phiⱼ \eta(tᵢ - tᵢ₋ⱼ)} the error of the AR model.
-#'   \item Resample \eqn{\epsilon(tᵢ)*} with replacement from \eqn{\epsilon(tₚ₊₁),\dots,
+#'   \item Randomly choose a \eqn{\epsilon(tᵢ)*} with replacement from \eqn{\epsilon(tₚ₊₁),\dots,
 #'     \epsilon(tₙ)} to obtain \deqn{Y(tᵢ)* = S(tᵢ) + \eta(tᵢ)*,} where  \deqn{\eta(tᵢ)* = \sumᵖⱼ₌₁ \phiⱼ \eta(tᵢ₋ⱼ)*+ \epsilon(tᵢ₋ⱼ)*} the bootstrapped residuals of the smoother.
 #'   \item Compute \eqn{S(.)* = g(Y(t₁),\dots, Y(tₙ))} where \eqn{g} is the
 #'     function with which the smoother is calculated.
@@ -97,6 +98,9 @@ NULL
 #' x - \code{width}/2 to x + \code{width}/2 will be used for the calculation
 #' of the median.
 #'
+#' If the parameter \code{order} it not given, the order of the autoregressive
+#' model will be determined using the Akaike information criterion (AIC).
+#'
 #' @seealso \code{\link{summary.edecob}}, \code{\link{plot.edecob}}
 #'
 #' @param data A data frame in long format containing the data for which events
@@ -127,19 +131,36 @@ NULL
 #' @param conf_band_lvl The confidence level for the simultaneous confidence
 #'   bands. Defaults to 0.95.
 #' @param ... Additional parameters to be given to the function. When the moving
-#'   median is used, a \code{width} parameter is expected.
+#'   median is used, a \code{width} parameter is expected. If no \code{width} is
+#'   given, it will default to 84. If the parameter
+#'   \code{order} is given, that number will be the (maximal) order of the autoregressive
+#'   model.
 #'
-#' @return A list of four variables: \describe{ \item{\code{event_detected}}{gives
-#'   whether an event was detected}
-#'   \item{\code{event_detection_study_day}}{gives the study_day at which the
-#'   event was detected. It is defined as the first day the upper or lower bound
-#'   of the confidence band is below or above the threshold, and after which it
-#'   stays below or above the threshold for at least \code{min_change_dur} days.}
-#'   \item{\code{event_duration}}{gives the number of days the upper or lower bound
-#'   of the confidence band stays below or above the threshold.}
-#'   \item{\code{event_stop}}{gives whether the the confidence bounds stay below or
-#'   above the threshold until
-#'   the last day at which we can calculate the confidence bound or not. } }
+#' @return A list of 11 variables: \describe{
+#'   \item{\code{event}}{gives a list with four values: \code{event_detected} gives
+#'     whether an event was detected;
+#'     \code{event_onset} gives the first day at which the upper or lower bound
+#'     of the confidence band is below or above the threshold, and after which it
+#'     stays below or above the threshold for at least \code{min_change_dur}
+#'     consecutive days; \code{event_duration} gives the number of days the upper or lower bound
+#'     of the confidence band stays below or above the threshold; and
+#'     \code{event_stop} gives whether the the confidence bounds stay below or
+#'     above the threshold until
+#'     the last day at which we can calculate the confidence bound or not.}
+#'   \item{\code{conf_band}}{gives the confidence bands.}
+#'   \item{\code{smoother_pts}}{gives the smoother.}
+#'   \item{\code{data}}{gives the data but with four additional columns:
+#'     \code{event_detected}, \code{event_onset}, \code{event_duration}, and
+#'    \code{event_stop}. They contain the same values as in \code{event}.}
+#'   \item{\code{baseline}}{gives the baseline.}
+#'   \item{\code{threshold}}{gives the threshold.}
+#'   \item{\code{smoother}}{gives the smoother used.}
+#'   \item{\code{min_change_dur}}{gives the smallest consecutive number of days
+#'     the change needs to be sustained in order for an event to be detected.}
+#'   \item{\code{conf_band_lvl}}{gives the level of the simultaneous confidence band.}
+#'   \item{\code{bt_tot_rep}}{gives the total amount of bootstrap repetitions performed.}
+#'   \item{\code{call}}{gives the function call.}}
+#'
 #'
 #' @export
 #'
@@ -150,7 +171,26 @@ NULL
 #'   \emph{Introduction to mathematical statistics.} Harlow: Pearson Education.
 #'
 #' @examples
-#'   edecob(data.frame(data = LakeHuron, year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2], subject = "LakeHuron"))
+#' # We look at the level of Lake Huron
+#' LakeHuron_event <-
+#'   edecob(data.frame(Subject = "LakeHuron",
+#'                     Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                     Data = LakeHuron),
+#'          baseline = 580.5, threshold = 579.7, width = 10, min_change_dur = 20)
+#' summary(LakeHuron_event)
+#' # Notice in the plot that the event onset does not happen the first time the
+#' # confidence bands drop below the threshold as the change is not sutained for long enough
+#' plot(LakeHuron_event)
+#'
+#' # Let us see what happens when we introduce a gap into the data
+#' LakeHuron_event2 <-
+#'   edecob(data.frame(Subject = "LakeHuron",
+#'                     Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                     Data = c(LakeHuron[1:25], rep(NA, 20), LakeHuron[46:98])),
+#'          baseline = 580.5, threshold = 579.7, width = 10, min_change_dur = 10)
+#' summary(LakeHuron_event2)
+#' # Notice that the confidence bounds become wider around the gap
+#' plot(LakeHuron_event2)
 edecob <- function(data,
                    smoother = "mov_med",
                    baseline,
@@ -160,9 +200,26 @@ edecob <- function(data,
                    bt_tot_rep = 100,
                    ...) {
 
-  # EXTRACT ... !!!!!!!! may contain width.
+  columns <- colnames(data)
   colnames(data) <- c("subj_id", "study_day", "value")
-  width <- 12*7
+  if (sum(is.na(data$value)) > 1) {
+    warning("Removing rows where value is NA")
+    data <- data[!is.na(data$value), ]
+  }
+
+
+  # making sure that width is not repeated in future function calls
+  no_width_given <- FALSE
+
+  if (smoother == "mov_med" && !("width" %in% names(match.call()))) {
+
+    warning("Parameter width not given after choosing the moving median as smoother. Defaulting to 84.")
+    width <- 84
+    no_width_given <- TRUE
+
+  } else if (smoother == "mov_med") {
+    width <- match.call()$width
+  }
 
   # calculate the smoother
   if (smoother == "mov_med") {
@@ -170,14 +227,22 @@ edecob <- function(data,
   } else {
     warning("Smoother not recognized. Defaulting to moving median.")
 
+    if (!("width" %in% names(match.call()))) {
+      warning("Parameter width not given after choosing the moving median as smoother. Defaulting to 84.")
+      width <- 84
+      no_width_given <- TRUE
+    }
+    smoother_pts <- mov_med(data, width)
   }
 
   # calculate residuals of the smoother
   smoother_resid <- smoother_resid(data, smoother_pts)
 
   # bootstrap the errors of the AR model fitted on the residuals
-  if (smoother == "mov_med") {
-    bt_smoother <- bt_smoother(data, smoother, smoother_pts, smoother_resid, bt_tot_rep, width)
+  if (no_width_given) {
+    bt_smoother <- bt_smoother(data, smoother, smoother_pts, smoother_resid, bt_tot_rep, width, ...)
+  } else {
+    bt_smoother <- bt_smoother(data, smoother, smoother_pts, smoother_resid, bt_tot_rep, ...)
   }
 
   # calculate the confidence bands
@@ -186,6 +251,13 @@ edecob <- function(data,
   # detect events using confidence bands
   event <- detect_event(conf_band, baseline, threshold, min_change_dur)
 
+  # add columns with event information to data
+  data$event <- event$event_detected
+  data$event_onset <- event$event_onset
+  data$event_duration <- event$event_duration
+  data$event_stop <- event$event_stop
+
+  # compose output
   output <- list(
     "event" = event,
     "conf_band" = conf_band,
@@ -196,9 +268,10 @@ edecob <- function(data,
     "smoother" = smoother,
     "min_change_dur" = min_change_dur,
     "conf_band_lvl" = conf_band_lvl,
-    "bt_tot_rep" = bt_tot_rep
+    "bt_tot_rep" = bt_tot_rep,
+    "call" = match.call(),
+    "colnames" = columns
   )
-
   class(output) <- "edecob"
 
   return(output)

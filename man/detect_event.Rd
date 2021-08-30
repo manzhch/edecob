@@ -20,7 +20,7 @@ detected. Defaults to 84, i.e. 12 weeks.}
 \value{
 A list of four values: \describe{ \item{\code{event_detected}}{gives
 whether an event was detected}
-\item{\code{event_detection_study_day}}{gives the study_day at which the
+\item{\code{event_onset}}{gives the study_day at which the
 event was detected} \item{\code{event_duration}}{gives the duration the
 event is sustained} \item{\code{event_stop}}{gives whether the detected
 event is censored}

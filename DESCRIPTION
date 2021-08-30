@@ -1,6 +1,6 @@
 Package: edecob
 Title: Event Detection Using Confidence Bounds
-Version: 0.0.0.9000
+Version: 0.1
 Authors@R: 
     person(given = "Zheng Chen",
            family = "Man",
@@ -15,5 +15,5 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Imports: stats
-Suggests: ggplot2, rlang
+Imports: stats, ggplot2, rlang
+Suggests: 

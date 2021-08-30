@@ -7,13 +7,11 @@
 bt_smoother(data, smoother, smoother_pts, resid, bt_tot_rep, ...)
 }
 \arguments{
-\item{data}{A data frame or matrix containing the data. The data points should be in the
-first column, the study days in the second column, and the subject
-identifier in the third column. If a matrix is used, the subject identifier
-is to be specified in the row names. The study days are expected to be integer
-numbers. Study day zero may be the randomization date, the first day
-after baseline, or whatever is preferred. The subject identifier is expected
-to be a string.}
+\item{data}{A data frame in long format containing the data for which events
+is to be detected. The first column
+contains stings specifying the subject identifier, the second column contains
+numbers specifying the study day, and the third column contains the numerical
+values of the measurements.}
 
 \item{smoother}{Which smoother is to be used. Use \code{mov_med} for the
 moving median. When using the moving median, the parameter \code{width} must
@@ -26,11 +24,15 @@ output of one of the smoother functions included in this package.}
 \item{resid}{A vector containing the residuals of the smoother to the data
 points.}
 
-\item{bt_tot_rep}{The number of times we perform the bootstrap. Defaults to 100.}
+\item{bt_tot_rep}{The number of times we perform the bootstrap. Because of
+run time, it is recommended to keep this number below 500, especially with
+large data sets. Defaults to 100.}
 
 \item{...}{Additional parameters to be given to the function. When the moving
-median is used, a \code{width} parameter is expected. When using the quantile
-for baseline method, a \code{quantile} parameter is expected.}
+median is used, a \code{width} parameter is expected. If no \code{width} is
+given, it will default to 84. If the parameter
+\code{order} is given, that number will be the (maximal) order of the autoregressive
+model.}
 }
 \value{
 A data frame containing the bootstrap repetitions of the smoother.

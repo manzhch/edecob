@@ -7,11 +7,8 @@
 edecob(
   data,
   smoother = "mov_med",
-  basel_start = min(data[, 2]),
-  basel_end = basel_start + 41,
-  basel_method = "median",
-  thresh_diff = -20,
-  thresh_method = "percent",
+  baseline,
+  threshold,
   min_change_dur = 12 * 7,
   conf_band_lvl = 0.95,
   bt_tot_rep = 100,
@@ -19,41 +16,28 @@ edecob(
 )
 }
 \arguments{
-\item{data}{A data frame or matrix containing the data. The data points should be in the
-first column, the study days in the second column, and the subject
-identifier in the third column. If a matrix is used, the subject identifier
-is to be specified in the row names. The study days are expected to be integer
-numbers. Study day zero may be the randomization date, the first day
-after baseline, or whatever is preferred. The subject identifier is expected
-to be a string.}
+\item{data}{A data frame in long format containing the data for which events
+is to be detected. The first column
+contains stings specifying the subject identifier, the second column contains
+numbers specifying the study day, and the third column contains the numerical
+values of the measurements.}
 
 \item{smoother}{Which smoother is to be used. Use \code{mov_med} for the
 moving median. When using the moving median, the parameter \code{width} must
 be given to specify the size of the window over which the moving median is
 to be taken. Defaults to the moving median.}
 
-\item{basel_start}{The study day of first data point to be used for the
-baseline. Defaults to the smallest available study day.}
+\item{baseline}{A number specifying the baseline.}
 
-\item{basel_end}{The study day of last data point to be used for the
-baseline. Defaults to six weeks after \code{basel_start}.}
-
-\item{basel_method}{How the baseline should be calculated. Can take any of
-the following values: \code{median, mean, quantile}. When using quantile,
-an additional argument \code{quantile} specifying the quantile needs to be
-given. Defaults to median.}
-
-\item{thresh_diff}{The absolute or percentage (depending on \code{thresh_method})
-difference between the baseline and
-threshold. A negative number indicates a threshold below the baseline and
-similarly a positive number indicates a threshold above the baseline. If it
-is zero, the algorithm will detect events below the baseline.
-Defaults to -20\%. To detect events above the baseline with threshold
-equal to baseline, use a very small number like 1e-10.}
-
-\item{thresh_method}{Whether the threshold is a percentage or absolute
-difference from the baseline. Use \code{percent} or \code{absolute}.
-Defaults to percent.}
+\item{threshold}{A number specifying the threshold. If the threshold is smaller
+than the than the baseline, an event will be detected
+when the confidence band stays below the threshold for \code{min_change_dur}
+days. Similarly, if the threshold is larger than baseline, an event will be detected
+when the confidence band stays above the threshold for \code{min_change_dur}
+days. If the threshold is equal to the baseline, events below the threshold
+will be detected. For detection of events above the threshold with the
+threshold equal to the baseline, choose a threshold minimally larger than
+the baseline.}
 
 \item{min_change_dur}{The minimal number of days that the confidence bounds
 need to stay below or above the threshold in order for an event to be
@@ -62,24 +46,41 @@ detected. Defaults to 84, i.e. 12 weeks.}
 \item{conf_band_lvl}{The confidence level for the simultaneous confidence
 bands. Defaults to 0.95.}
 
-\item{bt_tot_rep}{The number of times we perform the bootstrap. Defaults to 100.}
+\item{bt_tot_rep}{The number of times we perform the bootstrap. Because of
+run time, it is recommended to keep this number below 500, especially with
+large data sets. Defaults to 100.}
 
 \item{...}{Additional parameters to be given to the function. When the moving
-median is used, a \code{width} parameter is expected. When using the quantile
-for baseline method, a \code{quantile} parameter is expected.}
+median is used, a \code{width} parameter is expected. If no \code{width} is
+given, it will default to 84. If the parameter
+\code{order} is given, that number will be the (maximal) order of the autoregressive
+model.}
 }
 \value{
-A list of four variables: \describe{ \item{\code{event_detected}}{gives
-whether an event was detected}
-\item{\code{event_detection_study_day}}{gives the study_day at which the
-event was detected. It is defined as the first day the upper or lower bound
+A list of 11 variables: \describe{
+\item{\code{event}}{gives a list with four values: \code{event_detected} gives
+whether an event was detected;
+\code{event_onset} gives the first day at which the upper or lower bound
 of the confidence band is below or above the threshold, and after which it
-stays below or above the threshold for at least \code{min_change_dur} days.}
-\item{\code{event_duration}}{gives the number of days the upper or lower bound
-of the confidence band stays below or above the threshold.}
-\item{\code{event_stop}}{gives whether the the confidence bounds stay below or
+stays below or above the threshold for at least \code{min_change_dur}
+consecutive days; \code{event_duration} gives the number of days the upper or lower bound
+of the confidence band stays below or above the threshold; and
+\code{event_stop} gives whether the the confidence bounds stay below or
 above the threshold until
-the last day at which we can calculate the confidence bound or not. } }
+the last day at which we can calculate the confidence bound or not.}
+\item{\code{conf_band}}{gives the confidence bands.}
+\item{\code{smoother_pts}}{gives the smoother.}
+\item{\code{data}}{gives the data but with four additional columns:
+\code{event_detected}, \code{event_onset}, \code{event_duration}, and
+\code{event_stop}. They contain the same values as in \code{event}.}
+\item{\code{baseline}}{gives the baseline.}
+\item{\code{threshold}}{gives the threshold.}
+\item{\code{smoother}}{gives the smoother used.}
+\item{\code{min_change_dur}}{gives the smallest consecutive number of days
+the change needs to be sustained in order for an event to be detected.}
+\item{\code{conf_band_lvl}}{gives the level of the simultaneous confidence band.}
+\item{\code{bt_tot_rep}}{gives the total amount of bootstrap repetitions performed.}
+\item{\code{call}}{gives the function call.}}
 }
 \description{
 Calculate a smoother of the data and bootstrap the errors of the autoregressive
@@ -114,19 +115,20 @@ variable \eqn{t} is the study day, \eqn{Y(t)} the data point at study day \eqn{t
 and the measurement at study day \eqn{t}, \eqn{p}
 the order of the AR model, \eqn{\phiⱼ} the coefficients of the AR model, and
 \eqn{\epsilon} the error of the AR model. The order is calculated using the
-Akaike information criterion (AIC).
+Akaike information criterion (AIC) if it was not given in the function call.
 }
 
 \section{Bootstrap}{
 
-The bootstrap procedure is as follows:
+In the following, the star * denotes a bootstrapped value. The bootstrap
+procedure is as follows:
 \enumerate{
 \item Compute the smoother \eqn{S(t)}.
 \item Compute the residuals \eqn{\eta(tᵢ) = Y(tᵢ) - S(tᵢ)}.
   \item Fit an AR(p) model to \eqn{\eta(tᵢ)} to obtain the coefficients
 \eqn{\phi₁,\dots, \phiₚ} and \eqn{\epsilon(tᵢ) = \eta(tᵢ) -
     \sumᵖⱼ₌₁ \phiⱼ \eta(tᵢ - tᵢ₋ⱼ)} the error of the AR model.
-\item Resample \eqn{\epsilon(tᵢ)*} with replacement from \eqn{\epsilon(tₚ₊₁),\dots,
+\item Randomly choose a \eqn{\epsilon(tᵢ)*} with replacement from \eqn{\epsilon(tₚ₊₁),\dots,
     \epsilon(tₙ)} to obtain \deqn{Y(tᵢ)* = S(tᵢ) + \eta(tᵢ)*,} where  \deqn{\eta(tᵢ)* = \sumᵖⱼ₌₁ \phiⱼ \eta(tᵢ₋ⱼ)*+ \epsilon(tᵢ₋ⱼ)*} the bootstrapped residuals of the smoother.
 \item Compute \eqn{S(.)* = g(Y(t₁),\dots, Y(tₙ))} where \eqn{g} is the
 function with which the smoother is calculated.
@@ -156,14 +158,39 @@ and \eqn{N} the number of measurements or rows in \code{data}, in our case the n
 
 \section{Notes}{
 
+The term study day is not to be taken too seriously; it only needs to be a
+number specifying the time point at which the measurement was taken.
+
 For the moving median, the width is the total size of the window, meaning
 that for the value corresponding to day x, the data points from day
 x - \code{width}/2 to x + \code{width}/2 will be used for the calculation
 of the median.
+
+If the parameter \code{order} it not given, the order of the autoregressive
+model will be determined using the Akaike information criterion (AIC).
 }
 
 \examples{
-  edecob(data.frame(data = LakeHuron, year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2], subject = "LakeHuron"))
+# We look at the level of Lake Huron
+LakeHuron_event <-
+  edecob(data.frame(subject = "LakeHuron",
+                    year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+                    data = LakeHuron),
+         baseline = 580.5, threshold = 579.7, width = 10, min_change_dur = 20)
+summary(LakeHuron_event)
+# Notice in the plot that the event onset does not happen the first time the
+# confidence bands drop below the threshold as the change is not sutained for long enough
+plot(LakeHuron_event)
+
+# Let us see what happens when we introduce a gap into the data
+LakeHuron_event2 <-
+  edecob(data.frame(subject = "LakeHuron",
+                    year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+                    data = c(LakeHuron[1:25], rep(NA, 20), LakeHuron[46:98])),
+         baseline = 580.5, threshold = 579.7, width = 10, min_change_dur = 10)
+summary(LakeHuron_event2)
+# Notice that the confidence bounds become wider around the gap
+plot(LakeHuron_event2)
 }
 \references{
 Bühlmann, P. (1998). Sieve Bootstrap for Smoothing in

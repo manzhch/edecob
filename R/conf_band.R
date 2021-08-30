@@ -141,7 +141,7 @@ conf_band <- function(bt_smoother,
       sapply(split(init_est, factor(names(init_est))),
              function(x){
                if (sum(!is.na(x)) > 0 &&
-                   !is.na(ptw_conf_band_lvl) &&
+                   !is.na(ptw_conf_band_lvl)[1] &&
                    !is.null(ptw_conf_band_lvl$root)) {
 
                  return(c(stats::quantile(x, ptw_conf_band_lvl$root),
@@ -154,7 +154,7 @@ conf_band <- function(bt_smoother,
     both_quantiles <- NA
   }
   suppressWarnings(
-  if (!is.na(both_quantiles)) {
+  if (!is.na(both_quantiles)[1]) {
     my_quantile_lower <- both_quantiles[1, ]
     my_quantile_upper <- both_quantiles[2, ]
   })

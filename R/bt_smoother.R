@@ -4,7 +4,7 @@
 # Helper function to bootstrap the epsilon (error of AR) and then reconstruct
 # smoother (currently the moving median) using AR model and bootstrapped
 # epsilon
-bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, width){
+bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, ...){
 
   # bootstrap error
   bt_Y <- numeric(nrow(data))
@@ -14,7 +14,14 @@ bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, width){
   # fit autoregression model on residuals
   data_ind <- !is.na(resid)
   if (sum(data_ind) > 1 && stats::var(resid[data_ind]) != 0) {
-    ar_resid <- stats::ar(resid[data_ind])
+
+    # if order given in function call
+    if ("order" %in% names(match.call())) {
+      order <- match.call()$order
+      ar_resid <- stats::ar(resid[data_ind], aic = FALSE, order.max = order)
+    } else {
+      ar_resid <- stats::ar(resid[data_ind])
+    }
 
     # remove NAs and bootstrap the residuals of the AR model
     ar_resid_non_na <- ar_resid$resid[which(!is.na(ar_resid$resid))]
@@ -44,25 +51,25 @@ bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, width){
     win_beg_day <- min(data$study_day)
     last_data_study_day <- max(data$study_day)
 
-    if (last_data_study_day > win_beg_day + width) {
+    if (smoother == "mov_med") {
+      width <- match.call()$width
 
-      if (smoother == "mov_med") {
+      if (last_data_study_day > win_beg_day + width) {
         S_star_one_bt <-
-          mov_med(data.frame(value = bt_Y,
+          mov_med(data.frame(subj_id = rep(data$subj_id[1], length(bt_Y)),
                              study_day = data$study_day[which(data$study_day <= max(smoother_pts$study_day))],
-                             subj_id = rep(data$subj_id[1], length(bt_Y))),
+                             value = bt_Y),
                   width)
-        S_star_one_bt <- S_star_one_bt[, c("value", "study_day", "subj_id")]
+        S_star_one_bt <- S_star_one_bt[, c("subj_id", "study_day", "value")]
         S_star_one_bt$bt_rep <- rep(bt_rep, nrow(S_star_one_bt))
-        # S_star_one_bt <- S_star_one_bt[, c(1,2,4,3)]
-      }
+        return(S_star_one_bt)
 
-      return(S_star_one_bt)
-    } else {
-      return(data.frame("value" = NA,
-                        "study_day" = NA,
-                        "bt_rep" = bt_rep,
-                        "subj_id" = data$subj_id[1]))
+      } else {
+        return(data.frame("value" = NA,
+                          "study_day" = NA,
+                          "bt_rep" = bt_rep,
+                          "subj_id" = data$subj_id[1]))
+      }
     }
   } else {
     warning("AR model cannot be fitted (variance of residuals is 0 or residuals are NA)")
@@ -118,10 +125,6 @@ bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, width){
 #' @examples
 bt_smoother <- function(data, smoother, smoother_pts, resid, bt_tot_rep, ...) {
   bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, data, smoother, smoother_pts, resid, ...))
-  # print(bt_Y)
-  # bt_Y$study_day <- unlist(bt_Y$study_day)
-  # bt_Y$value <- unlist(bt_Y$value)
-  # bt_Y$bt_rep <- unlist(bt_Y$bt_rep)
   bt_Y <- bt_Y[!is.na(bt_Y$value), ]
   return(bt_Y)
 }
