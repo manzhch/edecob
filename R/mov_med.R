@@ -32,6 +32,8 @@
 #' @inheritParams edecob
 #' @param width The width of the window over which the moving median is taken in
 #'   number of days.
+#' @param min_pts_in_win The minimal number of measurements required to be in
+#'   the time window in order for the median to be calculated.
 #'
 #' @return A data frame containing the values of the moving median, the study
 #'   day to which it corresponds, the time window from which it was calculated,
@@ -39,7 +41,8 @@
 #' @export
 #'
 mov_med <- function(data,
-                    width = 12*7) {
+                    width = 12*7,
+                    min_pts_in_win = 1) {
 
 
   subj_id <- data$subj_id[1]
@@ -71,7 +74,7 @@ mov_med <- function(data,
 
     win <- data$value[win_ind]
 
-    if (sum(win_ind) > 0) {
+    if (sum(win_ind) >= min_pts_in_win) {
 
       # saving the values for the window
       med_pts_med[ll] <- stats::median(win)
@@ -95,7 +98,7 @@ mov_med <- function(data,
       (data$study_day >= win_beg_day) * (data$study_day < win_beg_day + width))
     win <- data$value[win_ind]
 
-    if (sum(win_ind) > 0 &&
+    if (sum(win_ind) >= min_pts_in_win &&
       win_beg_day + width / 2 >= first_study_day) {
 
       # saving the values for the win
@@ -122,4 +125,6 @@ mov_med <- function(data,
     stringsAsFactors = FALSE
   )
   med_pts <- med_pts[med_pts$subj_id != "", ]
+
+  return(med_pts)
 }

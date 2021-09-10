@@ -4,17 +4,20 @@
 \alias{mov_med}
 \title{Moving Median over a Time Window}
 \usage{
-mov_med(data, width = 12 * 7)
+mov_med(data, width = 12 * 7, min_pts_in_win = 1)
 }
 \arguments{
 \item{data}{A data frame in long format containing the data for which events
-is to be detected. The first column
-contains stings specifying the subject identifier, the second column contains
-numbers specifying the study day, and the third column contains the numerical
-values of the measurements.}
+is to be detected. The columns are (in order): subject identifier, study day,
+measurements, baseline, and threshold. The subject identifier is expected to
+be a string; the study day, measurements, baseline, and threshold are expected to be numerical.
+The baseline and threshold are each expected to be identical for the same patient.}
 
 \item{width}{The width of the window over which the moving median is taken in
 number of days.}
+
+\item{min_pts_in_win}{The minimal number of measurements required to be in
+the time window in order for the median to be calculated.}
 }
 \value{
 A data frame containing the values of the moving median, the study
@@ -27,7 +30,7 @@ all time points between the first and last study day provided.
 }
 \details{
 Consider a sample \eqn{X₁,\dots, Xₙ} of size \eqn{n} and the
-reordering 2KLSjtMrK335REPxY9yJT1jFv2U9F9eq-3\eqn{X₍₁₎ \le X₍₂₎ \le \dots \le X₍ₙ₎}, commonly
+reordering R8rJv0REy3MfvsS7Vzz26fSenugng8Qz-3\eqn{X₍₁₎ \le X₍₂₎ \le \dots \le X₍ₙ₎}, commonly
 called the order statistic. Then for \eqn{n} even the median usually
 defined as \deqn{median(X₁,\dots, Xₙ) = X₍ₖ₎, where k = n/2.} In the
 case where \eqn{n} is odd the median is

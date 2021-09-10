@@ -13,17 +13,29 @@
 #' bound  is the blue area. If an event is detected, a red triangle will mark
 #' the detection day.
 #'
-#' @param event_data The output of the \code{edecob} function. It is an object
+#' Since the output is a ggplot, it can be manipulated using the usual functions
+#' from the ggplot2 package like \code{xlim}, \code{ylim}, \code{scale_x_continuous},
+#' and many more.
+#'
+#' @param event_data The output of the \code{edecob} function for one subject. It is an object
 #'   of class \code{edecob} containing the data and the event information.
-#' @param ... Additional parameters to be given to the function.
+#' @param title The title of the plot. Defaults to the subject identifier for the
+#'   subject to which \code{event_data} corresponds to.
+#' @param xlab The label for the x-axis. Defaults to the name of the second
+#'   column of the data when it was first entered into the \code{edecob} function.
+#' @param ylab The label for the y-axis. Defaults to the name of the third
+#'   column of the data when it was first entered into the \code{edecob} function.
 #'
 #' @return A `ggplot2` object that visualizes the data.
 #' @export
 #'
 #'
 #' @importFrom rlang .data
+#' @importFrom utils capture.output
 plot.edecob <- function(event_data,
-                        ...) {
+                        title = event_data$data$subj_id[1],
+                        xlab = event_data$col_names[2],
+                        ylab = event_data$col_names[3]) {
 
   # if ggplot2 was not imported
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
@@ -52,6 +64,9 @@ plot.edecob <- function(event_data,
       data = data$value[data$subj_id == subj_id],
       study_day = data$study_day[data$subj_id == subj_id])
 
+    # conf_band_text <- paste("Confidence Band (", event_data$conf_band_lvl*100, "%)", sep = "")
+    # conf_band_text <- "Confidence Band"
+
     # plotting data points, baseline, and threshold
     plot_colors <- character()
     plot_shape <- numeric()
@@ -74,7 +89,7 @@ plot.edecob <- function(event_data,
       #   color = "grey70",
       #   size = dot_size*0.9
       # ) +
-      ggplot2::labs(x = event_data$colnames[2], y = event_data$colnames[3]) +
+      ggplot2::labs(x = xlab, y = ylab) +
       ggplot2::geom_hline(ggplot2::aes(yintercept = basel, color = "Baseline")) +
       # geom_hline(aes(yintercept = threshold, color = "threshold")) +
       ggplot2::geom_hline(ggplot2::aes(yintercept = thresh, color = "Threshold")) +
@@ -102,7 +117,7 @@ plot.edecob <- function(event_data,
         aesthetics = "fill",
         values = c("Confidence Band" = "blue")
       ) +
-      ggplot2::ggtitle(subj_id) +
+      ggplot2::ggtitle(title) +
       ggplot2::theme(legend.title = ggplot2::element_blank())
 
 
@@ -191,6 +206,73 @@ plot.edecob <- function(event_data,
         )
     }
 
-    return(patient_plot)
+
+    # annotation below plot
+
+    if (event$event_detected) {
+      if (event$event_duration == 1) {
+        text_below_plot_event <-
+          paste("Event detected at ", event_data$time_unit, " ",
+                event$event_onset, ", sustained for ", event$event_duration,
+                " ", event_data$time_unit, ".", sep = "")
+      } else {
+        text_below_plot_event <-
+          paste("Event detected at ", event_data$time_unit, " ", event_data$time_unit, " ",
+                event$event_onset, ", sustained for ", event$event_duration,
+                " ", event_data$time_unit, "s.", sep = "")
+      }
+    } else {
+        if (event$event_duration == 1) {
+          text_below_plot_event <-
+            paste("Event detection censored at ", event_data$time_unit, " ", event$event_onset ,". Longest sustained change is ",
+                  event$event_duration, " ", event_data$time_unit, ".", sep = "")
+
+        } else {
+          text_below_plot_event <-
+            paste("Event detection censored at ", event_data$time_unit, " ", event$event_onset ,". Longest sustained change is ",
+                  event$event_duration, " ", event_data$time_unit, "s.", sep = "")
+
+        }
+    }
+
+    if (event_data$min_change_dur == 1) {
+      text_below_plot_min_dur <-
+        paste("Minimal duration of change for event detection: ",
+              event_data$min_change_dur, " ", event_data$time_unit, sep = "")
+    } else {
+      text_below_plot_min_dur <-
+        paste("Minimal duration of change for event detection: ",
+              event_data$min_change_dur, " ", event_data$time_unit, "s", sep = "")
+    }
+
+    text_below_plot_CI <- paste("Level of confidence band: ", 100*event_data$conf_band_lvl, "%", sep = "")
+
+    text_below_plot <- grid::textGrob(
+      paste(text_below_plot_event, text_below_plot_min_dur, text_below_plot_CI, sep = "\n"),
+      gp = grid::gpar(fontsize = 10),
+      just = c("left", "top"))
+
+    patient_plot <-  patient_plot +
+      ggplot2::theme(plot.margin = ggplot2::unit(c(0.03,0.03,0.18,0.03), "npc")) +
+      ggplot2::annotation_custom(grob = text_below_plot,
+                                 xmin = min(data$study_day) - 0.15*(max(data$study_day) - min(data$study_day)),
+                                 xmax = min(data$study_day) - 0.15*(max(data$study_day) - min(data$study_day)),
+                                 ymin = min(data$value) - 0.28*(max(data$value) - min(data$value)),
+                                 ymax = min(data$value) - 0.28*(max(data$value) - min(data$value)))
+    # print(patient_plot)
+    #   ggplot2::labs(tag = paste("Minimal duration of change for event detection:", event_data$min_change_dur)) +
+    #   ggplot2::theme(plot.tag.position = c(min(data$study_day), min(data$value) + 0.05*(max(data$value) - min(data$value))))
+    # grid::grid.text((paste("Minimal duration of change for event detection:", event_data$min_change_dur)),
+    #           x = grid::unit(0, "npc"), y = grid::unit(0, "npc"), just = c("left", "bottom"),
+    #           gp = grid::gpar(fontsize = 12, col = "black"))
+    # return(patient_plot)
+
+    # Code to override clipping
+    patient_plot <- ggplot2::ggplotGrob(patient_plot)
+    patient_plot$layout$clip[patient_plot$layout$name == "panel"] <- "off"
+
+    grid::grid.draw(patient_plot)
+
+    invisible(capture.output(return(patient_plot)))
   }
 }

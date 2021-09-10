@@ -20,16 +20,28 @@ summary.edecob <- function(object) {
   cat("Event detected:", object$event$event_detected, "\n")
   if (object$event$event_detected) {
     cat("Event ", object$colnames[2], ": ", object$event$event_onset, "\n", sep = "")
-    cat("Event duration: ", object$event$event_duration, " ", object$colnames[2], "s\n", sep = "")
+    if (object$event$event_duration == 1) {
+      cat("Event duration: ", object$event$event_duration, " ", object$time_unit, "\n", sep = "")
+    } else {
+      cat("Event duration: ", object$event$event_duration, " ", object$time_unit, "s\n", sep = "")
+    }
     cat("Event sustained until end of observation:", object$event$event_stop, "\n")
   } else {
-    cat("Longest sustained change: ", object$event$event_duration, " ", object$colnames[2], "s\n", sep = "")
+      if (object$event$event_duration == 1) {
+        cat("Longest sustained change: ", object$event$event_duration, " ", object$time_unit, "\n", sep = "")
+      } else {
+        cat("Longest sustained change: ", object$event$event_duration, " ", object$time_unit, "s\n", sep = "")
+      }
   }
   cat("---\n")
-  cat(object$colnames[1], ": ", object$data$subj_id[1], "\n", sep = "")
+  cat(object$colnames[1], ": ", object$subj_id, "\n", sep = "")
   cat("Baseline:", object$baseline, "\n")
   cat("Threshold:", object$threshold, "\n")
-  cat("Minimal duration of change for event detection: ", object$min_change_dur, " ", object$colnames[2], "s\n", sep = "")
+  if (object$min_change_dur == 1) {
+    cat("Minimal duration of change for event detection: ", object$min_change_dur, " ", object$time_unit, "\n", sep = "")
+  } else {
+    cat("Minimal duration of change for event detection: ", object$min_change_dur, " ", object$time_unit, "s\n", sep = "")
+  }
   cat("Bootstrap repetitions:", object$bt_tot_rep, "\n")
   cat("Confidence band level: ", object$conf_band_lvl*100, "%", "\n", sep = "")
 }

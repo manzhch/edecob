@@ -4,15 +4,25 @@
 \alias{plot.edecob}
 \title{Plot Event Data}
 \usage{
-\method{plot}{edecob}(event_data, label = "Data", ...)
+\method{plot}{edecob}(
+  event_data,
+  title = event_data$data$subj_id[1],
+  xlab = event_data$col_names[2],
+  ylab = event_data$col_names[3]
+)
 }
 \arguments{
-\item{event_data}{The output of the \code{edecob} function. It is an object
+\item{event_data}{The output of the \code{edecob} function for one subject. It is an object
 of class \code{edecob} containing the data and the event information.}
 
-\item{label}{The name of the y-axis in the plot.}
+\item{title}{The title of the plot. Defaults to the subject identifier for the
+subject to which \code{event_data} corresponds to.}
 
-\item{...}{Additional parameters to be given to the function.}
+\item{xlab}{The label for the x-axis. Defaults to the name of the second
+column of the data when it was first entered into the \code{edecob} function.}
+
+\item{ylab}{The label for the y-axis. Defaults to the name of the third
+column of the data when it was first entered into the \code{edecob} function.}
 }
 \value{
 A \code{ggplot2} object that visualizes the data.
@@ -26,4 +36,8 @@ The data from the learning period are gray. The baseline period is outlined
 by two vertical blue lines. The smoother is plotted in orange. The confidence
 bound  is the blue area. If an event is detected, a red triangle will mark
 the detection day.
+
+Since the output is a ggplot, it can be manipulated using the usual functions
+from the ggplot2 package like \code{xlim}, \code{ylim}, \code{scale_x_continuous},
+and many more.
 }

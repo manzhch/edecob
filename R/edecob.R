@@ -93,6 +93,16 @@ NULL
 #' The term study day is not to be taken too seriously; it only needs to be a
 #' number specifying the time point at which the measurement was taken.
 #'
+#' If the threshold is smaller
+#' than the than the baseline, an event will be detected
+#' when the confidence band stays below the threshold for \code{min_change_dur}
+#' days. Similarly, if the threshold is larger than baseline, an event will be detected
+#' when the confidence band stays above the threshold for \code{min_change_dur}
+#' days. If the threshold is equal to the baseline, events below the threshold
+#' will be detected. For detection of events above the threshold with the
+#' threshold equal to the baseline, choose a threshold minimally larger than
+#' the baseline.
+#'
 #' For the moving median, the width is the total size of the window, meaning
 #' that for the value corresponding to day x, the data points from day
 #' x - \code{width}/2 to x + \code{width}/2 will be used for the calculation
@@ -101,27 +111,31 @@ NULL
 #' If the parameter \code{order} it not given, the order of the autoregressive
 #' model will be determined using the Akaike information criterion (AIC).
 #'
+#' If no confidence bound can be calculated for a certain time point, it will be
+#' assumed that the confidence is not below/above the threshold (i.e. no event).
+#'
+#' Please note that the event onset could be on a date where there are no actual
+#' measurements. This can happen when there is a gap in the data. In this case, the
+#' confidence bounds will extend into the gap.
+#' If the confidence bounds in this period are below/above the threshold and continue
+#' to be below/above the threshold for the next \code{min_change_duration} study
+#' days, the event onset will be in this gap.
+#'
+#' The censoring date is based on the last date where the confidence bounds can be
+#' calculated. We do not extend the confidence bounds to the last data point so
+#' that the confidence bounds don't change in case we obtain new measurements.
+#'
 #' @seealso \code{\link{summary.edecob}}, \code{\link{plot.edecob}}
 #'
 #' @param data A data frame in long format containing the data for which events
-#'   is to be detected. The first column
-#'   contains stings specifying the subject identifier, the second column contains
-#'   numbers specifying the study day, and the third column contains the numerical
-#'   values of the measurements.
+#'   is to be detected. The columns are (in order): subject identifier, study day,
+#'   measurements, baseline, and threshold. The subject identifier is expected to
+#'   be a string; the study day, measurements, baseline, and threshold are expected to be numerical.
+#'   The baseline and threshold are each expected to be identical for the same patient.
 #' @param smoother Which smoother is to be used. Use \code{mov_med} for the
 #'   moving median. When using the moving median, the parameter \code{width} must
 #'   be given to specify the size of the window over which the moving median is
 #'   to be taken. Defaults to the moving median.
-#' @param baseline A number specifying the baseline.
-#' @param threshold A number specifying the threshold. If the threshold is smaller
-#'   than the than the baseline, an event will be detected
-#'   when the confidence band stays below the threshold for \code{min_change_dur}
-#'   days. Similarly, if the threshold is larger than baseline, an event will be detected
-#'   when the confidence band stays above the threshold for \code{min_change_dur}
-#'   days. If the threshold is equal to the baseline, events below the threshold
-#'   will be detected. For detection of events above the threshold with the
-#'   threshold equal to the baseline, choose a threshold minimally larger than
-#'   the baseline.
 #' @param bt_tot_rep The number of times we perform the bootstrap. Because of
 #'   run time, it is recommended to keep this number below 500, especially with
 #'   large data sets. Defaults to 100.
@@ -130,14 +144,22 @@ NULL
 #'   detected. Defaults to 84, i.e. 12 weeks.
 #' @param conf_band_lvl The confidence level for the simultaneous confidence
 #'   bands. Defaults to 0.95.
-#' @param ... Additional parameters to be given to the function. When the moving
-#'   median is used, a \code{width} parameter is expected. If no \code{width} is
-#'   given, it will default to 84. If the parameter
-#'   \code{order} is given, that number will be the (maximal) order of the autoregressive
-#'   model.
+#' @param time_unit A string containing the unit of time used, in singular form.
+#'   Defaults to day.
+#' @param ... Additional parameters to be given to the function. Possible values
+#'   are \code{width}, \code{order}, and \code{min_pts_in_win}. When the moving
+#'   median is used as the smoother, \code{min_pts_in_win} is optional while
+#'   \code{width} is expected. If no \code{width} is
+#'   given, it will default to 84. The parameter \code{min_pts_in_win}
+#'   determines the minimal number of
+#'   measurements required to be in the time window for the median to be calculated.
+#'   If the parameter \code{order} is given, that number will be the (maximal)
+#'   order of the autoregressive model.
 #'
-#' @return A list of 11 variables: \describe{
-#'   \item{\code{event}}{gives a list with four values: \code{event_detected} gives
+#' @return If \code{data} contains only a single subject, the function returns
+#'   a list of 13 variables: \describe{
+#'   \item{\code{event}}{gives a list with four values: \code{event_detected},
+#'     \code{event_onset}, \code{event_duration}, and \code{event_stop}. \code{event_detected} gives
 #'     whether an event was detected;
 #'     \code{event_onset} gives the first day at which the upper or lower bound
 #'     of the confidence band is below or above the threshold, and after which it
@@ -159,7 +181,17 @@ NULL
 #'     the change needs to be sustained in order for an event to be detected.}
 #'   \item{\code{conf_band_lvl}}{gives the level of the simultaneous confidence band.}
 #'   \item{\code{bt_tot_rep}}{gives the total amount of bootstrap repetitions performed.}
-#'   \item{\code{call}}{gives the function call.}}
+#'   \item{\code{call}}{gives the function call.}
+#'   \item{\code{col_names}}{gives the original column names of the data.}
+#'   \item{\code{time_unit}}{gives the unit of time used.}}
+#'   If \code{data} contains more than one subject, the output will be a list
+#'   with one more element than the number of subjects in \code{data}. Every
+#'   element in this list will again be a list named after the corresponding subject identifiers
+#'   with 13 items as described above except for the last one. The last element
+#'   in the list is called \code{event_info} and is a data frame containing the
+#'   information from \code{event} from each patient. \code{event_info} will thus
+#'   have the following columns: \code{subj_id}, \code{event_detected},
+#'   \code{event_onset}, \code{event_duration}, and \code{event_stop}.
 #'
 #'
 #' @export
@@ -175,8 +207,10 @@ NULL
 #' LakeHuron_event1 <-
 #'   edecob(data.frame(Subject = "Lake Huron",
 #'                     Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
-#'                     Data = LakeHuron),
-#'          baseline = 580.5, threshold = 579.7, width = 10, min_change_dur = 20)
+#'                     Level = as.numeric(LakeHuron),
+#'                     Baseline = 580.5,
+#'                     Threshold = 579.7),
+#'          width = 10, min_change_dur = 20, time_unit = "year")
 #' summary(LakeHuron_event1)
 #'
 #' # Notice in the plot that the event onset does not happen the first time the
@@ -188,38 +222,90 @@ NULL
 #' LakeHuron_event2 <-
 #'   edecob(data.frame(Subject = "Lake Huron",
 #'                     Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
-#'                     Data = LakeHuron),
-#'          baseline = 580.5, threshold = 578.7, width = 10, min_change_dur = 20)
-#' summary.edecob(LakeHuron_event2)
+#'                     Level = as.numeric(LakeHuron),
+#'                     Baseline = 580.5,
+#'                     Threshold = 578.7),
+#'          width = 10, min_change_dur = 20, time_unit = "year")
+#' summary(LakeHuron_event2)
 #'
 #' # Then we do not detect an event as the confidence bound does not stay below
 #' # the threshold for a sufficient amount of time.
-#' plot.edecob(LakeHuron_event2)
+#' plot(LakeHuron_event2)
 #'
 #'
 #' # Let us see what happens when we introduce a gap into the data
 #' LakeHuron_event3 <-
 #'   edecob(data.frame(Subject = "Lake Huron",
 #'                     Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
-#'                     Data = c(LakeHuron[1:25], rep(NA, 20), LakeHuron[46:98])),
-#'          baseline = 580.5, threshold = 579.7, width = 10, min_change_dur = 10)
+#'                     Level = as.numeric(c(LakeHuron[1:25], rep(NA, 20), LakeHuron[46:98])),
+#'                     Baseline = 580.5,
+#'                     Threshold = 579.7),
+#'          width = 10, min_change_dur = 10, time_unit = "year")
 #' summary(LakeHuron_event3)
 #'
 #' # Notice that the confidence bounds become wider around the gap
 #' plot(LakeHuron_event3)
 #'
+#' # Let us look at an example with multiple subjects
+#' lh <- rbind(data.frame(Subject = "Lake Huron 1",
+#'                        Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                        Level = as.numeric(LakeHuron),
+#'                        Baseline = 580.5,
+#'                        Threshold = 579.7),
+#'             data.frame(Subject = "Lake Huron 2",
+#'                        Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                        Level = as.numeric(LakeHuron),
+#'                        Baseline = 580.5,
+#'                        Threshold = 578.7),
+#'             data.frame(Subject = "Lake Huron 3",
+#'                        Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                        Level = as.numeric(LakeHuron),
+#'                        Baseline = 580.5,
+#'                        Threshold = 576.7))
+#' lhevent <- edecob(lh, width = 10, min_change_dur = 10, time_unit = "year")
+#'
+#' # Plot one subject
+#' plot(lhevent$`Lake Huron 1`)
+#' plot(lhevent$`Lake Huron 2`)
+#' plot(lhevent$`Lake Huron 3`)
+#'
+#' # Draw survival plot
+#' library("survival")
+#' plot(survfit(Surv(time = event_onset, event = event_detected) ~ 1,
+#'              data = lhevent$event_info),
+#'      conf.int = F, xlim = c(1875,1975), ylim = c(0,1), mark.time = TRUE)
+#'
 #'
 edecob <- function(data,
                    smoother = "mov_med",
-                   baseline,
-                   threshold,
                    min_change_dur = 12*7,
                    conf_band_lvl = 0.95,
                    bt_tot_rep = 100,
+                   time_unit = "day",
                    ...) {
 
-  columns <- colnames(data)
-  colnames(data) <- c("subj_id", "study_day", "value")
+  if (!("col_names" %in% names(match.call()))) {
+    col_names <- colnames(data)
+    colnames(data) <- c("subj_id", "study_day", "value", "baseline", "threshold")
+  } else {
+    col_names <- list(...)$col_names
+  }
+
+  stopifnot(
+    "Data not a data frame" = is.data.frame(data),
+    "Data empty" = nrow(data) > 0,
+    "Baseline not all equal for at least one subject" = {
+      all(do.call(c, lapply(unique(data$subj_id), function(x){
+        return(length(unique(data$baseline[data$subj_id == x])) == 1)
+      })))},
+    "Threshold not all equal for at least one subject" = {
+      all(do.call(c, lapply(unique(data$subj_id), function(x){
+        return(length(unique(data$threshold[data$subj_id == x])) == 1)
+      })))}
+  )
+
+
+
   if (sum(is.na(data$value)) > 1) {
     warning("Removing rows where value is NA")
     data <- data[!is.na(data$value), ]
@@ -239,8 +325,31 @@ edecob <- function(data,
     width <- match.call()$width
   }
 
+  # multiple patients
+  if (length(unique(data$subj_id)) > 1) {
+    patients_event_data <-
+      lapply(split(data, factor(data$subj_id)), edecob,
+             smoother, min_change_dur,conf_band_lvl, bt_tot_rep, time_unit,
+             "col_names" = col_names, ...)
+    patients_event_data$event_info <- as.data.frame(do.call(rbind,
+      lapply(patients_event_data, function(x) {
+        return(list(x$subj_id, x$event$event_detected, x$event$event_onset, x$event$event_duration, x$event$event_stop))
+      })))
+    colnames(patients_event_data$event_info) <-
+      c("subj_id", "event_detected", "event_onset", "event_duration", "event_stop")
+    patients_event_data$event_info$subj_id <- unlist(patients_event_data$event_info$subj_id)
+    patients_event_data$event_info$event_detected <- unlist(patients_event_data$event_info$event_detected)
+    patients_event_data$event_info$event_onset <- unlist(patients_event_data$event_info$event_onset)
+    patients_event_data$event_info$event_duration  <- unlist(patients_event_data$event_info$event_duration)
+    patients_event_data$event_info$event_stop  <- unlist(patients_event_data$event_info$event_stop)
+    return(patients_event_data)
+  }
+
   # calculate the smoother
   if (smoother == "mov_med") {
+    if ("min_pts_in_win" %in% names(match.call)) {
+      smoother_pts <- mov_med(data, width, list(...)$min_pts_in_win)
+    }
     smoother_pts <- mov_med(data, width)
   } else {
     warning("Smoother not recognized. Defaulting to moving median.")
@@ -267,7 +376,7 @@ edecob <- function(data,
   conf_band <- conf_band(bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)
 
   # detect events using confidence bands
-  event <- detect_event(conf_band, baseline, threshold, min_change_dur)
+  event <- detect_event(conf_band, data$baseline[1], data$threshold[1], min_change_dur)
 
   # add columns with event information to data
   data$event <- event$event_detected
@@ -277,18 +386,20 @@ edecob <- function(data,
 
   # compose output
   output <- list(
+    "subj_id" = data$subj_id[1],
     "event" = event,
     "conf_band" = conf_band,
     "smoother_pts" = smoother_pts,
     "data" = data,
-    "baseline" = baseline,
-    "threshold" = threshold,
     "smoother" = smoother,
+    "baseline" = data$baseline[1],
+    "threshold" = data$threshold[1],
     "min_change_dur" = min_change_dur,
     "conf_band_lvl" = conf_band_lvl,
     "bt_tot_rep" = bt_tot_rep,
     "call" = match.call(),
-    "colnames" = columns
+    "col_names" = col_names,
+    "time_unit" = time_unit
   )
   class(output) <- "edecob"
 

@@ -7,37 +7,24 @@
 edecob(
   data,
   smoother = "mov_med",
-  baseline,
-  threshold,
   min_change_dur = 12 * 7,
   conf_band_lvl = 0.95,
   bt_tot_rep = 100,
+  time_unit = "day",
   ...
 )
 }
 \arguments{
 \item{data}{A data frame in long format containing the data for which events
-is to be detected. The first column
-contains stings specifying the subject identifier, the second column contains
-numbers specifying the study day, and the third column contains the numerical
-values of the measurements.}
+is to be detected. The columns are (in order): subject identifier, study day,
+measurements, baseline, and threshold. The subject identifier is expected to
+be a string; the study day, measurements, baseline, and threshold are expected to be numerical.
+The baseline and threshold are each expected to be identical for the same patient.}
 
 \item{smoother}{Which smoother is to be used. Use \code{mov_med} for the
 moving median. When using the moving median, the parameter \code{width} must
 be given to specify the size of the window over which the moving median is
 to be taken. Defaults to the moving median.}
-
-\item{baseline}{A number specifying the baseline.}
-
-\item{threshold}{A number specifying the threshold. If the threshold is smaller
-than the than the baseline, an event will be detected
-when the confidence band stays below the threshold for \code{min_change_dur}
-days. Similarly, if the threshold is larger than baseline, an event will be detected
-when the confidence band stays above the threshold for \code{min_change_dur}
-days. If the threshold is equal to the baseline, events below the threshold
-will be detected. For detection of events above the threshold with the
-threshold equal to the baseline, choose a threshold minimally larger than
-the baseline.}
 
 \item{min_change_dur}{The minimal number of days that the confidence bounds
 need to stay below or above the threshold in order for an event to be
@@ -50,15 +37,24 @@ bands. Defaults to 0.95.}
 run time, it is recommended to keep this number below 500, especially with
 large data sets. Defaults to 100.}
 
-\item{...}{Additional parameters to be given to the function. When the moving
-median is used, a \code{width} parameter is expected. If no \code{width} is
-given, it will default to 84. If the parameter
-\code{order} is given, that number will be the (maximal) order of the autoregressive
-model.}
+\item{time_unit}{A string containing the unit of time used, in singular form.
+Defaults to day.}
+
+\item{...}{Additional parameters to be given to the function. Possible values
+are \code{width}, \code{order}, and \code{min_pts_in_win}. When the moving
+median is used as the smoother, \code{min_pts_in_win} is optional while
+\code{width} is expected. If no \code{width} is
+given, it will default to 84. The parameter \code{min_pts_in_win}
+determines the minimal number of
+measurements required to be in the time window for the median to be calculated.
+If the parameter \code{order} is given, that number will be the (maximal)
+order of the autoregressive model.}
 }
 \value{
-A list of 11 variables: \describe{
-\item{\code{event}}{gives a list with four values: \code{event_detected} gives
+If \code{data} contains only a single subject, the function returns
+a list of 13 variables: \describe{
+\item{\code{event}}{gives a list with four values: \code{event_detected},
+\code{event_onset}, \code{event_duration}, and \code{event_stop}. \code{event_detected} gives
 whether an event was detected;
 \code{event_onset} gives the first day at which the upper or lower bound
 of the confidence band is below or above the threshold, and after which it
@@ -80,7 +76,17 @@ the last day at which we can calculate the confidence bound or not.}
 the change needs to be sustained in order for an event to be detected.}
 \item{\code{conf_band_lvl}}{gives the level of the simultaneous confidence band.}
 \item{\code{bt_tot_rep}}{gives the total amount of bootstrap repetitions performed.}
-\item{\code{call}}{gives the function call.}}
+\item{\code{call}}{gives the function call.}
+\item{\code{col_names}}{gives the original column names of the data.}
+\item{\code{time_unit}}{gives the unit of time used.}}
+If \code{data} contains more than one subject, the output will be a list
+with one more element than the number of subjects in \code{data}. Every
+element in this list will again be a list named after the corresponding subject identifiers
+with 13 items as described above except for the last one. The last element
+in the list is called \code{event_info} and is a data frame containing the
+information from \code{event} from each patient. \code{event_info} will thus
+have the following columns: \code{subj_id}, \code{event_detected},
+\code{event_onset}, \code{event_duration}, and \code{event_stop}.
 }
 \description{
 Calculate a smoother of the data and bootstrap the errors of the autoregressive
@@ -161,6 +167,16 @@ and \eqn{N} the number of measurements or rows in \code{data}, in our case the n
 The term study day is not to be taken too seriously; it only needs to be a
 number specifying the time point at which the measurement was taken.
 
+If the threshold is smaller
+than the than the baseline, an event will be detected
+when the confidence band stays below the threshold for \code{min_change_dur}
+days. Similarly, if the threshold is larger than baseline, an event will be detected
+when the confidence band stays above the threshold for \code{min_change_dur}
+days. If the threshold is equal to the baseline, events below the threshold
+will be detected. For detection of events above the threshold with the
+threshold equal to the baseline, choose a threshold minimally larger than
+the baseline.
+
 For the moving median, the width is the total size of the window, meaning
 that for the value corresponding to day x, the data points from day
 x - \code{width}/2 to x + \code{width}/2 will be used for the calculation
@@ -168,29 +184,96 @@ of the median.
 
 If the parameter \code{order} it not given, the order of the autoregressive
 model will be determined using the Akaike information criterion (AIC).
+
+If no confidence bound can be calculated for a certain time point, it will be
+assumed that the confidence is not below/above the threshold (i.e. no event).
+
+Please note that the event onset could be on a date where there are no actual
+measurements. This can happen when there is a gap in the data. In this case, the
+confidence bounds will extend into the gap.
+If the confidence bounds in this period are below/above the threshold and continue
+to be below/above the threshold for the next \code{min_change_duration} study
+days, the event onset will be in this gap.
+
+The censoring date is based on the last date where the confidence bounds can be
+calculated. We do not extend the confidence bounds to the last data point so
+that the confidence bounds don't change in case we obtain new measurements.
 }
 
 \examples{
 # We look at the level of Lake Huron
-LakeHuron_event <-
-  edecob(data.frame(subject = "LakeHuron",
-                    year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
-                    data = LakeHuron),
-         baseline = 580.5, threshold = 579.7, width = 10, min_change_dur = 20)
-summary(LakeHuron_event)
+LakeHuron_event1 <-
+  edecob(data.frame(Subject = "Lake Huron",
+                    Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+                    Level = as.numeric(LakeHuron),
+                    Baseline = 580.5,
+                    Threshold = 579.7),
+         width = 10, min_change_dur = 20, time_unit = "year")
+summary(LakeHuron_event1)
+
 # Notice in the plot that the event onset does not happen the first time the
 # confidence bands drop below the threshold as the change is not sutained for long enough
-plot(LakeHuron_event)
+plot(LakeHuron_event1)
+
+
+# Suppose we chose a smaller threshold.
+LakeHuron_event2 <-
+  edecob(data.frame(Subject = "Lake Huron",
+                    Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+                    Level = as.numeric(LakeHuron),
+                    Baseline = 580.5,
+                    Threshold = 578.7),
+         width = 10, min_change_dur = 20, time_unit = "year")
+summary(LakeHuron_event2)
+
+# Then we do not detect an event as the confidence bound does not stay below
+# the threshold for a sufficient amount of time.
+plot(LakeHuron_event2)
+
 
 # Let us see what happens when we introduce a gap into the data
-LakeHuron_event2 <-
-  edecob(data.frame(subject = "LakeHuron",
-                    year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
-                    data = c(LakeHuron[1:25], rep(NA, 20), LakeHuron[46:98])),
-         baseline = 580.5, threshold = 579.7, width = 10, min_change_dur = 10)
-summary(LakeHuron_event2)
+LakeHuron_event3 <-
+  edecob(data.frame(Subject = "Lake Huron",
+                    Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+                    Level = as.numeric(c(LakeHuron[1:25], rep(NA, 20), LakeHuron[46:98])),
+                    Baseline = 580.5,
+                    Threshold = 579.7),
+         width = 10, min_change_dur = 10, time_unit = "year")
+summary(LakeHuron_event3)
+
 # Notice that the confidence bounds become wider around the gap
-plot(LakeHuron_event2)
+plot(LakeHuron_event3)
+
+# Let us look at an example with multiple subjects
+lh <- rbind(data.frame(Subject = "Lake Huron 1",
+                       Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+                       Level = as.numeric(LakeHuron),
+                       Baseline = 580.5,
+                       Threshold = 579.7),
+            data.frame(Subject = "Lake Huron 2",
+                       Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+                       Level = as.numeric(LakeHuron),
+                       Baseline = 580.5,
+                       Threshold = 578.7),
+            data.frame(Subject = "Lake Huron 3",
+                       Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+                       Level = as.numeric(LakeHuron),
+                       Baseline = 580.5,
+                       Threshold = 576.7))
+lhevent <- edecob(lh, width = 10, min_change_dur = 10, time_unit = "year")
+
+# Plot one subject
+plot(lhevent$`Lake Huron 1`)
+plot(lhevent$`Lake Huron 2`)
+plot(lhevent$`Lake Huron 3`)
+
+# Draw survival plot
+library("survival")
+plot(survfit(Surv(time = event_onset, event = event_detected) ~ 1,
+             data = lhevent$event_info),
+     conf.int = F, xlim = c(1875,1975), ylim = c(0,1), mark.time = TRUE)
+
+
 }
 \references{
 Bühlmann, P. (1998). Sieve Bootstrap for Smoothing in

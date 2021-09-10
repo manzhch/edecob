@@ -8,10 +8,10 @@ bt_smoother(data, smoother, smoother_pts, resid, bt_tot_rep, ...)
 }
 \arguments{
 \item{data}{A data frame in long format containing the data for which events
-is to be detected. The first column
-contains stings specifying the subject identifier, the second column contains
-numbers specifying the study day, and the third column contains the numerical
-values of the measurements.}
+is to be detected. The columns are (in order): subject identifier, study day,
+measurements, baseline, and threshold. The subject identifier is expected to
+be a string; the study day, measurements, baseline, and threshold are expected to be numerical.
+The baseline and threshold are each expected to be identical for the same patient.}
 
 \item{smoother}{Which smoother is to be used. Use \code{mov_med} for the
 moving median. When using the moving median, the parameter \code{width} must
@@ -28,11 +28,15 @@ points.}
 run time, it is recommended to keep this number below 500, especially with
 large data sets. Defaults to 100.}
 
-\item{...}{Additional parameters to be given to the function. When the moving
-median is used, a \code{width} parameter is expected. If no \code{width} is
-given, it will default to 84. If the parameter
-\code{order} is given, that number will be the (maximal) order of the autoregressive
-model.}
+\item{...}{Additional parameters to be given to the function. Possible values
+are \code{width}, \code{order}, and \code{min_pts_in_win}. When the moving
+median is used as the smoother, \code{min_pts_in_win} is optional while
+\code{width} is expected. If no \code{width} is
+given, it will default to 84. The parameter \code{min_pts_in_win}
+determines the minimal number of
+measurements required to be in the time window for the median to be calculated.
+If the parameter \code{order} is given, that number will be the (maximal)
+order of the autoregressive model.}
 }
 \value{
 A data frame containing the bootstrap repetitions of the smoother.
