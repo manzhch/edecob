@@ -35,15 +35,18 @@ bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, ...){
       } else {
         pred_helper <- rep(NA, ar_resid$order)
         for (kk in 1:ar_resid$order) {
-          pred_helper[kk] <-
-            resid[min(which(!is.na(resid))) - 1 + x - kk]
+          if (kk > 0) {
+            pred_helper[kk] <-
+              resid[min(which(!is.na(resid))) + x - kk]
+
+          }
         }
         return(stats::predict(ar_resid, newdata = pred_helper)$pred[[1]] + bt_epsilon[x])
       }
     }, ar_resid, resid)
 
     # calculate Y* (the bootstrapped data points using the AR model)
-    bt_Y <- vapply(1:max(which(data$study_day <= max(smoother_pts$study_day))), function(x, bt_eta) {
+    bt_Y <- vapply(1:length(data$study_day[which(data$study_day <= max(smoother_pts$study_day))]), function(x, bt_eta) {
       return(smoother_pts$value[smoother_pts$study_day == data$study_day[x]] + bt_eta[x])
     }, numeric(1), bt_eta)
 
@@ -52,7 +55,7 @@ bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, ...){
     last_data_study_day <- max(data$study_day)
 
     if (smoother == "mov_med") {
-      width <- match.call()$width
+      width <- list(...)$width
 
       if (last_data_study_day > win_beg_day + width) {
         S_star_one_bt <-

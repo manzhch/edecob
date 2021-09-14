@@ -148,8 +148,8 @@ NULL
 #'   Defaults to day.
 #' @param ... Additional parameters to be given to the function. Possible values
 #'   are \code{width}, \code{order}, and \code{min_pts_in_win}. When the moving
-#'   median is used as the smoother, \code{min_pts_in_win} is optional while
-#'   \code{width} is expected. If no \code{width} is
+#'   median is used as the smoother, \code{width} is expected while
+#'   \code{min_pts_in_win} is optional. If no \code{width} is
 #'   given, it will default to 84. The parameter \code{min_pts_in_win}
 #'   determines the minimal number of
 #'   measurements required to be in the time window for the median to be calculated.
@@ -312,12 +312,11 @@ edecob <- function(data,
   }
 
 
+
   # making sure that width is not repeated in future function calls
   no_width_given <- FALSE
-
   if (smoother == "mov_med" && !("width" %in% names(match.call()))) {
-
-    warning("Parameter width not given after choosing the moving median as smoother. Defaulting to 84.")
+    warning("Parameter width not given after choosing the moving median as smoother. Defaulting to 84.", immediate. = TRUE)
     width <- 84
     no_width_given <- TRUE
 
@@ -367,10 +366,11 @@ edecob <- function(data,
 
   # bootstrap the errors of the AR model fitted on the residuals
   if (no_width_given) {
-    bt_smoother <- bt_smoother(data, smoother, smoother_pts, smoother_resid, bt_tot_rep, width, ...)
+    bt_smoother <- bt_smoother(data, smoother, smoother_pts, smoother_resid, bt_tot_rep, "width" = width, ...)
   } else {
     bt_smoother <- bt_smoother(data, smoother, smoother_pts, smoother_resid, bt_tot_rep, ...)
   }
+
 
   # calculate the confidence bands
   conf_band <- conf_band(bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)

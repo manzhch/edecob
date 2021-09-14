@@ -32,6 +32,7 @@
 #'
 #' @importFrom rlang .data
 #' @importFrom utils capture.output
+#' @importFrom graphics plot.new
 plot.edecob <- function(event_data,
                         title = event_data$data$subj_id[1],
                         xlab = event_data$col_names[2],
@@ -42,6 +43,8 @@ plot.edecob <- function(event_data,
     stop("Package \"gglot2\" needed for plots.", call. = FALSE)
   } else {
 
+
+    plot.new()
 
     # initialize variables
     dot_size <- 1.8
@@ -217,7 +220,7 @@ plot.edecob <- function(event_data,
                 " ", event_data$time_unit, ".", sep = "")
       } else {
         text_below_plot_event <-
-          paste("Event detected at ", event_data$time_unit, " ", event_data$time_unit, " ",
+          paste("Event detected at ", event_data$time_unit, " ",
                 event$event_onset, ", sustained for ", event$event_duration,
                 " ", event_data$time_unit, "s.", sep = "")
       }

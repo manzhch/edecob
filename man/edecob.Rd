@@ -42,8 +42,8 @@ Defaults to day.}
 
 \item{...}{Additional parameters to be given to the function. Possible values
 are \code{width}, \code{order}, and \code{min_pts_in_win}. When the moving
-median is used as the smoother, \code{min_pts_in_win} is optional while
-\code{width} is expected. If no \code{width} is
+median is used as the smoother, \code{width} is expected while
+\code{min_pts_in_win} is optional. If no \code{width} is
 given, it will default to 84. The parameter \code{min_pts_in_win}
 determines the minimal number of
 measurements required to be in the time window for the median to be calculated.
