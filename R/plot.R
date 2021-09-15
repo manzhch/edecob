@@ -37,7 +37,8 @@
 plot.edecob <- function(event_data,
                         title = event_data$data$subj_id[1],
                         xlab = event_data$col_names[2],
-                        ylab = event_data$col_names[3]) {
+                        ylab = event_data$col_names[3],
+                        ...) {
 
   # if ggplot2 was not imported
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
