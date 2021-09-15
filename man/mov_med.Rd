@@ -30,7 +30,7 @@ all time points between the first and last study day provided.
 }
 \details{
 Consider a sample \eqn{X₁,\dots, Xₙ} of size \eqn{n} and the
-reordering eEVb2dpqLbAl984XdizybLY2zsXx1xAd-3\eqn{X₍₁₎ \le X₍₂₎ \le \dots \le X₍ₙ₎}, commonly
+reordering rOGOFxaqEOkY6Gnhl1AU58eBxLE6GBYi-3\eqn{X₍₁₎ \le X₍₂₎ \le \dots \le X₍ₙ₎}, commonly
 called the order statistic. Then for \eqn{n} even the median usually
 defined as \deqn{median(X₁,\dots, Xₙ) = X₍ₖ₎, where k = n/2.} In the
 case where \eqn{n} is odd the median is
