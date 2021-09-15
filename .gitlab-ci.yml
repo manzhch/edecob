@@ -1,7 +1,9 @@
-image: registry.code.roche.com/frictionless-insights/ci-cd:validr-3.6.3
+image: rocker/rstudio
 
 test:
    script:
+     - sudo apt-get update
+     - sudo apt-get install libxml2-dev
      - Rscript -e 'install.packages(c("ggplot2", "rlang", "utils", "graphics", "stats", "devtools"), repos="https://cloud.r-project.org")'
      - R CMD build . --no-build-vignettes --no-manual
      - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
