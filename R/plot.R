@@ -19,13 +19,7 @@
 #'
 #' @param event_data The output of the \code{edecob} function for one subject. It is an object
 #'   of class \code{edecob} containing the data and the event information.
-#' @param title The title of the plot. Defaults to the subject identifier for the
-#'   subject to which \code{event_data} corresponds to.
-#' @param xlab The label for the x-axis. Defaults to the name of the second
-#'   column of the data when it was first entered into the \code{edecob} function.
-#' @param ylab The label for the y-axis. Defaults to the name of the third
-#'   column of the data when it was first entered into the \code{edecob} function.
-#' @param ... Other arguments.
+#' @param ... Other arguments like \code{title}, \code{xlab}, or \code{ylab}.
 #'
 #' @return A `ggplot2` object that visualizes the data.
 #' @export
@@ -35,16 +29,24 @@
 #' @importFrom utils capture.output
 #' @importFrom graphics plot.new
 plot.edecob <- function(event_data,
-                        ...,
-                        title = event_data$data$subj_id[1],
-                        xlab = event_data$col_names[2],
-                        ylab = event_data$col_names[3]) {
+                        ...) {
 
   # if ggplot2 was not imported
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Package \"gglot2\" needed for plots.", call. = FALSE)
   } else {
 
+    if (!("title" %in% names(list(...)))) {
+      title <- event_data$data$subj_id[1]
+    }
+
+    if (!("xlab" %in% names(list(...)))) {
+      xlab <- event_data$col_names[2]
+    }
+
+    if (!("ylab" %in% names(list(...)))) {
+      ylab <- event_data$col_names[3]
+    }
 
     plot.new()
 

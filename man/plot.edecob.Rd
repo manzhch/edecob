@@ -4,28 +4,13 @@
 \alias{plot.edecob}
 \title{Plot Event Data}
 \usage{
-\method{plot}{edecob}(
-  event_data,
-  ...,
-  title = event_data$data$subj_id[1],
-  xlab = event_data$col_names[2],
-  ylab = event_data$col_names[3]
-)
+\method{plot}{edecob}(event_data, ...)
 }
 \arguments{
 \item{event_data}{The output of the \code{edecob} function for one subject. It is an object
 of class \code{edecob} containing the data and the event information.}
 
-\item{...}{Other arguments.}
-
-\item{title}{The title of the plot. Defaults to the subject identifier for the
-subject to which \code{event_data} corresponds to.}
-
-\item{xlab}{The label for the x-axis. Defaults to the name of the second
-column of the data when it was first entered into the \code{edecob} function.}
-
-\item{ylab}{The label for the y-axis. Defaults to the name of the third
-column of the data when it was first entered into the \code{edecob} function.}
+\item{...}{Other arguments like \code{title}, \code{xlab}, or \code{ylab}.}
 }
 \value{
 A \code{ggplot2} object that visualizes the data.

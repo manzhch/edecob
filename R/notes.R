@@ -396,3 +396,10 @@
 #' @export
 #'
 
+# doc plot -----
+#' @param title The title of the plot. Defaults to the subject identifier for the
+#'   subject to which \code{event_data} corresponds to.
+#' @param xlab The label for the x-axis. Defaults to the name of the second
+#'   column of the data when it was first entered into the \code{edecob} function.
+#' @param ylab The label for the y-axis. Defaults to the name of the third
+#'   column of the data when it was first entered into the \code{edecob} function.
