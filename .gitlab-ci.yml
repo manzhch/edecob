@@ -1,5 +1,4 @@
-
-image: rocker/rstudio
+image: registry.code.roche.com/frictionless-insights/ci-cd:validr-3.6.3
 
 test:
    script:
