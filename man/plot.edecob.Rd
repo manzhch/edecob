@@ -4,10 +4,10 @@
 \alias{plot.edecob}
 \title{Plot Event Data}
 \usage{
-\method{plot}{edecob}(event_data, ...)
+\method{plot}{edecob}(x, ...)
 }
 \arguments{
-\item{event_data}{The output of the \code{edecob} function for one subject. It is an object
+\item{x}{The output of the \code{edecob} function for one subject. It is an object
 of class \code{edecob} containing the data and the event information.}
 
 \item{...}{Other arguments like \code{title}, \code{xlab}, or \code{ylab}.}

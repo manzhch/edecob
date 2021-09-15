@@ -17,7 +17,7 @@
 #' from the ggplot2 package like \code{xlim}, \code{ylim}, \code{scale_x_continuous},
 #' and many more.
 #'
-#' @param event_data The output of the \code{edecob} function for one subject. It is an object
+#' @param x The output of the \code{edecob} function for one subject. It is an object
 #'   of class \code{edecob} containing the data and the event information.
 #' @param ... Other arguments like \code{title}, \code{xlab}, or \code{ylab}.
 #'
@@ -28,8 +28,10 @@
 #' @importFrom rlang .data
 #' @importFrom utils capture.output
 #' @importFrom graphics plot.new
-plot.edecob <- function(event_data,
+plot.edecob <- function(x,
                         ...) {
+
+  event_data <- x
 
   # if ggplot2 was not imported
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
