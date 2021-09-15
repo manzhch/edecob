@@ -271,7 +271,7 @@ plot(lhevent$`Lake Huron 3`)
 library("survival")
 plot(survfit(Surv(time = event_onset, event = event_detected) ~ 1,
              data = lhevent$event_info),
-     conf.int = F, xlim = c(1875,1975), ylim = c(0,1), mark.time = TRUE)
+     conf.int = FALSE, xlim = c(1875,1975), ylim = c(0,1), mark.time = TRUE)
 
 
 }
