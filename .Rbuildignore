@@ -4,3 +4,4 @@
 ^R_latex$
 ^notes$
 ^LICENSE\.md$
+^\.gitlab-ci\.yml$
