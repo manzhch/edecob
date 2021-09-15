@@ -8,11 +8,12 @@
 #' \code{summary} method for class "\code{edecob}", gives a summary of an edecob object
 #'
 #' @param object An object of class "\code{edecob}" for which the summary will be shown.
+#' @param ... Other arguments
 #'
 #' @return A short summary whether an event was detected and the parameters of the \code{edecob} function call.
 #' @export
 #'
-summary.edecob <- function(object) {
+summary.edecob <- function(object, ...) {
   cat("edecob object\n\n")
   cat("Call: ")
   print(object$call)

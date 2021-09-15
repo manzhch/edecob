@@ -25,6 +25,7 @@
 #'   column of the data when it was first entered into the \code{edecob} function.
 #' @param ylab The label for the y-axis. Defaults to the name of the third
 #'   column of the data when it was first entered into the \code{edecob} function.
+#' @param ... Other arguments.
 #'
 #' @return A `ggplot2` object that visualizes the data.
 #' @export

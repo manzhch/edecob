@@ -4,10 +4,12 @@
 \alias{summary.edecob}
 \title{Summarizing Event Detection Results}
 \usage{
-\method{summary}{edecob}(object)
+\method{summary}{edecob}(object, ...)
 }
 \arguments{
 \item{object}{An object of class "\code{edecob}" for which the summary will be shown.}
+
+\item{...}{Other arguments}
 }
 \value{
 A short summary whether an event was detected and the parameters of the \code{edecob} function call.
