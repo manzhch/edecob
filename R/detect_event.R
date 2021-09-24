@@ -12,7 +12,7 @@
 #'
 #' @return A list of four values: \describe{ \item{\code{event_detected}}{gives
 #'   whether an event was detected}
-#'   \item{\code{event_onset}}{gives the study_day at which the
+#'   \item{\code{event_onset}}{gives the time_point at which the
 #'   event was detected} \item{\code{event_duration}}{gives the duration the
 #'   event is sustained} \item{\code{event_stop}}{gives whether the detected
 #'   event is censored}
@@ -37,10 +37,10 @@ detect_event <- function(conf_band,
   }
 
   gap_below_thresh <- data.frame(
-    "study_day" = min(conf_band$study_day):max(conf_band$study_day),
+    "time_point" = min(conf_band$time_point):max(conf_band$time_point),
     "value" = FALSE)
 
-   gap_below_thresh$value[gap_below_thresh$study_day %in% conf_band$study_day] <-
+   gap_below_thresh$value[gap_below_thresh$time_point %in% conf_band$time_point] <-
     conf_band$is_below_thresh
 
   # if there is at least one time point at which the upper interval is below the threshold
@@ -60,21 +60,21 @@ detect_event <- function(conf_band,
     if (sum(below_thresh_runs[, "event"]) > 0) {
       event_detected <- TRUE
       event_onset <-
-        gap_below_thresh$study_day[below_thresh_runs[, "starts"][
+        gap_below_thresh$time_point[below_thresh_runs[, "starts"][
           which.max(below_thresh_runs[, "event"])]]
       event_duration <-
         below_thresh_runs[, "dur"][which.max(below_thresh_runs[, "event"])]
-      event_stop <- (event_onset + event_duration - 1) >= max(conf_band$study_day)
+      event_stop <- (event_onset + event_duration - 1) >= max(conf_band$time_point)
 
     } else {
       event_detected <- FALSE
-      event_onset <- max(conf_band$study_day) # censoring study_day
+      event_onset <- max(conf_band$time_point) # censoring time_point
       event_duration <- max(below_thresh_runs[, "dur"]) # longest sequence below threshold
       event_stop <- FALSE
     }
   } else {
     event_detected <- FALSE
-    event_onset <- max(conf_band$study_day) # censoring study_day
+    event_onset <- max(conf_band$time_point) # censoring time_point
     event_duration <- 0 # longest sequence below threshold
     event_stop <- FALSE
   }

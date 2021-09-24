@@ -2,7 +2,7 @@
 #' Moving Median over a Time Window
 #'
 #' Calculates the moving median over a time window around a time point for the
-#' all time points between the first and last study day provided.
+#' all time points between the first and last time point provided.
 #'
 #' Consider a sample \eqn{X₁,\dots, Xₙ} of size \eqn{n} and the
 #' reordering \eqn{X₍₁₎,\dots, X₍ₙ₎} such
@@ -11,7 +11,7 @@
 #' defined as \deqn{median(X₁,\dots, Xₙ) = X₍ₖ₎, where k = n/2.} In the
 #' case where \eqn{n} is odd the median is
 #' defined as \deqn{median(X₁,\dots, Xₙ) = 1/2(X₍ₖ₎ + X₍ₖ₊₁₎), where k = n/2.} Let the
-#' study days at which the measurements \eqn{X₁, \dots, Xₙ} were taken
+#' time points at which the measurements \eqn{X₁, \dots, Xₙ} were taken
 #' be \eqn{t₁, \dots, tₙ}.
 #' Let \eqn{T} a fixed positive amount of time. Then the moving median at time
 #' point \eqn{t} with window size \eqn{T} is defined as
@@ -48,10 +48,10 @@ mov_med <- function(data,
   subj_id <- data$subj_id[1]
 
   # the number of days for which the moving median will be calculated
-  dur <- max(data$study_day) - min(data$study_day) + 1 - width/2
+  dur <- max(data$time_point) - min(data$time_point) + 1 - width/2
 
   med_pts_med <- numeric(dur)
-  med_pts_study_day <- numeric(dur)
+  med_pts_time_point <- numeric(dur)
   med_pts_win_beg <- numeric(dur)
   med_pts_win_end <- numeric(dur)
   med_pts_subj_id <- character(dur)
@@ -60,17 +60,17 @@ mov_med <- function(data,
 
 
   # calculate moving medians of the first 6 weeks by taking smaller window
-  # by taking whatever we have from baseline until current data$study_day + 6 weeks
+  # by taking whatever we have from baseline until current data$time_point + 6 weeks
   # (basically creating an unbalanced window)
 
-  first_study_day <- min(data$study_day)
-  win_beg_day <- first_study_day
+  first_time_point <- min(data$time_point)
+  win_beg_day <- first_time_point
 
-  while (win_beg_day < first_study_day + width / 2) {
+  while (win_beg_day < first_time_point + width / 2) {
 
     # determine window
-    win_ind <- as.logical((data$study_day >= first_study_day) *
-      (data$study_day < win_beg_day + width / 2))
+    win_ind <- as.logical((data$time_point >= first_time_point) *
+      (data$time_point < win_beg_day + width / 2))
 
     win <- data$value[win_ind]
 
@@ -78,7 +78,7 @@ mov_med <- function(data,
 
       # saving the values for the window
       med_pts_med[ll] <- stats::median(win)
-      med_pts_study_day[ll] <- win_beg_day
+      med_pts_time_point[ll] <- win_beg_day
       med_pts_win_beg[ll] <- win_beg_day
       med_pts_win_end[ll] <- win_beg_day + width - 1
       med_pts_subj_id[ll] <- subj_id
@@ -89,21 +89,21 @@ mov_med <- function(data,
   }
 
   # calculate moving median for the rest of the data
-  win_beg_day <- first_study_day
-  last_study_day <- max(data$study_day)
-  while (win_beg_day < last_study_day - width) {
+  win_beg_day <- first_time_point
+  last_time_point <- max(data$time_point)
+  while (win_beg_day < last_time_point - width) {
 
     # determining winow
     win_ind <- as.logical(
-      (data$study_day >= win_beg_day) * (data$study_day < win_beg_day + width))
+      (data$time_point >= win_beg_day) * (data$time_point < win_beg_day + width))
     win <- data$value[win_ind]
 
     if (sum(win_ind) >= min_pts_in_win &&
-      win_beg_day + width / 2 >= first_study_day) {
+      win_beg_day + width / 2 >= first_time_point) {
 
       # saving the values for the win
       med_pts_med[ll] <- stats::median(win)
-      med_pts_study_day[ll] <- ceiling(win_beg_day + width / 2)
+      med_pts_time_point[ll] <- ceiling(win_beg_day + width / 2)
       med_pts_win_beg[ll] <- win_beg_day
       med_pts_win_end[ll] <- win_beg_day + width - 1
       med_pts_subj_id[ll] <- subj_id
@@ -118,7 +118,7 @@ mov_med <- function(data,
   # compile median point data into dataframe
   med_pts <- data.frame(
     "subj_id" = med_pts_subj_id,
-    "study_day" = med_pts_study_day,
+    "time_point" = med_pts_time_point,
     "value" = med_pts_med,
     "win_beg" = med_pts_win_beg,
     "win_end" = med_pts_win_end,

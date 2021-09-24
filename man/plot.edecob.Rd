@@ -19,7 +19,7 @@ A \code{ggplot2} object that visualizes the data.
 Generates a ggplot2 visualizing the data and event if any detected.
 }
 \details{
-The data points are plotted on the x-axis with the study day on the y-axis.
+The data points are plotted on the x-axis with the time point on the y-axis.
 The data from the learning period are gray. The baseline period is outlined
 by two vertical blue lines. The smoother is plotted in orange. The confidence
 bound  is the blue area. If an event is detected, a red triangle will mark

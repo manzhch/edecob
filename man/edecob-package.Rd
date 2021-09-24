@@ -5,24 +5,30 @@
 \alias{edecob-package}
 \title{edecob: Event Detection Using Confidence Bounds}
 \description{
-Detect sustained change in time-dependent data.
+Detect sustained change (or "events") in time-dependent data while accounting for
+heterogeneity in assessment frequency and noise. The data is first smoothed
+(e.g. using the moving median) before an autoregressive model is fitted on
+the residuals of the smoother.
+The errors of this autoregressive model are then bootstrapped to find
+simultaneous confidence bands for the smoother.
 }
 \section{Main function}{
 
 \describe{
-\item{\code{edecob}}{Detects events in the data provided and visualizes the data}
+\item{\code{edecob}}{Detects sustained change in the data provided}
 }
 }
 
 \section{Other functions}{
 
 \describe{
-\item{\code{mov_med}}{Calculates the moving median}
-\item{\code{smoother_resid}}{Calculates the residuals of the moving median}
-\item{\code{bt_smoother}}{Bootstraps the smoother}
-\item{\code{conf_band}}{Calculates the confidence bounds}
-\item{\code{detect_event}}{Detects events using the confidence bounds}
-\item{\code{edecob_plot}}{Generates a ggplot to visualize the data}
+\item{\code{plot.edecob}}{Generates a ggplot to visualize the output of \code{edecob}}
+\item{\code{summary.edecob}}{Gives a summary of the sustained change detected}
+\item{\code{mov_med}}{Calculates the moving median for use as smoother}
+\item{\code{smoother_resid}}{Calculates the residuals of the smoother}
+\item{\code{bt_smoother}}{Bootstraps the errors of the autoregressive model fitted on the residuals of the smoother}
+\item{\code{conf_band}}{Calculates the confidence bounds which will be used to detect sustained change}
+\item{\code{detect_event}}{Detects sustained change using the confidence bounds
 }
 }
 

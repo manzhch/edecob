@@ -28,7 +28,7 @@ bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, ...){
     bt_epsilon <- sample(ar_resid_non_na, length(ar_resid$resid), replace = T)
 
     # calculate residuals of the smoother with bootstrapped errors
-    bt_eta <- sapply(1:length(data$study_day), function(x, ar_resid, resid) {
+    bt_eta <- sapply(1:length(data$time_point), function(x, ar_resid, resid) {
       # if first k data points where k order of AR (not enough previous data pts for AR)
       if (x <= ar_resid$order) {
         return(resid[min(which(!is.na(resid))) - 1 + x] + bt_epsilon[x])
@@ -46,49 +46,53 @@ bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, ...){
     }, ar_resid, resid)
 
     # calculate Y* (the bootstrapped data points using the AR model)
-    bt_Y <- vapply(1:length(data$study_day[which(data$study_day <= max(smoother_pts$study_day))]), function(x, bt_eta) {
-      return(smoother_pts$value[smoother_pts$study_day == data$study_day[x]] + bt_eta[x])
+    bt_Y <- vapply(1:length(data$time_point[which(data$time_point <= max(smoother_pts$time_point))]), function(x, bt_eta) {
+      return(smoother_pts$value[smoother_pts$time_point == data$time_point[x]] + bt_eta[x])
     }, numeric(1), bt_eta)
 
     # calculate bootstrapped smoother S*
-    win_beg_day <- min(data$study_day)
-    last_data_study_day <- max(data$study_day)
+    win_beg_day <- min(data$time_point)
+    last_data_time_point <- max(data$time_point)
 
     if (smoother == "mov_med") {
       width <- list(...)$width
 
-      if (last_data_study_day > win_beg_day + width) {
+      if (last_data_time_point > win_beg_day + width) {
         S_star_one_bt <-
           mov_med(data.frame(subj_id = rep(data$subj_id[1], length(bt_Y)),
-                             study_day = data$study_day[which(data$study_day <= max(smoother_pts$study_day))],
+                             time_point = data$time_point[which(data$time_point <= max(smoother_pts$time_point))],
                              value = bt_Y),
                   width)
-        S_star_one_bt <- S_star_one_bt[, c("subj_id", "study_day", "value")]
+        S_star_one_bt <- S_star_one_bt[, c("subj_id", "time_point", "value")]
         S_star_one_bt$bt_rep <- rep(bt_rep, nrow(S_star_one_bt))
         return(S_star_one_bt)
 
       } else {
-        return(data.frame("value" = NA,
-                          "study_day" = NA,
-                          "bt_rep" = bt_rep,
-                          "subj_id" = data$subj_id[1]))
+        return(data.frame("subj_id" = data$subj_id[1],
+                          "time_point" = NA,
+                          "value" = NA,
+                          "bt_rep" = bt_rep
+                          ))
       }
     }
   } else {
     warning("AR model cannot be fitted (variance of residuals is 0 or residuals are NA)")
-    return(data.frame("value" = NA,
-                      "study_day" = NA,
-                      "bt_rep" = bt_rep,
-                      "subj_id" = data$subj_id[1]))
+    return(data.frame("subj_id" = data$subj_id[1],
+                      "time_point" = NA,
+                      "value" = NA,
+                      "bt_rep" = bt_rep
+                      ))
   }
 }
 
 #' Bootstrap the Smoother
 #'
-#' Fit an autoregressive model on the residuals of the smoother and bootstrap
-#' the error of the autoregressive model. Reconstruct the smoother by adding the
-#' bootstrapped error, the fitted autoregressive model, and the smoother to form
-#' the bootstrapped smoother.
+#' First, fit an autoregressive model on the residuals of the smoother. Then bootstrap
+#' the errors of the autoregressive model. Afterwards, reconstruct the measurements
+#' by adding the bootstrapped error, the autoregressive model, and the smoother.
+#' We can again calculate the smoother using these reconstructed measurements to
+#' obtain the bootstrapped smoother (which can later be used to construct the
+#' simultaneous confidence bounds). For details see below.
 #'
 #' An autoregressive (AR) model is used for the residuals of the smoother:
 #' \deqn{Y(t) = S(t) + \eta(t)}
@@ -113,13 +117,17 @@ bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, ...){
 #' }
 #'
 #'
-#' @param smoother_pts A data frame containing the smoother. Preferably the
-#'   output of one of the smoother functions included in this package.
-#' @param resid A vector containing the residuals of the smoother to the data
-#'   points.
+#' @param smoother_pts A data frame containing the smoother with columns time_point
+#'   and value. Preferably the output of one of the smoother functions within
+#'   this package.
+#' @param resid A vector of the same length as the number of rows of data
+#'   containing the difference between the smoother and the
+#'   measurements. Preferably the output of \code{\link{smoother_resid}}.
 #' @inheritParams edecob
 #'
 #' @return A data frame containing the bootstrap repetitions of the smoother.
+#'   The column are subject identifier, time point, value, and the bootstrap
+#'   repetition the value corrsponds to.
 #' @export
 #'
 #' @references Bühlmann, P. (1998). Sieve Bootstrap for Smoothing in

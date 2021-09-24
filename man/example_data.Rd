@@ -8,7 +8,7 @@
 A dataframe with 2100 rows and 5 variables:
 \describe{
 \item{subject}{The subject identifier}
-\item{study_day}{The study day from which the data is collected}
+\item{time_point}{The point in time from which the data is collected, in days}
 \item{jump_height}{The jump height, in cm}
 \item{baseline}{The baseline for the subject}
 \item{threshold}{The threshold for the subject}

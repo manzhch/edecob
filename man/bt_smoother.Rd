@@ -8,44 +8,61 @@ bt_smoother(data, smoother, smoother_pts, resid, bt_tot_rep, ...)
 }
 \arguments{
 \item{data}{A data frame in long format containing the data for which events
-is to be detected. The columns are (in order): subject identifier, study day,
-measurements, baseline, and threshold. The subject identifier is expected to
-be a string; the study day, measurements, baseline, and threshold are expected to be numerical.
-The baseline and threshold are each expected to be identical for the same patient.}
+is to be detected. This means that each measurement corresponds to a row
+and the columns are (in order): subject identifier, point in time,
+measurement value, baseline, and threshold.
+
+The subject identifier is expected to
+be a string; the time point, measurements, baseline, and threshold are expected to be numerical.
+The baseline and threshold are in absolute values in the same unit as the
+measurements and each is expected to be identical for the same patient. The
+threshold can be above or below the baseline. For details see below.}
 
 \item{smoother}{Which smoother is to be used. Use \code{mov_med} for the
 moving median. When using the moving median, the parameter \code{width} must
 be given to specify the size of the window over which the moving median is
 to be taken. Defaults to the moving median.}
 
-\item{smoother_pts}{A data frame containing the smoother. Preferably the
-output of one of the smoother functions included in this package.}
+\item{smoother_pts}{A data frame containing the smoother with columns time_point
+and value. Preferably the output of one of the smoother functions within
+this package.}
 
-\item{resid}{A vector containing the residuals of the smoother to the data
-points.}
+\item{resid}{A vector of the same length as the number of rows of data
+containing the difference between the smoother and the
+measurements. Preferably the output of \code{\link{smoother_resid}}.}
 
-\item{bt_tot_rep}{The number of times we perform the bootstrap. Because of
-run time, it is recommended to keep this number below 500, especially with
-large data sets. Defaults to 100.}
+\item{bt_tot_rep}{The number of iterations for the bootstrap computation. Because of
+run time, it is recommended to keep this number below 500. Defaults to 100.}
 
-\item{...}{Additional parameters to be given to the function. Possible values
-are \code{width}, \code{order}, and \code{min_pts_in_win}. When the moving
-median is used as the smoother, \code{width} is expected while
-\code{min_pts_in_win} is optional. If no \code{width} is
-given, it will default to 84. The parameter \code{min_pts_in_win}
-determines the minimal number of
+\item{...}{Additional parameters to be given to the function. Possible
+parameters for the model are \code{order} and \code{min_pts_in_win}. For
+the moving median, a \code{width} is required.
+
+The parameter \code{min_pts_in_win}
+defines the minimal number of
 measurements required to be in the time window for the median to be calculated.
+Defaults to 1.
+
 If the parameter \code{order} is given, that number will be the (maximal)
-order of the autoregressive model.}
+order of the autoregressive model. If no \code{order} is given, it will be
+determined using the Akaike information criterion.
+
+When the moving
+median is used as the smoother, \code{width} is expected. If no \code{width} is
+given, it will default to 84.}
 }
 \value{
 A data frame containing the bootstrap repetitions of the smoother.
+The column are subject identifier, time point, value, and the bootstrap
+repetition the value corrsponds to.
 }
 \description{
-Fit an autoregressive model on the residuals of the smoother and bootstrap
-the error of the autoregressive model. Reconstruct the smoother by adding the
-bootstrapped error, the fitted autoregressive model, and the smoother to form
-the bootstrapped smoother.
+First, fit an autoregressive model on the residuals of the smoother. Then bootstrap
+the errors of the autoregressive model. Afterwards, reconstruct the measurements
+by adding the bootstrapped error, the autoregressive model, and the smoother.
+We can again calculate the smoother using these reconstructed measurements to
+obtain the bootstrapped smoother (which can later be used to construct the
+simultaneous confidence bounds). For details see below.
 }
 \details{
 An autoregressive (AR) model is used for the residuals of the smoother:

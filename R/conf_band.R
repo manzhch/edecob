@@ -7,27 +7,27 @@ ratio_in_ci <- function(alpha_p,
                         bt_tot_rep,
                         conf_band_lvl) {
   # initialize variables
-  uniq_study_day <- unique(bt_smoother$study_day)
-  uniq_study_day <- uniq_study_day[!is.na(uniq_study_day)]
-  my_quantile_lower <- numeric(length(uniq_study_day))
-  my_quantile_upper <- numeric(length(uniq_study_day))
+  uniq_time_point <- unique(bt_smoother$time_point)
+  uniq_time_point <- uniq_time_point[!is.na(uniq_time_point)]
+  my_quantile_lower <- numeric(length(uniq_time_point))
+  my_quantile_upper <- numeric(length(uniq_time_point))
   bt_smoother$init_est <- numeric(nrow(bt_smoother))
 
   # calculate difference of bootstrapped smoother vs non-bootstrapped smoother
   bt_smoother$init_est <- bt_smoother$value -
-    rep(smoother_pts$value[smoother_pts$study_day %in% uniq_study_day], bt_tot_rep)
+    rep(smoother_pts$value[smoother_pts$time_point %in% uniq_time_point], bt_tot_rep)
 
   # calculate quantiles
-  for (ii in 1:length(uniq_study_day)) {
-    # print(bt_smoother$init_est[bt_smoother$study_day == uniq_study_day[[ii]]])
+  for (ii in 1:length(uniq_time_point)) {
+    # print(bt_smoother$init_est[bt_smoother$time_point == uniq_time_point[[ii]]])
     my_quantile_lower[ii] <-
-      stats::quantile(bt_smoother$init_est[bt_smoother$study_day == uniq_study_day[ii]], alpha_p)
+      stats::quantile(bt_smoother$init_est[bt_smoother$time_point == uniq_time_point[ii]], alpha_p)
     my_quantile_upper[ii] <-
-      stats::quantile(bt_smoother$init_est[bt_smoother$study_day == uniq_study_day[ii]],
+      stats::quantile(bt_smoother$init_est[bt_smoother$time_point == uniq_time_point[ii]],
                1 - alpha_p)
   }
-  names(my_quantile_lower) <- uniq_study_day
-  names(my_quantile_upper) <- uniq_study_day
+  names(my_quantile_lower) <- uniq_time_point
+  names(my_quantile_upper) <- uniq_time_point
 
   # determine for each data point whether it is between the quantiles
   bt_smoother$in_intvl <- logical(nrow(bt_smoother))
@@ -43,7 +43,7 @@ ratio_in_ci <- function(alpha_p,
   }
 
   bt_in_intvl_ratio <-
-    sum(bt_smoother$bt_in_intvl[bt_smoother$study_day == min(bt_smoother$study_day)]) /
+    sum(bt_smoother$bt_in_intvl[bt_smoother$time_point == min(bt_smoother$time_point)]) /
     bt_tot_rep
 
 
@@ -112,7 +112,7 @@ find_ptw_conf_band_lvl <- function(bt_smoother,
 #' @param bt_smoother A data frame containing the bootstrapped smoother. Use the output of \code{bt_smoother}.
 #'
 #' @return A data frame containing the upper confidence bound, the lower confidence bound,
-#'   and the study day corresponding to the bounds.
+#'   and the time point corresponding to the bounds.
 #' @export
 #'
 #' @references Bühlmann, P. (1998). Sieve Bootstrap for Smoothing in
@@ -125,20 +125,20 @@ conf_band <- function(bt_smoother,
                       conf_band_lvl){
 
   # calculate pointwise quantile
-  study_days <- sort(unique(bt_smoother$study_day))
-  my_quantile_lower <- numeric(length(study_days))
-  my_quantile_upper <- numeric(length(study_days))
+  time_points <- sort(unique(bt_smoother$time_point))
+  my_quantile_lower <- numeric(length(time_points))
+  my_quantile_upper <- numeric(length(time_points))
   width <- smoother_pts$win_end[1] - smoother_pts$win_beg[1] + 1
 
   ptw_conf_band_lvl <- find_ptw_conf_band_lvl(bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)
   init_est <- bt_smoother$value -
-    rep(smoother_pts$value[smoother_pts$study_day %in% bt_smoother$study_day], bt_tot_rep)
-  names(init_est) <- bt_smoother$study_day
+    rep(smoother_pts$value[smoother_pts$time_point %in% bt_smoother$time_point], bt_tot_rep)
+  names(init_est) <- bt_smoother$time_point
 
   # calculate quantiles
   if (nrow(bt_smoother) > 0) {
     both_quantiles <-
-      sapply(split(init_est, factor(names(init_est))),
+      sapply(split(init_est, factor(unique(names(init_est)), unique(names(init_est)))),
              function(x){
                if (sum(!is.na(x)) > 0 &&
                    !is.na(ptw_conf_band_lvl)[1] &&
@@ -159,18 +159,18 @@ conf_band <- function(bt_smoother,
     my_quantile_upper <- both_quantiles[2, ]
   })
 
-  if (!is.null(study_days)) {
-    names(my_quantile_lower) <- study_days
-    names(my_quantile_upper) <- study_days
+  if (!is.null(time_points)) {
+    names(my_quantile_lower) <- time_points
+    names(my_quantile_upper) <- time_points
 
   }
 
-  study_days_matching <- unique(sort(smoother_pts$study_day[
-    smoother_pts$study_day %in% unique(bt_smoother$study_day)]))
-  study_days_matching <- study_days_matching[study_days_matching <= max(smoother_pts$study_day) - width/2]
+  time_points_matching <- unique(sort(smoother_pts$time_point[
+    smoother_pts$time_point %in% unique(bt_smoother$time_point)]))
+  time_points_matching <- time_points_matching[time_points_matching <= max(smoother_pts$time_point) - width/2]
 
-  for (ii in study_days_matching) {
-    current_ind <- smoother_pts$study_day == ii
+  for (ii in time_points_matching) {
+    current_ind <- smoother_pts$time_point == ii
     smoother_pts$intvl_upper[current_ind] <-
       smoother_pts$value[current_ind] + my_quantile_upper[as.character(ii)]
     smoother_pts$intvl_lower[current_ind] <-
@@ -178,10 +178,11 @@ conf_band <- function(bt_smoother,
   }
 
   conf_band <- data.frame(
-    upper = smoother_pts$intvl_upper[!is.na(smoother_pts$intvl_upper)],
+    subj_id = rep(smoother_pts$subj_id[1], length(time_points_matching)),
+    time_point = time_points_matching,
     lower = smoother_pts$intvl_lower[!is.na(smoother_pts$intvl_lower)],
-    study_day = study_days_matching,
-    subj_id = rep(smoother_pts$subj_id[1], length(study_days_matching)))
+    upper = smoother_pts$intvl_upper[!is.na(smoother_pts$intvl_upper)]
+    )
 
   return(conf_band)
 }

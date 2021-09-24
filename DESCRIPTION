@@ -14,6 +14,6 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Depends: R (>= 4.0.0)
-Imports: stats (>= 4.0.3), ggplot2 (>= 3.3.2), rlang (>= 0.4.11), utils (>= 4.0.3), graphics (>= 4.0.3)
-Suggests: survival (>= 3.2)
+Depends: R (>= 3.5.0)
+Imports: stats (>= 3.5.0), ggplot2 (>= 3.1.0), rlang (>= 0.4.0), utils (>= 3.5.0), graphics (>= 3.5.0)
+Suggests: survival (>= 2.43) 

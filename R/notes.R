@@ -268,7 +268,84 @@
 #' plot(LakeHuron_event2)
 
 
-# doc conf_band
+#' @examples
+#' # We look at the level of Lake Huron
+#' LakeHuron_event1 <-
+#'   edecob(data.frame(Subject = "Lake Huron",
+#'                     Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                     Level = as.numeric(LakeHuron),
+#'                     Baseline = 580.5,
+#'                     Threshold = 579.7),
+#'          width = 10, min_change_dur = 20, time_unit = "year")
+#' summary(LakeHuron_event1)
+#'
+#' # Notice in the plot that the event onset does not happen the first time the
+#' # confidence bands drop below the threshold as the change is not sutained for long enough
+#' plot(LakeHuron_event1)
+#'
+#'
+#' # Suppose we chose a smaller threshold.
+#' LakeHuron_event2 <-
+#'   edecob(data.frame(Subject = "Lake Huron",
+#'                     Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                     Level = as.numeric(LakeHuron),
+#'                     Baseline = 580.5,
+#'                     Threshold = 578.7),
+#'          width = 10, min_change_dur = 20, time_unit = "year")
+#' summary(LakeHuron_event2)
+#'
+#' # Then we do not detect an event as the confidence bound does not stay below
+#' # the threshold for a sufficient amount of time.
+#' plot(LakeHuron_event2)
+#'
+#'
+#' # Let us see what happens when we introduce a gap into the data
+#' LakeHuron_event3 <-
+#'   edecob(data.frame(Subject = "Lake Huron",
+#'                     Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                     Level = as.numeric(c(LakeHuron[1:25], rep(NA, 20), LakeHuron[46:98])),
+#'                     Baseline = 580.5,
+#'                     Threshold = 579.7),
+#'          width = 10, min_change_dur = 10, time_unit = "year")
+#' summary(LakeHuron_event3)
+#'
+#' # Notice that the confidence bounds become wider around the gap
+#' plot(LakeHuron_event3)
+#'
+#' # Let us look at an example with multiple subjects
+#' lh <- rbind(data.frame(Subject = "Lake Huron 1",
+#'                        Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                        Level = as.numeric(LakeHuron),
+#'                        Baseline = 580.5,
+#'                        Threshold = 579.7),
+#'             data.frame(Subject = "Lake Huron 2",
+#'                        Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                        Level = as.numeric(LakeHuron),
+#'                        Baseline = 580.5,
+#'                        Threshold = 578.7),
+#'             data.frame(Subject = "Lake Huron 3",
+#'                        Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                        Level = as.numeric(LakeHuron),
+#'                        Baseline = 580.5,
+#'                        Threshold = 576.7))
+#' lhevent <- edecob(lh, width = 10, min_change_dur = 10, time_unit = "year")
+#'
+#' # Plot one subject
+#' plot(lhevent$`Lake Huron 1`)
+#' plot(lhevent$`Lake Huron 2`)
+#' plot(lhevent$`Lake Huron 3`)
+#'
+#' # Draw survival plot
+#' library("survival")
+#' plot(survfit(Surv(time = event_onset, event = event_detected) ~ 1,
+#'              data = lhevent$event_info),
+#'      conf.int = FALSE, xlim = c(1875,1975), ylim = c(0,1), mark.time = TRUE)
+#'
+
+
+
+
+# doc conf_band ---------------
 
 
 #' Confidence Bounds of the Smoother
@@ -304,6 +381,80 @@
 #' @references Bühlmann, P. (1998). Sieve Bootstrap for Smoothing in
 #'   Nonstationary Time Series. \emph{The Annals of Statistics}, 26(1), 48-83.
 #'
+#' @examples
+#' # We look at the level of Lake Huron
+#' LakeHuron_event1 <-
+#'   edecob(data.frame(Subject = "Lake Huron",
+#'                     Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                     Level = as.numeric(LakeHuron),
+#'                     Baseline = 580.5,
+#'                     Threshold = 579.7),
+#'          width = 10, min_change_dur = 20, time_unit = "year")
+#' summary(LakeHuron_event1)
+#'
+#' # Notice in the plot that the event onset does not happen the first time the
+#' # confidence bands drop below the threshold as the change is not sutained for long enough
+#' plot(LakeHuron_event1)
+#'
+#'
+#' # Suppose we chose a smaller threshold.
+#' LakeHuron_event2 <-
+#'   edecob(data.frame(Subject = "Lake Huron",
+#'                     Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                     Level = as.numeric(LakeHuron),
+#'                     Baseline = 580.5,
+#'                     Threshold = 578.7),
+#'          width = 10, min_change_dur = 20, time_unit = "year")
+#' summary(LakeHuron_event2)
+#'
+#' # Then we do not detect an event as the confidence bound does not stay below
+#' # the threshold for a sufficient amount of time.
+#' plot(LakeHuron_event2)
+#'
+#'
+#' # Let us see what happens when we introduce a gap into the data
+#' LakeHuron_event3 <-
+#'   edecob(data.frame(Subject = "Lake Huron",
+#'                     Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                     Level = as.numeric(c(LakeHuron[1:25], rep(NA, 20), LakeHuron[46:98])),
+#'                     Baseline = 580.5,
+#'                     Threshold = 579.7),
+#'          width = 10, min_change_dur = 10, time_unit = "year")
+#' summary(LakeHuron_event3)
+#'
+#' # Notice that the confidence bounds become wider around the gap
+#' plot(LakeHuron_event3)
+#'
+#' # Let us look at an example with multiple subjects
+#' lh <- rbind(data.frame(Subject = "Lake Huron 1",
+#'                        Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                        Level = as.numeric(LakeHuron),
+#'                        Baseline = 580.5,
+#'                        Threshold = 579.7),
+#'             data.frame(Subject = "Lake Huron 2",
+#'                        Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                        Level = as.numeric(LakeHuron),
+#'                        Baseline = 580.5,
+#'                        Threshold = 578.7),
+#'             data.frame(Subject = "Lake Huron 3",
+#'                        Year = tsp(LakeHuron)[1]:tsp(LakeHuron)[2],
+#'                        Level = as.numeric(LakeHuron),
+#'                        Baseline = 580.5,
+#'                        Threshold = 576.7))
+#' lhevent <- edecob(lh, width = 10, min_change_dur = 10, time_unit = "year")
+#'
+#' # Plot one subject
+#' plot(lhevent$`Lake Huron 1`)
+#' plot(lhevent$`Lake Huron 2`)
+#' plot(lhevent$`Lake Huron 3`)
+#'
+#' # Draw survival plot
+#' library("survival")
+#' plot(survfit(Surv(time = event_onset, event = event_detected) ~ 1,
+#'              data = lhevent$event_info),
+#'      conf.int = FALSE, xlim = c(1875,1975), ylim = c(0,1), mark.time = TRUE)
+#'
+
 
 # doc bt_smoother -------
 
@@ -395,6 +546,9 @@
 #'   and the subject id corresponding to the data.
 #' @export
 #'
+
+
+
 
 # doc plot -----
 #' @param title The title of the plot. Defaults to the subject identifier for the

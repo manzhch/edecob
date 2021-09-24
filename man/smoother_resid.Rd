@@ -8,10 +8,15 @@ smoother_resid(data, smoother_pts)
 }
 \arguments{
 \item{data}{A data frame in long format containing the data for which events
-is to be detected. The columns are (in order): subject identifier, study day,
-measurements, baseline, and threshold. The subject identifier is expected to
-be a string; the study day, measurements, baseline, and threshold are expected to be numerical.
-The baseline and threshold are each expected to be identical for the same patient.}
+is to be detected. This means that each measurement corresponds to a row
+and the columns are (in order): subject identifier, point in time,
+measurement value, baseline, and threshold.
+
+The subject identifier is expected to
+be a string; the time point, measurements, baseline, and threshold are expected to be numerical.
+The baseline and threshold are in absolute values in the same unit as the
+measurements and each is expected to be identical for the same patient. The
+threshold can be above or below the baseline. For details see below.}
 
 \item{smoother_pts}{A data frame containing the smoother. Preferably the
 output of one of the smoother functions included in this package.}
