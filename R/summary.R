@@ -35,9 +35,9 @@ summary.edecob <- function(object, ...) {
       }
   }
   cat("---\n")
-  cat(object$colnames[1], ": ", object$subj_id, "\n", sep = "")
-  cat("Baseline:", object$baseline, "\n")
-  cat("Threshold:", object$threshold, "\n")
+  cat(object$colnames[1], ": ", object$source, "\n", sep = "")
+  cat("Lower detection bound:", object$detec_lower, "\n")
+  cat("Upper detection bound:", object$detec_upper, "\n")
   if (object$min_change_dur == 1) {
     cat("Minimal duration of change for event detection: ", object$min_change_dur, " ", object$time_unit, "\n", sep = "")
   } else {

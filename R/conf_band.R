@@ -178,7 +178,7 @@ conf_band <- function(bt_smoother,
   }
 
   conf_band <- data.frame(
-    subj_id = rep(smoother_pts$subj_id[1], length(time_points_matching)),
+    source = rep(smoother_pts$source[1], length(time_points_matching)),
     time_point = time_points_matching,
     lower = smoother_pts$intvl_lower[!is.na(smoother_pts$intvl_lower)],
     upper = smoother_pts$intvl_upper[!is.na(smoother_pts$intvl_upper)]

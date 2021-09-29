@@ -4,18 +4,18 @@
 #' Calculates the moving median over a time window around a time point for the
 #' all time points between the first and last time point provided.
 #'
-#' Consider a sample \eqn{X₁,\dots, Xₙ} of size \eqn{n} and the
-#' reordering \eqn{X₍₁₎,\dots, X₍ₙ₎} such
-#' that \eqn{X₍₁₎ \le X₍₂₎ \le \dots \le X₍ₙ₎}, commonly
-#' called the order statistic. Then for \eqn{n} even the median usually
-#' defined as \deqn{median(X₁,\dots, Xₙ) = X₍ₖ₎, where k = n/2.} In the
-#' case where \eqn{n} is odd the median is
-#' defined as \deqn{median(X₁,\dots, Xₙ) = 1/2(X₍ₖ₎ + X₍ₖ₊₁₎), where k = n/2.} Let the
-#' time points at which the measurements \eqn{X₁, \dots, Xₙ} were taken
-#' be \eqn{t₁, \dots, tₙ}.
-#' Let \eqn{T} a fixed positive amount of time. Then the moving median at time
-#' point \eqn{t} with window size \eqn{T} is defined as
-#' \deqn{S(t) = median({Xⱼ | t - T/2 \le tⱼ \le t + T/2}).}
+#'   Consider a sample \eqn{X₁,\dots, Xₙ} of size \eqn{n} and the
+#'   reordering \eqn{X₍₁₎,\dots, X₍ₙ₎} such
+#'   that \eqn{X₍₁₎ \le X₍₂₎ \le \dots \le X₍ₙ₎}, commonly
+#'   called the order statistic. Then for \eqn{n} even the median usually
+#'   defined as \deqn{median(X₁,\dots, Xₙ) = X₍ₖ₎, where k = n/2.} In the
+#'   case where \eqn{n} is odd the median is
+#'   defined as \deqn{median(X₁,\dots, Xₙ) = 1/2(X₍ₖ₎ + X₍ₖ₊₁₎), where k = n/2.} Let the
+#'   time points at which the measurements \eqn{X₁, \dots, Xₙ} were taken
+#'   be \eqn{t₁, \dots, tₙ}.
+#'   Let \eqn{T} a fixed positive amount of time. Then
+#'   \deqn{S(t) = median({Xⱼ | t - T/2 \le tⱼ \le t + T/2})}
+#'   is defined as the moving median at time point \eqn{t} with window size \eqn{T}.
 #'
 #' For the initial time points where the time difference between the first data
 #' point and the time point for which we are calculating the median is less than
@@ -27,7 +27,8 @@
 #' No median is calculated if the time difference between the last data point
 #' and the current time point for which we are calculating the median is less
 #' than half the \code{width}. We do not calculate the median using a smaller
-#' time window so that the values do not change upon receiving new data.
+#' time window so that the values do not change upon receiving new data with
+#' time points newer than that of the old data.
 #'
 #' @inheritParams edecob
 #' @param width The width of the window over which the moving median is taken in
@@ -45,7 +46,7 @@ mov_med <- function(data,
                     min_pts_in_win = 1) {
 
 
-  subj_id <- data$subj_id[1]
+  source <- data$source[1]
 
   # the number of days for which the moving median will be calculated
   dur <- max(data$time_point) - min(data$time_point) + 1 - width/2
@@ -54,7 +55,7 @@ mov_med <- function(data,
   med_pts_time_point <- numeric(dur)
   med_pts_win_beg <- numeric(dur)
   med_pts_win_end <- numeric(dur)
-  med_pts_subj_id <- character(dur)
+  med_pts_source <- character(dur)
   ll <- 1 # index for the vectors above
 
 
@@ -81,7 +82,7 @@ mov_med <- function(data,
       med_pts_time_point[ll] <- win_beg_day
       med_pts_win_beg[ll] <- win_beg_day
       med_pts_win_end[ll] <- win_beg_day + width - 1
-      med_pts_subj_id[ll] <- subj_id
+      med_pts_source[ll] <- source
 
       ll <- ll + 1
     }
@@ -106,7 +107,7 @@ mov_med <- function(data,
       med_pts_time_point[ll] <- ceiling(win_beg_day + width / 2)
       med_pts_win_beg[ll] <- win_beg_day
       med_pts_win_end[ll] <- win_beg_day + width - 1
-      med_pts_subj_id[ll] <- subj_id
+      med_pts_source[ll] <- source
 
       ll <- ll + 1
     }
@@ -117,14 +118,14 @@ mov_med <- function(data,
 
   # compile median point data into dataframe
   med_pts <- data.frame(
-    "subj_id" = med_pts_subj_id,
+    "source" = med_pts_source,
     "time_point" = med_pts_time_point,
     "value" = med_pts_med,
     "win_beg" = med_pts_win_beg,
     "win_end" = med_pts_win_end,
     stringsAsFactors = FALSE
   )
-  med_pts <- med_pts[med_pts$subj_id != "", ]
+  med_pts <- med_pts[med_pts$source != "", ]
 
   return(med_pts)
 }

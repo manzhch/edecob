@@ -59,16 +59,16 @@ bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, ...){
 
       if (last_data_time_point > win_beg_day + width) {
         S_star_one_bt <-
-          mov_med(data.frame(subj_id = rep(data$subj_id[1], length(bt_Y)),
+          mov_med(data.frame(source = rep(data$source[1], length(bt_Y)),
                              time_point = data$time_point[which(data$time_point <= max(smoother_pts$time_point))],
                              value = bt_Y),
                   width)
-        S_star_one_bt <- S_star_one_bt[, c("subj_id", "time_point", "value")]
+        S_star_one_bt <- S_star_one_bt[, c("source", "time_point", "value")]
         S_star_one_bt$bt_rep <- rep(bt_rep, nrow(S_star_one_bt))
         return(S_star_one_bt)
 
       } else {
-        return(data.frame("subj_id" = data$subj_id[1],
+        return(data.frame("source" = data$source[1],
                           "time_point" = NA,
                           "value" = NA,
                           "bt_rep" = bt_rep
@@ -77,7 +77,7 @@ bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, ...){
     }
   } else {
     warning("AR model cannot be fitted (variance of residuals is 0 or residuals are NA)")
-    return(data.frame("subj_id" = data$subj_id[1],
+    return(data.frame("source" = data$source[1],
                       "time_point" = NA,
                       "value" = NA,
                       "bt_rep" = bt_rep

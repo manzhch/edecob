@@ -9,14 +9,14 @@ mov_med(data, width = 12 * 7, min_pts_in_win = 1)
 \arguments{
 \item{data}{A data frame in long format containing the data for which events
 is to be detected. This means that each measurement corresponds to a row
-and the columns are (in order): subject identifier, point in time,
-measurement value, baseline, and threshold.
+and the columns are (in order): source (the device or person from which the
+data was collected), point in time,
+measurement value, lower detection bound, and upper detection bound.
 
-The subject identifier is expected to
-be a string; the time point, measurements, baseline, and threshold are expected to be numerical.
-The baseline and threshold are in absolute values in the same unit as the
-measurements and each is expected to be identical for the same patient. The
-threshold can be above or below the baseline. For details see below.}
+The source is expected to
+be a string; the time point, measurements, and detection bounds are expected to be numerical.
+The detection bounds are in absolute value in the same unit as the
+values and each is expected to be identical for the same source. For details see below.}
 
 \item{width}{The width of the window over which the moving median is taken in
 number of days.}
@@ -35,16 +35,17 @@ all time points between the first and last time point provided.
 }
 \details{
 Consider a sample \eqn{X₁,\dots, Xₙ} of size \eqn{n} and the
-reordering gXf7rwQLE2jJPRMhC7eirrNAID1e5DIF-3\eqn{X₍₁₎ \le X₍₂₎ \le \dots \le X₍ₙ₎}, commonly
-called the order statistic. Then for \eqn{n} even the median usually
+reordering \eqn{X₍₁₎,\dots, X₍ₙ₎} such
+  that \eqn{X₍₁₎ \le X₍₂₎ \le \dots \le X₍ₙ₎}, commonly
+  called the order statistic. Then for \eqn{n} even the median usually
 defined as \deqn{median(X₁,\dots, Xₙ) = X₍ₖ₎, where k = n/2.} In the
-case where \eqn{n} is odd the median is
+  case where \eqn{n} is odd the median is
 defined as \deqn{median(X₁,\dots, Xₙ) = 1/2(X₍ₖ₎ + X₍ₖ₊₁₎), where k = n/2.} Let the
-time points at which the measurements \eqn{X₁, \dots, Xₙ} were taken
+  time points at which the measurements \eqn{X₁, \dots, Xₙ} were taken
 be \eqn{t₁, \dots, tₙ}.
-Let \eqn{T} a fixed positive amount of time. Then the moving median at time
-point \eqn{t} with window size \eqn{T} is defined as
-\deqn{S(t) = median({Xⱼ | t - T/2 \le tⱼ \le t + T/2}).}
+  Let \eqn{T} a fixed positive amount of time. Then
+\deqn{S(t) = median({Xⱼ | t - T/2 \le tⱼ \le t + T/2})}
+  is defined as the moving median at time point \eqn{t} with window size \eqn{T}.
 
 For the initial time points where the time difference between the first data
 point and the time point for which we are calculating the median is less than
@@ -56,5 +57,6 @@ symmetric around the time point for which we are calculating the median.
 No median is calculated if the time difference between the last data point
 and the current time point for which we are calculating the median is less
 than half the \code{width}. We do not calculate the median using a smaller
-time window so that the values do not change upon receiving new data.
+time window so that the values do not change upon receiving new data with
+time points newer than that of the old data.
 }

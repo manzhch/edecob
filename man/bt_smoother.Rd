@@ -9,14 +9,14 @@ bt_smoother(data, smoother, smoother_pts, resid, bt_tot_rep, ...)
 \arguments{
 \item{data}{A data frame in long format containing the data for which events
 is to be detected. This means that each measurement corresponds to a row
-and the columns are (in order): subject identifier, point in time,
-measurement value, baseline, and threshold.
+and the columns are (in order): source (the device or person from which the
+data was collected), point in time,
+measurement value, lower detection bound, and upper detection bound.
 
-The subject identifier is expected to
-be a string; the time point, measurements, baseline, and threshold are expected to be numerical.
-The baseline and threshold are in absolute values in the same unit as the
-measurements and each is expected to be identical for the same patient. The
-threshold can be above or below the baseline. For details see below.}
+The source is expected to
+be a string; the time point, measurements, and detection bounds are expected to be numerical.
+The detection bounds are in absolute value in the same unit as the
+values and each is expected to be identical for the same source. For details see below.}
 
 \item{smoother}{Which smoother is to be used. Use \code{mov_med} for the
 moving median. When using the moving median, the parameter \code{width} must

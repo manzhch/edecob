@@ -39,7 +39,7 @@ plot.edecob <- function(x,
   } else {
 
     if (!("title" %in% names(list(...)))) {
-      title <- event_data$data$subj_id[1]
+      title <- event_data$data$source[1]
     }
 
     if (!("xlab" %in% names(list(...)))) {
@@ -60,19 +60,19 @@ plot.edecob <- function(x,
     txt_size <- 12
 
     data <- event_data$data
-    basel <- event_data$baseline
-    thresh <- event_data$threshold
+    detec_upper <- event_data$detec_upper
+    detec_lower <- event_data$detec_lower
     smoother_pts <- event_data$smoother_pts
     conf_band <- event_data$conf_band
     event <- event_data$event
-    subj_id <- event_data$data$subj_id[1]
+    source <- event_data$data$source[1]
     # basel_start <- event_data$basel_start
     # basel_end <- event_data$basel_end
     # width <- event_data$width
 
     subj_data <- data.frame(
-      time_point = data$time_point[data$subj_id == subj_id],
-      data = data$value[data$subj_id == subj_id]
+      time_point = data$time_point[data$source == source],
+      data = data$value[data$source == source]
     )
 
     # conf_band_text <- paste("Confidence Band (", event_data$conf_band_lvl*100, "%)", sep = "")
@@ -101,9 +101,9 @@ plot.edecob <- function(x,
       #   size = dot_size*0.9
       # ) +
       ggplot2::labs(x = xlab, y = ylab) +
-      ggplot2::geom_hline(ggplot2::aes(yintercept = basel, color = "Baseline")) +
+      ggplot2::geom_hline(ggplot2::aes(yintercept = detec_lower, color = "Detection Bounds")) +
       # geom_hline(aes(yintercept = threshold, color = "threshold")) +
-      ggplot2::geom_hline(ggplot2::aes(yintercept = thresh, color = "Threshold")) +
+      ggplot2::geom_hline(ggplot2::aes(yintercept = detec_upper, color = "Detection Bounds")) +
       # ggplot2::geom_vline(ggplot2::aes(xintercept = min(subj_data$time_point) + learn_dur,
       #                                  color = "Baseline Period"),
       #                     linetype = "dashed", key_glyph = "path") +
@@ -118,7 +118,8 @@ plot.edecob <- function(x,
       ggplot2::scale_color_manual(
         "",
         aesthetics  = "color",
-        values = c("Baseline" = "black", "Threshold" = "red",
+        values = c(#"Lower Detection Bound" = "red",
+                   "Detection Bounds" = "red",
                    "Smoother" = "orange")
       ) +
       # ggplot2::scale_color_manual("",
@@ -182,8 +183,8 @@ plot.edecob <- function(x,
                                   guide = ggplot2::guide_legend(
                                     override.aes = list(color = plot_colors, size = plot_size, fill = plot_fill)
                                   )) +
-      ggplot2::geom_hline(ggplot2::aes(yintercept = thresh), color = "red") +
-      ggplot2::geom_hline(ggplot2::aes(yintercept = basel), color = "black") #+
+      ggplot2::geom_hline(ggplot2::aes(yintercept = detec_upper), color = "red") #+
+      # ggplot2::geom_hline(ggplot2::aes(yintercept = basel), color = "black") #+
       # ggplot2::theme(text = ggplot2::element_text(size = txt_size),
       #                axis.title.y.right = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 0, b = 0, l = 20)),
       #                axis.title.y.left = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 10, b = 0, l = 0)))
@@ -268,8 +269,42 @@ plot.edecob <- function(x,
       ggplot2::annotation_custom(grob = text_below_plot,
                                  xmin = min(data$time_point) - 0.15*(max(data$time_point) - min(data$time_point)),
                                  xmax = min(data$time_point) - 0.15*(max(data$time_point) - min(data$time_point)),
-                                 ymin = min(data$value) - 0.28*(max(data$value) - min(data$value)),
-                                 ymax = min(data$value) - 0.28*(max(data$value) - min(data$value)))
+                                 ymin = min(data$value) - 0.29*(max(data$value) - min(data$value)),
+                                 ymax = min(data$value) - 0.29*(max(data$value) - min(data$value)))
+
+    # text if lower detection bound at -Inf
+    if (is.infinite(detec_lower)) {
+
+      inf_text <- grid::textGrob(
+        "-∞",
+        gp = grid::gpar(fontsize = 12, col = "red"),
+        just = c("right", "top"))
+
+      patient_plot <- patient_plot +
+        ggplot2::annotation_custom(grob = inf_text,
+                                   xmin = min(data$time_point) - 0.06*(max(data$time_point) - min(data$time_point)),
+                                   xmax = min(data$time_point) - 0.06*(max(data$time_point) - min(data$time_point)),
+                                   ymin = min(data$value) - 0.03*(max(data$value) - min(data$value)),
+                                   ymax = min(data$value) - 0.03*(max(data$value) - min(data$value)))
+    }
+
+    # text if lower detection bound at Inf
+    if (is.infinite(detec_upper)) {
+
+      inf_text <- grid::textGrob(
+        "∞",
+        gp = grid::gpar(fontsize = 12, col = "red"),
+        just = c("right", "bottom"))
+
+      patient_plot <- patient_plot +
+        ggplot2::annotation_custom(grob = inf_text,
+                                   xmin = min(data$time_point) - 0.06*(max(data$time_point) - min(data$time_point)),
+                                   xmax = min(data$time_point) - 0.06*(max(data$time_point) - min(data$time_point)),
+                                   ymin = max(data$value) + 0.04*(max(data$value) - min(data$value)),
+                                   ymax = max(data$value) + 0.04*(max(data$value) - min(data$value)))
+    }
+
+
     # print(patient_plot)
     #   ggplot2::labs(tag = paste("Minimal duration of change for event detection:", event_data$min_change_dur)) +
     #   ggplot2::theme(plot.tag.position = c(min(data$time_point), min(data$value) + 0.05*(max(data$value) - min(data$value))))

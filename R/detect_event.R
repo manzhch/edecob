@@ -21,33 +21,37 @@
 #'
 #' @examples
 detect_event <- function(conf_band,
-                         basel,
-                         thresh,
+                         detec_upper,
+                         detec_lower,
                          min_change_dur) {
 
 
   # check if threshold above or below baseline
-  if (thresh > basel) {
-    conf_band$is_below_thresh <- conf_band$upper > thresh
-  } else if (thresh < basel) {
-    conf_band$is_below_thresh <- conf_band$upper < thresh
-  } else if (thresh == basel) {
-    warning("Threshold equal to baseline. Detecting events if data points below threshold.")
-    conf_band$is_below_thresh <- conf_band$upper < thresh
-  }
+  conf_band$upper_inside <- conf_band$upper < detec_upper
+  conf_band$lower_inside <- conf_band$lower > detec_lower
 
-  gap_below_thresh <- data.frame(
+  # in case of gap set upper_inside and lower_inside to FALSE
+  gap_upper_inside <- data.frame(
+    "time_point" = min(conf_band$time_point):max(conf_band$time_point),
+    "value" = FALSE)
+  gap_lower_inside <- data.frame(
     "time_point" = min(conf_band$time_point):max(conf_band$time_point),
     "value" = FALSE)
 
-   gap_below_thresh$value[gap_below_thresh$time_point %in% conf_band$time_point] <-
-    conf_band$is_below_thresh
+  gap_upper_inside$value[gap_upper_inside$time_point %in% conf_band$time_point] <-
+    conf_band$upper_inside
+  gap_lower_inside$value[gap_lower_inside$time_point %in% conf_band$time_point] <-
+    conf_band$lower_inside
 
-  # if there is at least one time point at which the upper interval is below the threshold
-  if (sum(gap_below_thresh$value) > 0) {
+  gap_both_inside <- data.frame(
+    "time_point" = min(conf_band$time_point):max(conf_band$time_point),
+    "value" = as.logical(gap_upper_inside$value * gap_lower_inside$value))
 
-    # find sequences of consecutive days where CI below threshold
-    below_thresh_runs <- with(rle(gap_below_thresh$value), {
+  # if there is at least one time point at which the both intervals are inside the detection interval
+  if (sum(gap_both_inside) > 0) {
+
+    # find sequences of consecutive days where both bound inside
+    both_inside_runs <- with(rle(gap_both_inside$value), {
       ok <- values == TRUE
       ends <- cumsum(lengths)[ok]
       starts <- ends - lengths[ok] + 1
@@ -57,19 +61,19 @@ detect_event <- function(conf_band,
     })
 
     # if events found
-    if (sum(below_thresh_runs[, "event"]) > 0) {
+    if (sum(both_inside_runs[, "event"]) > 0) {
       event_detected <- TRUE
       event_onset <-
-        gap_below_thresh$time_point[below_thresh_runs[, "starts"][
-          which.max(below_thresh_runs[, "event"])]]
+        gap_both_inside$time_point[both_inside_runs[, "starts"][
+          which.max(both_inside_runs[, "event"])]]
       event_duration <-
-        below_thresh_runs[, "dur"][which.max(below_thresh_runs[, "event"])]
+        both_inside_runs[, "dur"][which.max(both_inside_runs[, "event"])]
       event_stop <- (event_onset + event_duration - 1) >= max(conf_band$time_point)
 
     } else {
       event_detected <- FALSE
       event_onset <- max(conf_band$time_point) # censoring time_point
-      event_duration <- max(below_thresh_runs[, "dur"]) # longest sequence below threshold
+      event_duration <- max(both_inside_runs[, "dur"]) # longest sequence below threshold
       event_stop <- FALSE
     }
   } else {

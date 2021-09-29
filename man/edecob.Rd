@@ -17,14 +17,14 @@ edecob(
 \arguments{
 \item{data}{A data frame in long format containing the data for which events
 is to be detected. This means that each measurement corresponds to a row
-and the columns are (in order): subject identifier, point in time,
-measurement value, baseline, and threshold.
+and the columns are (in order): source (the device or person from which the
+data was collected), point in time,
+measurement value, lower detection bound, and upper detection bound.
 
-The subject identifier is expected to
-be a string; the time point, measurements, baseline, and threshold are expected to be numerical.
-The baseline and threshold are in absolute values in the same unit as the
-measurements and each is expected to be identical for the same patient. The
-threshold can be above or below the baseline. For details see below.}
+The source is expected to
+be a string; the time point, measurements, and detection bounds are expected to be numerical.
+The detection bounds are in absolute value in the same unit as the
+values and each is expected to be identical for the same source. For details see below.}
 
 \item{smoother}{Which smoother is to be used. Use \code{mov_med} for the
 moving median. When using the moving median, the parameter \code{width} must
@@ -32,7 +32,7 @@ be given to specify the size of the window over which the moving median is
 to be taken. Defaults to the moving median.}
 
 \item{min_change_dur}{The minimal number of days that the confidence bounds
-need to stay below or above the threshold in order for an event to be
+need to stay inside the detection bounds in order for an event to be
 detected. Defaults to 84, i.e. 12 weeks.}
 
 \item{conf_band_lvl}{The confidence level for the simultaneous confidence
@@ -62,67 +62,58 @@ median is used as the smoother, \code{width} is expected. If no \code{width} is
 given, it will default to 84.}
 }
 \value{
-If \code{data} contains only a single subject, the function returns
+If \code{data} contains only a single source, the function returns
 a list of 13 variables: \describe{
 \item{\code{event}}{gives a list with four values: \code{event_detected},
 \code{event_onset}, \code{event_duration}, and \code{event_stop}.
 \describe{\item{\code{event_detected}}{gives
 whether an event was detected}
 \item{\code{event_onset}}{gives the first time point at which the upper or lower bound
-of the confidence band is below or above the threshold, and after which it
-stays below or above the threshold for at least \code{min_change_dur}
+of the confidence band is inside the detection bounds, and after which it
+stays inside the detection bounds for at least \code{min_change_dur}
 consecutive time units} \item{\code{event_duration}}{gives the number of time units the upper or lower bound
-of the confidence band stays below or above the threshold
+of the confidence band stays inside the detection bounds
 after \code{event_onset}} \item{\code{event_stop}}{gives whether the confidence
-bounds stay below or above the threshold until
+bounds stay inside the detection bounds until
 the last time point at which we can calculate the confidence bound or not.}}
 }
 \item{\code{conf_band}}{gives a data frame containing the confidence bands.
-The columns are subject identifier, time point, lower bound, and upper
+The columns are source, time point, lower bound, and upper
 bound of the confidence band.}
 \item{\code{smoother_pts}}{gives a data frame containing the smoother.
-The columns are subject identifier, time point, and the smoother}
+The columns are source, time point, and the smoother}
 \item{\code{data}}{gives the data but with four additional columns:
 \code{event_detected}, \code{event_onset}, \code{event_duration}, and
 \code{event_stop}. They contain the same values as in \code{event}.}
-\item{\code{baseline}}{gives the baseline.}
-\item{\code{threshold}}{gives the threshold.}
+\item{\code{detec_lower}}{gives the lower detection bound.}
+\item{\code{detec_upper}}{gives the upper detection bound.}
 \item{\code{smoother}}{gives the smoother used.}
 \item{\code{min_change_dur}}{gives the smallest consecutive number of time units
-the change needs to be sustained in order for an event to be detected.}
+the confidence bounds must stay within the detection bounds in order for an event to be detected.}
 \item{\code{conf_band_lvl}}{gives the level of the simultaneous confidence band.}
 \item{\code{bt_tot_rep}}{gives the total amount of bootstrap repetitions performed.}
 \item{\code{call}}{gives the function call.}
 \item{\code{col_names}}{gives the original column names of the data.}
 \item{\code{time_unit}}{gives the unit of time used.}}
-If \code{data} contains more than one subject, the output will be a list
-with one more element than the number of subjects in \code{data}. Every
-element in this list will again be a list named after the corresponding subject identifiers
+If \code{data} contains more than one source, the output will be a list
+with one more element than the number of sources in \code{data}. Every
+element in this list will again be a list named after the corresponding sources
 with 13 items as described above except for the last one. The last element
 in the list is called \code{event_info} and is a data frame containing the
 information from \code{event} from each patient. \code{event_info} will thus
-have the following columns: \code{subj_id}, \code{event_detected},
+have the following columns: \code{source}, \code{event_detected},
 \code{event_onset}, \code{event_duration}, and \code{event_stop}.
 }
 \description{
 Calculate a smoother of longitudinal data of the same measure and bootstrap the errors of the autoregressive
 model fitted on the smoother to form simultaneous
-confidence bounds of a certain level (mathematical details below). Define an event if the simultaneous confidence bound is
-below or above a threshold for a predefined amount of time. When data from
-multiple subjects is provided, the calculation will be done separately for
-each subject.
+confidence bounds of a certain level (mathematical details below).
+Define an event if the simultaneous confidence bound is
+within a chosen interval for a predefined amount of time. When data from
+multiple sources is provided, the calculation will be done separately for
+each source.
 }
 \details{
-If the threshold is smaller
-than the baseline, an event will be detected
-when the confidence band stays below the threshold for \code{min_change_dur}
-days. Similarly, if the threshold is larger than baseline, an event will be detected
-when the confidence band stays above the threshold for \code{min_change_dur}
-days. If the threshold is equal to the baseline, events below the threshold
-will be detected. For detection of events above the threshold with the
-threshold equal to the baseline, choose a threshold minimally larger (10e-10) than
-the baseline.
-
 For the moving median, the width is the total size of the window, meaning
 that for the value corresponding to day x, the data points from day
 x - \code{width}/2 to x + \code{width}/2 will be used for the calculation
@@ -130,21 +121,21 @@ of the median.
 
 If there is no data for two times \code{width} consecutive time units, there
 will be time points at which no confidence bound can be calculated. In this
-case, it will be assumed that the confidence bound is not below/above the threshold
-(i.e. no event detected) when detecting sustained change.
+case, it will be assumed that the confidence bound is outside of the
+detection interval when detecting sustained change.
 
 In case there are multiple instances where the algorithm would detect a
 sustained change (i.e. if after the first sustained change the confidence
-bound go above/below the threshold and then back below/above the threshold
+bounds leave the detection interval and then return into it
 for longer than \code{min_change_dur} time units) then only the first
 sustained change would be detected.
 
 Please note that the event onset could be on a date where there are no actual
 measurements. This can happen when there is a gap in the data. In this case, the
 confidence bounds will extend into the gap.
-If the confidence bounds in this period are below/above the threshold and continue
-to be below/above the threshold for the next \code{min_change_duration} study
-days, the event onset will be in this gap.
+If the confidence bounds in this period are outside the detection interval and
+remain outside for the next \code{min_change_duration} time units,
+the event onset will be in this gap.
 
 The censoring date is based on the last date where the confidence bounds can be
 calculated. We do not extend the confidence bounds to the last data point so
@@ -229,7 +220,7 @@ head(example_data)
 example_event <- edecob(example_data, width = 49)
 names(example_event)
 
-# example_event contains the event data for each subject
+# example_event contains the event data for each source
 plot(example_event$`Subject 1`)
 
 # and a data frame containing the event information for all patients
