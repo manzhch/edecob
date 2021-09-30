@@ -25,6 +25,12 @@ detect_event <- function(conf_band,
                          detec_lower,
                          min_change_dur) {
 
+  if (nrow(conf_band) == 0) {
+    event_detected <- FALSE
+    event_onset <- max(conf_band$time_point) # censoring time_point
+    event_duration <- 0 # longest sequence below threshold
+    event_stop <- FALSE
+  } else {
 
   # check if threshold above or below baseline
   conf_band$upper_inside <- conf_band$upper < detec_upper
@@ -32,10 +38,10 @@ detect_event <- function(conf_band,
 
   # in case of gap set upper_inside and lower_inside to FALSE
   gap_upper_inside <- data.frame(
-    "time_point" = min(conf_band$time_point):max(conf_band$time_point),
+    "time_point" = seq(min(conf_band$time_point), max(conf_band$time_point)),
     "value" = FALSE)
   gap_lower_inside <- data.frame(
-    "time_point" = min(conf_band$time_point):max(conf_band$time_point),
+    "time_point" = seq(min(conf_band$time_point), max(conf_band$time_point)),
     "value" = FALSE)
 
   gap_upper_inside$value[gap_upper_inside$time_point %in% conf_band$time_point] <-
@@ -43,8 +49,9 @@ detect_event <- function(conf_band,
   gap_lower_inside$value[gap_lower_inside$time_point %in% conf_band$time_point] <-
     conf_band$lower_inside
 
+
   gap_both_inside <- data.frame(
-    "time_point" = min(conf_band$time_point):max(conf_band$time_point),
+    "time_point" = seq(min(conf_band$time_point), max(conf_band$time_point)),
     "value" = as.logical(gap_upper_inside$value * gap_lower_inside$value))
 
   # if there is at least one time point at which the both intervals are inside the detection interval
@@ -82,7 +89,7 @@ detect_event <- function(conf_band,
     event_duration <- 0 # longest sequence below threshold
     event_stop <- FALSE
   }
-
+  }
   output <- list(event_detected = event_detected,
                  event_onset = event_onset,
                  event_duration = event_duration,

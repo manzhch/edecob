@@ -257,12 +257,20 @@ edecob <- function(data,
                    time_unit = "day",
                    ...) {
 
+  data_raw <- data
+
   if (!("col_names" %in% names(match.call()))) {
     col_names <- colnames(data)
     colnames(data) <- c("source", "time_point", "value", "detec_lower", "detec_upper")
   } else {
     col_names <- list(...)$col_names
   }
+
+  data <- data.frame("source" = unlist(data$source),
+                     "time_point" = unlist(data$time_point),
+                     "value" = unlist(data$value),
+                     "detec_lower" = unlist(data$detec_lower),
+                     "detec_upper" = unlist(data$detec_upper))
 
   stopifnot(
     "Data not a data frame" = is.data.frame(data),
@@ -280,20 +288,20 @@ edecob <- function(data,
       all(do.call(c, lapply(unique(data$source), function(x){
         return(length(unique(data$detec_lower[data$source == x])) == 1)
       })))},
-    "Upper bound of detection interval is NA" = !is.na(data[1,5]),
-    "Lower bound of detection interval is NA" = !is.na(data[1,4]),
-    "Lower bound of detection interval is larger than upper bound of detection interval" = data[1,4] < data[1,5],
-    "Lower bound of detection interval is equal to upper bound of detection interval" = data[1,4] != data[1,5]
+    "Upper bound of detection interval contains NA values" = sum(is.na(data[,5])) == 0,
+    "Lower bound of detection interval contains NA values" = sum(is.na(data[,4])) == 0,
+    "Lower bound of detection interval is larger than upper bound of detection interval for at least one source" = sum(data[,4] > data[,5]) == 0,
+    "Lower bound of detection interval is equal to upper bound of detection interval for at least one source" = sum(data[,4] == data[,5]) == 0
   )
 
 
 
   if (sum(is.na(data$value)) > 1) {
-    warning("Removing rows where value is NA")
+    warning("Removing rows where value is NA", immediate. = TRUE)
     data <- data[!is.na(data$value), ]
   }
   if (sum(is.na(data$time_point)) > 1) {
-    warning("Removing rows where time point is NA")
+    warning("Removing rows where time point is NA", immediate. = TRUE)
     data <- data[!is.na(data$time_point), ]
   }
 
@@ -330,6 +338,8 @@ edecob <- function(data,
     return(patients_event_data)
   }
 
+  print(data[1,1])
+
   # calculate the smoother
   if (smoother == "mov_med") {
     if ("min_pts_in_win" %in% names(match.call)) {
@@ -364,10 +374,10 @@ edecob <- function(data,
   event <- detect_event(conf_band, data$detec_upper[1], data$detec_lower[1], min_change_dur)
 
   # add columns with event information to data
-  data$event <- event$event_detected
-  data$event_onset <- event$event_onset
-  data$event_duration <- event$event_duration
-  data$event_stop <- event$event_stop
+  data_raw$event <- event$event_detected
+  data_raw$event_onset <- event$event_onset
+  data_raw$event_duration <- event$event_duration
+  data_raw$event_stop <- event$event_stop
 
   # compose output
   output <- list(
@@ -375,7 +385,7 @@ edecob <- function(data,
     "event" = event,
     "conf_band" = conf_band,
     "smoother_pts" = smoother_pts,
-    "data" = data,
+    "data" = data_raw,
     "smoother" = smoother,
     "detec_lower" = data$detec_lower[1],
     "detec_upper" = data$detec_upper[1],

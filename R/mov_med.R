@@ -47,9 +47,12 @@ mov_med <- function(data,
 
 
   source <- data$source[1]
-
   # the number of days for which the moving median will be calculated
   dur <- max(data$time_point) - min(data$time_point) + 1 - width/2
+
+  if (dur < 0) {
+    dur <- 0
+  }
 
   med_pts_med <- numeric(dur)
   med_pts_time_point <- numeric(dur)

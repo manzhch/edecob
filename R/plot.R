@@ -192,20 +192,22 @@ plot.edecob <- function(x,
 
     # CI
 
-    # create new data frame but containing NA values when no CI points
-    conf_band_na <- data.frame(
-      upper = rep(NA, max(conf_band$time_point) - min(conf_band$time_point) + 1),
-      lower = rep(NA, max(conf_band$time_point) - min(conf_band$time_point) + 1),
-      time_point = min(conf_band$time_point):max(conf_band$time_point))
+    if (nrow(conf_band) > 0) {
+      # create new data frame but containing NA values when no CI points
+      conf_band_na <- data.frame(
+        upper = rep(NA, max(conf_band$time_point) - min(conf_band$time_point) + 1),
+        lower = rep(NA, max(conf_band$time_point) - min(conf_band$time_point) + 1),
+        time_point = min(conf_band$time_point):max(conf_band$time_point))
 
-    conf_band_na$upper[conf_band_na$time_point %in% conf_band$time_point] <-
-      conf_band$upper
-    conf_band_na$lower[conf_band_na$time_point %in% conf_band$time_point] <-
-      conf_band$lower
+      conf_band_na$upper[conf_band_na$time_point %in% conf_band$time_point] <-
+        conf_band$upper
+      conf_band_na$lower[conf_band_na$time_point %in% conf_band$time_point] <-
+        conf_band$lower
 
-    patient_plot <- patient_plot +
-      ggplot2::geom_ribbon(data = conf_band_na, ggplot2::aes(x = .data$time_point, ymin = .data$lower, ymax = .data$upper, fill = "Confidence Band"),
-                           alpha = 0.45, color = "transparent")
+      patient_plot <- patient_plot +
+        ggplot2::geom_ribbon(data = conf_band_na, ggplot2::aes(x = .data$time_point, ymin = .data$lower, ymax = .data$upper, fill = "Confidence Band"),
+                             alpha = 0.45, color = "transparent")
+    }
 
 
     if (event[[1]]) {
@@ -220,6 +222,15 @@ plot.edecob <- function(x,
 
 
     # annotation below plot
+    detec_finite <- min(data$value)
+    if (!is.infinite(event_data$detec_lower) && !is.infinite(event_data$detec_upper)) {
+      detec_finite <- c(event_data$detec_lower, event_data$detec_upper)
+    } else if (!is.infinite(event_data$detec_lower) && is.infinite(event_data$detec_upper)) {
+      detec_finite <- event_data$detec_lower
+    } else if (is.infinite(event_data$detec_lower) && !is.infinite(event_data$detec_upper)) {
+      detec_finite <- event_data$detec_upper
+    }
+
 
     if (event$event_detected) {
       if (event$event_duration == 1) {
@@ -269,8 +280,8 @@ plot.edecob <- function(x,
       ggplot2::annotation_custom(grob = text_below_plot,
                                  xmin = min(data$time_point) - 0.15*(max(data$time_point) - min(data$time_point)),
                                  xmax = min(data$time_point) - 0.15*(max(data$time_point) - min(data$time_point)),
-                                 ymin = min(data$value) - 0.29*(max(data$value) - min(data$value)),
-                                 ymax = min(data$value) - 0.29*(max(data$value) - min(data$value)))
+                                 ymin = min(c(data$value, detec_finite)) - 0.29*(max(c(data$value, detec_finite)) - min(c(data$value, detec_finite))),
+                                 ymax = min(c(data$value, detec_finite)) - 0.29*(max(c(data$value, detec_finite)) - min(c(data$value, detec_finite))))
 
     # text if lower detection bound at -Inf
     if (is.infinite(detec_lower)) {
@@ -284,8 +295,8 @@ plot.edecob <- function(x,
         ggplot2::annotation_custom(grob = inf_text,
                                    xmin = min(data$time_point) - 0.06*(max(data$time_point) - min(data$time_point)),
                                    xmax = min(data$time_point) - 0.06*(max(data$time_point) - min(data$time_point)),
-                                   ymin = min(data$value) - 0.03*(max(data$value) - min(data$value)),
-                                   ymax = min(data$value) - 0.03*(max(data$value) - min(data$value)))
+                                   ymin = min(c(data$value, detec_finite)) - 0.035*(max(data$value) - min(data$value)),
+                                   ymax = min(c(data$value, detec_finite)) - 0.035*(max(data$value) - min(data$value)))
     }
 
     # text if lower detection bound at Inf
@@ -300,8 +311,8 @@ plot.edecob <- function(x,
         ggplot2::annotation_custom(grob = inf_text,
                                    xmin = min(data$time_point) - 0.06*(max(data$time_point) - min(data$time_point)),
                                    xmax = min(data$time_point) - 0.06*(max(data$time_point) - min(data$time_point)),
-                                   ymin = max(data$value) + 0.04*(max(data$value) - min(data$value)),
-                                   ymax = max(data$value) + 0.04*(max(data$value) - min(data$value)))
+                                   ymin = max(c(data$value, detec_finite)) + 0.045*(max(data$value) - min(data$value)),
+                                   ymax = max(c(data$value, detec_finite)) + 0.045*(max(data$value) - min(data$value)))
     }
 
 

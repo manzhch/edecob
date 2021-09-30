@@ -114,6 +114,10 @@ multiple sources is provided, the calculation will be done separately for
 each source.
 }
 \details{
+In case detection is wanted for a one sided change (e.g. give an event if
+the confidence bounds drop below a threshold) then the upper or lower detection
+bound can be chosen to be Inf or -Inf respectively.
+
 For the moving median, the width is the total size of the window, meaning
 that for the value corresponding to day x, the data points from day
 x - \code{width}/2 to x + \code{width}/2 will be used for the calculation
