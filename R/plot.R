@@ -50,8 +50,8 @@ plot.edecob <- function(x,
       ylab <- event_data$col_names[3]
     }
 
-    par(mar = c(1,1,1,1))
-    plot.new()
+    graphics::par(mar = c(1,1,1,1))
+    graphics::plot.new()
 
     # initialize variables
     dot_size <- 1.8
@@ -287,7 +287,7 @@ plot.edecob <- function(x,
     if (is.infinite(detec_lower)) {
 
       inf_text <- grid::textGrob(
-        "-∞",
+        paste("-", rawToChar(as.raw(c(226, 136, 158))), sep = ""),
         gp = grid::gpar(fontsize = 12, col = "red"),
         just = c("right", "top"))
 
@@ -303,7 +303,7 @@ plot.edecob <- function(x,
     if (is.infinite(detec_upper)) {
 
       inf_text <- grid::textGrob(
-        "∞",
+        rawToChar(as.raw(c(226, 136, 158))),
         gp = grid::gpar(fontsize = 12, col = "red"),
         just = c("right", "bottom"))
 

@@ -7,8 +7,8 @@
 #'
 #' @inheritParams edecob
 #' @param conf_band A data frame containing the confidence bounds. Ideally the output of \code{\link{conf_band}}.
-#' @param basel The baseline for the data.
-#' @param thresh The threshold for the data.
+#' @param detec_lower The lower detection bound in the same units as the values in data.
+#' @param detec_upper The upper detection bound in the same units as the values in data.
 #'
 #' @return A list of four values: \describe{ \item{\code{event_detected}}{gives
 #'   whether an event was detected}

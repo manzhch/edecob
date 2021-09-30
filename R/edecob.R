@@ -1,6 +1,6 @@
 #' edecob: Event Detection Using Confidence Bounds
 #'
-#' Detect sustained change (or "events") in time-dependent data while accounting for
+#' Detect sustained change (or events) in time-dependent data while accounting for
 #' heterogeneity in assessment frequency and noise. The data is first smoothed
 #' (e.g. using the moving median) before an autoregressive model is fitted on
 #' the residuals of the smoother.
@@ -22,10 +22,8 @@
 #'     \item{\code{conf_band}}{Calculates the confidence bounds which will be used to detect sustained change}
 #'     \item{\code{detect_event}}{Detects sustained change using the confidence bounds
 #' }
-#' @docType package
-#' @name edecob-package
+#'
 NULL
-#
 
 
 
