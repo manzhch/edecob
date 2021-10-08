@@ -4,14 +4,14 @@
 \alias{detect_event}
 \title{Detect Events}
 \usage{
-detect_event(conf_band, detec_upper, detec_lower, min_change_dur)
+detect_event(conf_band, detec_lower, detec_upper, min_change_dur)
 }
 \arguments{
 \item{conf_band}{A data frame containing the confidence bounds. Ideally the output of \code{\link{conf_band}}.}
 
-\item{detec_upper}{The upper detection bound in the same units as the values in data.}
-
 \item{detec_lower}{The lower detection bound in the same units as the values in data.}
+
+\item{detec_upper}{The upper detection bound in the same units as the values in data.}
 
 \item{min_change_dur}{The minimal number of days that the confidence bounds
 need to stay inside the detection bounds in order for an event to be

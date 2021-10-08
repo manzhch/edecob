@@ -16,7 +16,11 @@ measurement value, lower detection bound, and upper detection bound.
 The source is expected to
 be a string; the time point, measurements, and detection bounds are expected to be numerical.
 The detection bounds are in absolute value in the same unit as the
-values and each is expected to be identical for the same source. For details see below.}
+values and each is expected to be identical for the same source.
+
+In case detection is wanted for a one sided change (e.g. give an event if
+the confidence bounds drop below a threshold) then the upper or lower detection
+bound can be chosen to be Inf or -Inf respectively.}
 
 \item{smoother}{Which smoother is to be used. Use \code{mov_med} for the
 moving median. When using the moving median, the parameter \code{width} must
