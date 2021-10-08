@@ -21,8 +21,8 @@
 #'
 #' @examples
 detect_event <- function(conf_band,
-                         detec_upper,
                          detec_lower,
+                         detec_upper,
                          min_change_dur) {
 
   if (nrow(conf_band) == 0) {
@@ -78,9 +78,10 @@ detect_event <- function(conf_band,
       event_stop <- (event_onset + event_duration - 1) >= max(conf_band$time_point)
 
     } else {
+
       event_detected <- FALSE
       event_onset <- max(conf_band$time_point) # censoring time_point
-      event_duration <- max(both_inside_runs[, "dur"]) # longest sequence below threshold
+      event_duration <- max(c(both_inside_runs[, "dur"], 0)) # longest sequence below threshold
       event_stop <- FALSE
     }
   } else {

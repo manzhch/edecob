@@ -47,7 +47,11 @@ NULL
 #'   The source is expected to
 #'   be a string; the time point, measurements, and detection bounds are expected to be numerical.
 #'   The detection bounds are in absolute value in the same unit as the
-#'   values and each is expected to be identical for the same source. For details see below.
+#'   values and each is expected to be identical for the same source.
+#'
+#'   In case detection is wanted for a one sided change (e.g. give an event if
+#'   the confidence bounds drop below a threshold) then the upper or lower detection
+#'   bound can be chosen to be Inf or -Inf respectively.
 #' @param smoother Which smoother is to be used. Use \code{mov_med} for the
 #'   moving median. When using the moving median, the parameter \code{width} must
 #'   be given to specify the size of the window over which the moving median is
@@ -80,9 +84,6 @@ NULL
 #'
 #'
 #' @details
-#' In case detection is wanted for a one sided change (e.g. give an event if
-#' the confidence bounds drop below a threshold) then the upper or lower detection
-#' bound can be chosen to be Inf or -Inf respectively.
 #'
 #' For the moving median, the width is the total size of the window, meaning
 #' that for the value corresponding to day x, the data points from day
@@ -337,6 +338,7 @@ edecob <- function(data,
   }
 
   print(data[1,1])
+  data <- data[order(data$time_point), ]
 
   # calculate the smoother
   if (smoother == "mov_med") {
@@ -369,7 +371,7 @@ edecob <- function(data,
   conf_band <- conf_band(bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)
 
   # detect events using confidence bands
-  event <- detect_event(conf_band, data$detec_upper[1], data$detec_lower[1], min_change_dur)
+  event <- detect_event(conf_band, data$detec_lower[1], data$detec_upper[1], min_change_dur)
 
   # add columns with event information to data
   data_raw$event <- event$event_detected
