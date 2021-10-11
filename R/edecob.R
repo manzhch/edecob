@@ -244,7 +244,8 @@ NULL
 #' library("survival")
 #' plot(survfit(Surv(time = event_onset, event = event_detected) ~ 1,
 #'              data = example_event$event_info),
-#'      conf.int = FALSE, xlim = c(0,350), ylim = c(0,1), mark.time = TRUE)
+#'      conf.int = FALSE, xlim = c(0,350), ylim = c(0,1), mark.time = TRUE,
+#'      xlab = "Study Day", ylab = "Survival Probability", main = "Survival plot")
 #'
 #'
 #'
@@ -337,7 +338,7 @@ edecob <- function(data,
     return(patients_event_data)
   }
 
-  print(data[1,1])
+  # print(data[1,1])
   data <- data[order(data$time_point), ]
 
   # calculate the smoother
@@ -374,6 +375,7 @@ edecob <- function(data,
   event <- detect_event(conf_band, data$detec_lower[1], data$detec_upper[1], min_change_dur)
 
   # add columns with event information to data
+  colnames(data_raw) <- colnames(data) <- c("source", "time_point", "value", "detec_lower", "detec_upper")
   data_raw$event <- event$event_detected
   data_raw$event_onset <- event$event_onset
   data_raw$event_duration <- event$event_duration

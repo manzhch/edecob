@@ -1,6 +1,6 @@
 Package: edecob
 Title: Event Detection Using Confidence Bounds
-Version: 0.2
+Version: 0.3
 Authors@R: 
     person(given = "Zheng Chen",
            family = "Man",

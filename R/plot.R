@@ -50,7 +50,7 @@ plot.edecob <- function(x,
       ylab <- event_data$col_names[3]
     }
 
-    graphics::par(mar = c(1,1,1,1))
+    # graphics::par(mar = c(1,1,1,1))
     graphics::plot.new()
 
     # initialize variables
@@ -59,7 +59,7 @@ plot.edecob <- function(x,
     eve_size <- 3
     txt_size <- 12
 
-    data <- event_data$data
+    data <- event_data$data[!is.na(event_data$data$value), ]
     detec_upper <- event_data$detec_upper
     detec_lower <- event_data$detec_lower
     smoother_pts <- event_data$smoother_pts
@@ -71,9 +71,10 @@ plot.edecob <- function(x,
     # width <- event_data$width
 
     subj_data <- data.frame(
-      time_point = data$time_point[data$source == source],
-      data = data$value[data$source == source]
+      time_point = data[data$source == source, 2],
+      data = data[data$source == source, 3]
     )
+
 
     # conf_band_text <- paste("Confidence Band (", event_data$conf_band_lvl*100, "%)", sep = "")
     # conf_band_text <- "Confidence Band"
@@ -283,6 +284,7 @@ plot.edecob <- function(x,
                                  ymin = min(c(data$value, detec_finite, conf_band_na$lower), na.rm = TRUE) - 0.29*(max(c(data$value, detec_finite)) - min(c(data$value, detec_finite))),
                                  ymax = min(c(data$value, detec_finite, conf_band_na$lower), na.rm = TRUE) - 0.29*(max(c(data$value, detec_finite)) - min(c(data$value, detec_finite))))
 
+
     # text if lower detection bound at -Inf
     if (is.infinite(detec_lower)) {
 
@@ -316,7 +318,6 @@ plot.edecob <- function(x,
     }
 
 
-    # print(patient_plot)
     #   ggplot2::labs(tag = paste("Minimal duration of change for event detection:", event_data$min_change_dur)) +
     #   ggplot2::theme(plot.tag.position = c(min(data$time_point), min(data$value) + 0.05*(max(data$value) - min(data$value))))
     # grid::grid.text((paste("Minimal duration of change for event detection:", event_data$min_change_dur)),
