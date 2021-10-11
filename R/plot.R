@@ -50,7 +50,7 @@ plot.edecob <- function(x,
       ylab <- event_data$col_names[3]
     }
 
-    # graphics::par(mar = c(1,1,1,1))
+    graphics::par(mar = c(1,1,1,1))
     graphics::plot.new()
 
     # initialize variables
@@ -330,6 +330,7 @@ plot.edecob <- function(x,
     patient_plot$layout$clip[patient_plot$layout$name == "panel"] <- "off"
 
     grid::grid.draw(patient_plot)
+    graphics::par(mar = c(5, 4, 4, 2) + 0.1)
 
     invisible(capture.output(return(patient_plot)))
   }
