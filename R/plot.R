@@ -28,8 +28,7 @@
 #' @importFrom rlang .data
 #' @importFrom utils capture.output
 #' @importFrom graphics plot.new
-plot.edecob <- function(x,
-                        ...) {
+plot.edecob <- function(x, ...) {
 
   event_data <- x
 
@@ -38,15 +37,21 @@ plot.edecob <- function(x,
     stop("Package \"gglot2\" needed for plots.", call. = FALSE)
   } else {
 
-    if (!("title" %in% names(list(...)))) {
+    if ("title" %in% names(list(...))) {
+      title <- list(...)$title
+    } else {
       title <- event_data$data$source[1]
     }
 
-    if (!("xlab" %in% names(list(...)))) {
+    if ("xlab" %in% names(list(...))) {
+      xlab <- list(...)$xlab
+    } else {
       xlab <- event_data$col_names[2]
     }
 
     if (!("ylab" %in% names(list(...)))) {
+      ylab <- list(...)$ylab
+    } else {
       ylab <- event_data$col_names[3]
     }
 

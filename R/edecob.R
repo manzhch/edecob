@@ -52,10 +52,16 @@ NULL
 #'   In case detection is wanted for a one sided change (e.g. give an event if
 #'   the confidence bounds drop below a threshold) then the upper or lower detection
 #'   bound can be chosen to be Inf or -Inf respectively.
-#' @param smoother Which smoother is to be used. Use \code{mov_med} for the
+#' @param smoother A string specifying which smoother is to be used. Use \code{mov_med} for the
 #'   moving median. When using the moving median, the parameter \code{width} must
 #'   be given to specify the size of the window over which the moving median is
 #'   to be taken. Defaults to the moving median.
+#' @param resample_method A string that determines how to resample the errors of the
+#'   autoregression for the bootstrap. Default is \code{all}, meaning that the epsilon of a
+#'   certain time point are resampled from all time points. \code{past} only
+#'   considers epsilon corresponding to a time point prior to the one being
+#'   resampled. \code{window} resamples the epsilon from the window from which
+#'   the moving median is taken.
 #' @param bt_tot_rep The number of iterations for the bootstrap computation. Because of
 #'   run time, it is recommended to keep this number below 500. Defaults to 100.
 #' @param min_change_dur The minimal number of days that the confidence bounds
@@ -140,6 +146,7 @@ NULL
 #'   \item{\code{detec_lower}}{gives the lower detection bound.}
 #'   \item{\code{detec_upper}}{gives the upper detection bound.}
 #'   \item{\code{smoother}}{gives the smoother used.}
+#'   \item{\code{resample_method}}{gives the resampling method used for the bootstrap.}
 #'   \item{\code{min_change_dur}}{gives the smallest consecutive number of time units
 #'     the confidence bounds must stay within the detection bounds in order for an event to be detected.}
 #'   \item{\code{conf_band_lvl}}{gives the level of the simultaneous confidence band.}
@@ -251,6 +258,7 @@ NULL
 #'
 edecob <- function(data,
                    smoother = "mov_med",
+                   resample_method = "all",
                    min_change_dur = 12*7,
                    conf_band_lvl = 0.95,
                    bt_tot_rep = 100,
@@ -309,7 +317,7 @@ edecob <- function(data,
 
   # making sure that width is not repeated in future function calls
   no_width_given <- FALSE
-  if (smoother == "mov_med" && !("width" %in% names(list(...)))) {
+  if ((smoother == "mov_med" || smoother == "mov_mean") && !("width" %in% names(list(...)))) {
     warning("Parameter width not given after choosing the moving median as smoother. Defaulting to 84.", immediate. = TRUE)
     width <- 84
     no_width_given <- TRUE
@@ -322,8 +330,8 @@ edecob <- function(data,
   if (length(unique(data$source)) > 1) {
     patients_event_data <-
       lapply(split(data, factor(data$source)), edecob,
-             smoother, min_change_dur,conf_band_lvl, bt_tot_rep, time_unit,
-             "col_names" = col_names, ...)
+             smoother, resample_method, min_change_dur,conf_band_lvl,
+             bt_tot_rep, time_unit, "col_names" = col_names, ...)
     patients_event_data$event_info <- as.data.frame(do.call(rbind,
       lapply(patients_event_data, function(x) {
         return(list(x$event$source, x$event$event_detected, x$event$event_onset, x$event$event_duration, x$event$event_stop))
@@ -347,6 +355,11 @@ edecob <- function(data,
       smoother_pts <- mov_med(data, width, list(...)$min_pts_in_win)
     }
     smoother_pts <- mov_med(data, width)
+  } else if (smoother == "mov_mean") {
+    if ("min_pts_in_win" %in% names(match.call)) {
+      smoother_pts <- mov_mean(data, width, list(...)$min_pts_in_win)
+    }
+    smoother_pts <- mov_mean(data, width)
   } else {
     warning("Smoother not recognized. Defaulting to moving median.")
 
@@ -363,9 +376,9 @@ edecob <- function(data,
 
   # bootstrap the errors of the AR model fitted on the residuals
   if (no_width_given) {
-    bt_smoother <- bt_smoother(data, smoother, smoother_pts, smoother_resid, bt_tot_rep, "width" = width, ...)
+    bt_smoother <- bt_smoother(data, smoother, resample_method, smoother_pts, smoother_resid, bt_tot_rep, "width" = width, ...)
   } else {
-    bt_smoother <- bt_smoother(data, smoother, smoother_pts, smoother_resid, bt_tot_rep, ...)
+    bt_smoother <- bt_smoother(data, smoother, resample_method, smoother_pts, smoother_resid, bt_tot_rep, ...)
   }
 
   # calculate the confidence bands
@@ -389,6 +402,7 @@ edecob <- function(data,
     "smoother_pts" = smoother_pts,
     "data" = data_raw,
     "smoother" = smoother,
+    "resample_method" = resample_method,
     "detec_lower" = data$detec_lower[1],
     "detec_upper" = data$detec_upper[1],
     "min_change_dur" = min_change_dur,

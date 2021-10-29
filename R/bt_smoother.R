@@ -4,12 +4,15 @@
 # Helper function to bootstrap the epsilon (error of AR) and then reconstruct
 # smoother (currently the moving median) using AR model and bootstrapped
 # epsilon
-bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, ...){
+bt_eps <- function(bt_rep, data, smoother, resample_method, smoother_pts, resid, ...){
 
   # bootstrap error
   bt_Y <- numeric(nrow(data))
   bt_eta <- numeric(nrow(data))
   bt_epsilon <- numeric(nrow(data))
+  if (smoother == "mov_med") {
+    width <- list(...)$width
+  }
 
   # fit autoregression model on residuals
   data_ind <- !is.na(resid)
@@ -25,7 +28,30 @@ bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, ...){
 
     # remove NAs and bootstrap the residuals of the AR model
     ar_resid_non_na <- ar_resid$resid[which(!is.na(ar_resid$resid))]
-    bt_epsilon <- sample(ar_resid_non_na, length(ar_resid$resid), replace = T)
+
+
+    # resample epsilon depending on method
+    if (resample_method == "all") {
+      bt_epsilon <- sample(ar_resid_non_na, length(ar_resid$resid), replace = T)
+    }
+
+    if (resample_method == "past") {
+      bt_epsilon <- numeric(length(ar_resid_non_na))
+      for (ii in 1:length(ar_resid_non_na)) {
+        bt_epsilon[ii] <- sample(ar_resid_non_na[1:ii], 1)
+      }
+    }
+
+    if (resample_method == "window") {
+      bt_epsilon <- numeric(length(ar_resid_non_na))
+      time_points_non_na <- data$time_point[which(!is.na(ar_resid$resid))]
+      for (ii in 1:length(ar_resid_non_na)) {
+        ii_time_point <- time_points_non_na[ii]
+        resample_win_ind <- as.logical((time_points_non_na <= ii_time_point + width/2) *
+                                         (time_points_non_na >= ii_time_point - width/2))
+        bt_epsilon[ii] <- sample(ar_resid_non_na[resample_win_ind], 1)
+      }
+    }
 
     # calculate residuals of the smoother with bootstrapped errors
     bt_eta <- sapply(1:length(data$time_point), function(x, ar_resid, resid) {
@@ -134,8 +160,8 @@ bt_eps <- function(bt_rep, data, smoother, smoother_pts, resid, ...){
 #'   Nonstationary Time Series. \emph{The Annals of Statistics}, 26(1), 48-83.
 #'
 #' @examples
-bt_smoother <- function(data, smoother, smoother_pts, resid, bt_tot_rep, ...) {
-  bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, data, smoother, smoother_pts, resid, ...))
+bt_smoother <- function(data, smoother, resample_method, smoother_pts, resid, bt_tot_rep, ...) {
+  bt_Y <- do.call(rbind, lapply(1:bt_tot_rep, bt_eps, data, smoother, resample_method, smoother_pts, resid, ...))
   bt_Y <- bt_Y[!is.na(bt_Y$value), ]
   return(bt_Y)
 }

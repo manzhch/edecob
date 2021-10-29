@@ -92,7 +92,6 @@ find_ptw_conf_band_lvl <- function(bt_smoother,
 #' The procedure is as follows:
 #' \enumerate{
 #'   \item We compute the quantiles \deqn{ qₓ(tᵢ), q₁₋ₓ(tᵢ) i = 1,\dots, N}
-#'
 #'     where \deqn{qₓ(tᵢ) = inf {u; P*[S(tᵢ)*ᵦ - S(tᵢ) \le u] \ge x} } is a
 #'     pointwise bootstrap quantile, \eqn{S(tᵢ)*ᵦ the bootstrapped smoother},
 #'     and \eqn{N} the number of measurements.
@@ -118,7 +117,7 @@ find_ptw_conf_band_lvl <- function(bt_smoother,
 #' @references Bühlmann, P. (1998). Sieve Bootstrap for Smoothing in
 #'   Nonstationary Time Series. \emph{The Annals of Statistics}, 26(1), 48-83.
 #'
-#' @examples
+#' 
 conf_band <- function(bt_smoother,
                       smoother_pts,
                       bt_tot_rep,

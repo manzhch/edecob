@@ -7,6 +7,7 @@
 edecob(
   data,
   smoother = "mov_med",
+  resample_method = "all",
   min_change_dur = 12 * 7,
   conf_band_lvl = 0.95,
   bt_tot_rep = 100,
@@ -30,10 +31,17 @@ In case detection is wanted for a one sided change (e.g. give an event if
 the confidence bounds drop below a threshold) then the upper or lower detection
 bound can be chosen to be Inf or -Inf respectively.}
 
-\item{smoother}{Which smoother is to be used. Use \code{mov_med} for the
+\item{smoother}{A string specifying which smoother is to be used. Use \code{mov_med} for the
 moving median. When using the moving median, the parameter \code{width} must
 be given to specify the size of the window over which the moving median is
 to be taken. Defaults to the moving median.}
+
+\item{resample_method}{A string that determines how to resample the errors of the
+autoregression for the bootstrap. Default is \code{all}, meaning that the epsilon of a
+certain time point are resampled from all time points. \code{past} only
+considers epsilon corresponding to a time point prior to the one being
+resampled. \code{window} resamples the epsilon from the window from which
+the moving median is taken.}
 
 \item{min_change_dur}{The minimal number of days that the confidence bounds
 need to stay inside the detection bounds in order for an event to be
@@ -92,6 +100,7 @@ The columns are source, time point, and the smoother}
 \item{\code{detec_lower}}{gives the lower detection bound.}
 \item{\code{detec_upper}}{gives the upper detection bound.}
 \item{\code{smoother}}{gives the smoother used.}
+\item{\code{resample_method}}{gives the resampling method used for the bootstrap.}
 \item{\code{min_change_dur}}{gives the smallest consecutive number of time units
 the confidence bounds must stay within the detection bounds in order for an event to be detected.}
 \item{\code{conf_band_lvl}}{gives the level of the simultaneous confidence band.}

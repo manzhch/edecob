@@ -132,3 +132,99 @@ mov_med <- function(data,
 
   return(med_pts)
 }
+
+
+
+
+
+mov_mean <- function(data,
+                    width = 12*7,
+                    min_pts_in_win = 1) {
+
+
+  source <- data$source[1]
+  # the number of days for which the moving median will be calculated
+  dur <- max(data$time_point) - min(data$time_point) + 1 - width/2
+
+  if (dur < 0) {
+    dur <- 0
+  }
+
+  mean_pts_med <- numeric(dur)
+  mean_pts_time_point <- numeric(dur)
+  mean_pts_win_beg <- numeric(dur)
+  mean_pts_win_end <- numeric(dur)
+  mean_pts_source <- character(dur)
+  ll <- 1 # index for the vectors above
+
+
+
+  # calculate moving medians of the first 6 weeks by taking smaller window
+  # by taking whatever we have from baseline until current data$time_point + 6 weeks
+  # (basically creating an unbalanced window)
+
+  first_time_point <- min(data$time_point)
+  win_beg_day <- first_time_point
+
+  while (win_beg_day < first_time_point + width / 2) {
+
+    # determine window
+    win_ind <- as.logical((data$time_point >= first_time_point) *
+                            (data$time_point < win_beg_day + width / 2))
+
+    win <- data$value[win_ind]
+
+    if (sum(win_ind) >= min_pts_in_win) {
+
+      # saving the values for the window
+      mean_pts_med[ll] <- mean(win)
+      mean_pts_time_point[ll] <- win_beg_day
+      mean_pts_win_beg[ll] <- win_beg_day
+      mean_pts_win_end[ll] <- win_beg_day + width - 1
+      mean_pts_source[ll] <- source
+
+      ll <- ll + 1
+    }
+    win_beg_day <- win_beg_day + 1
+  }
+
+  # calculate moving median for the rest of the data
+  win_beg_day <- first_time_point
+  last_time_point <- max(data$time_point)
+  while (win_beg_day < last_time_point - width) {
+
+    # determining winow
+    win_ind <- as.logical(
+      (data$time_point >= win_beg_day) * (data$time_point < win_beg_day + width))
+    win <- data$value[win_ind]
+
+    if (sum(win_ind) >= min_pts_in_win &&
+        win_beg_day + width / 2 >= first_time_point) {
+
+      # saving the values for the win
+      mean_pts_med[ll] <- mean(win)
+      mean_pts_time_point[ll] <- ceiling(win_beg_day + width / 2)
+      mean_pts_win_beg[ll] <- win_beg_day
+      mean_pts_win_end[ll] <- win_beg_day + width - 1
+      mean_pts_source[ll] <- source
+
+      ll <- ll + 1
+    }
+
+    win_beg_day <- win_beg_day + 1
+  }
+
+
+  # compile median point data into dataframe
+  mean_pts <- data.frame(
+    "source" = mean_pts_source,
+    "time_point" = mean_pts_time_point,
+    "value" = mean_pts_med,
+    "win_beg" = mean_pts_win_beg,
+    "win_end" = mean_pts_win_end,
+    stringsAsFactors = FALSE
+  )
+  mean_pts <- mean_pts[mean_pts$source != "", ]
+
+  return(mean_pts)
+}

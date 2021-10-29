@@ -4,7 +4,15 @@
 \alias{bt_smoother}
 \title{Bootstrap the Smoother}
 \usage{
-bt_smoother(data, smoother, smoother_pts, resid, bt_tot_rep, ...)
+bt_smoother(
+  data,
+  smoother,
+  resample_method,
+  smoother_pts,
+  resid,
+  bt_tot_rep,
+  ...
+)
 }
 \arguments{
 \item{data}{A data frame in long format containing the data for which events
@@ -22,10 +30,17 @@ In case detection is wanted for a one sided change (e.g. give an event if
 the confidence bounds drop below a threshold) then the upper or lower detection
 bound can be chosen to be Inf or -Inf respectively.}
 
-\item{smoother}{Which smoother is to be used. Use \code{mov_med} for the
+\item{smoother}{A string specifying which smoother is to be used. Use \code{mov_med} for the
 moving median. When using the moving median, the parameter \code{width} must
 be given to specify the size of the window over which the moving median is
 to be taken. Defaults to the moving median.}
+
+\item{resample_method}{A string that determines how to resample the errors of the
+autoregression for the bootstrap. Default is \code{all}, meaning that the epsilon of a
+certain time point are resampled from all time points. \code{past} only
+considers epsilon corresponding to a time point prior to the one being
+resampled. \code{window} resamples the epsilon from the window from which
+the moving median is taken.}
 
 \item{smoother_pts}{A data frame containing the smoother with columns time_point
 and value. Preferably the output of one of the smoother functions within
