@@ -31,8 +31,12 @@
 #' time points newer than that of the old data.
 #'
 #' @inheritParams edecob
-#' @param width The width of the window over which the moving median is taken in
-#'   number of days.
+#' @param med_win A vector containing two numbers specifying the window over
+#'   which the moving median is to be taken. More specifically, when given a
+#'   certain time point, the numbers specify the maximum number of time units
+#'   difference that a time point can have such that that data point will be
+#'   considered for the moving median. Note that the first number must be smaller
+#'   than the second number. The numbers may be negative.
 #' @param min_pts_in_win The minimal number of measurements required to be in
 #'   the time window in order for the median to be calculated.
 #'
@@ -42,13 +46,13 @@
 #' @export
 #'
 mov_med <- function(data,
-                    width = 12*7,
+                    med_win= c(-42, 42),
                     min_pts_in_win = 1) {
 
-
+  # width <- med_win[2] - med_win[1]
   source <- data$source[1]
   # the number of days for which the moving median will be calculated
-  dur <- max(data$time_point) - min(data$time_point) + 1 - width/2
+  dur <- max(data$time_point) - min(data$time_point) + 1 - med_win[2]
 
   if (dur < 0) {
     dur <- 0
@@ -68,13 +72,12 @@ mov_med <- function(data,
   # (basically creating an unbalanced window)
 
   first_time_point <- min(data$time_point)
-  win_beg_day <- first_time_point
+  last_time_point <- max(data$time_point)
 
-  while (win_beg_day < first_time_point + width / 2) {
-
-    # determine window
-    win_ind <- as.logical((data$time_point >= first_time_point) *
-      (data$time_point < win_beg_day + width / 2))
+  med_time_point <- first_time_point
+  while (med_time_point <= min(last_time_point, last_time_point - med_win[2])) {
+    win_ind <- as.logical((data$time_point >= max(first_time_point, med_time_point + med_win[1])) *
+                          (data$time_point <= med_time_point + med_win[2]))
 
     win <- data$value[win_ind]
 
@@ -82,41 +85,66 @@ mov_med <- function(data,
 
       # saving the values for the window
       med_pts_med[ll] <- stats::median(win)
-      med_pts_time_point[ll] <- win_beg_day
-      med_pts_win_beg[ll] <- win_beg_day
-      med_pts_win_end[ll] <- win_beg_day + width - 1
+      med_pts_time_point[ll] <- med_time_point
+      med_pts_win_beg[ll] <- med_time_point + med_win[1]
+      med_pts_win_end[ll] <- med_time_point + med_win[2]
       med_pts_source[ll] <- source
 
       ll <- ll + 1
     }
-    win_beg_day <- win_beg_day + 1
+    med_time_point <- med_time_point + 1
+
   }
 
-  # calculate moving median for the rest of the data
-  win_beg_day <- first_time_point
-  last_time_point <- max(data$time_point)
-  while (win_beg_day < last_time_point - width) {
-
-    # determining winow
-    win_ind <- as.logical(
-      (data$time_point >= win_beg_day) * (data$time_point < win_beg_day + width))
-    win <- data$value[win_ind]
-
-    if (sum(win_ind) >= min_pts_in_win &&
-      win_beg_day + width / 2 >= first_time_point) {
-
-      # saving the values for the win
-      med_pts_med[ll] <- stats::median(win)
-      med_pts_time_point[ll] <- ceiling(win_beg_day + width / 2)
-      med_pts_win_beg[ll] <- win_beg_day
-      med_pts_win_end[ll] <- win_beg_day + width - 1
-      med_pts_source[ll] <- source
-
-      ll <- ll + 1
-    }
-
-    win_beg_day <- win_beg_day + 1
-  }
+  # win_beg_day <- first_time_point
+  #
+  # while (win_beg_day < first_time_point + width / 2) {
+  #
+  #   # determine window
+  #   win_ind <- as.logical((data$time_point >= first_time_point) *
+  #     (data$time_point < win_beg_day + width / 2))
+  #
+  #   win <- data$value[win_ind]
+  #
+  #   if (sum(win_ind) >= min_pts_in_win) {
+  #
+  #     # saving the values for the window
+  #     med_pts_med[ll] <- stats::median(win)
+  #     med_pts_time_point[ll] <- win_beg_day
+  #     med_pts_win_beg[ll] <- win_beg_day
+  #     med_pts_win_end[ll] <- win_beg_day + width - 1
+  #     med_pts_source[ll] <- source
+  #
+  #     ll <- ll + 1
+  #   }
+  #   win_beg_day <- win_beg_day + 1
+  # }
+  #
+  # # calculate moving median for the rest of the data
+  # win_beg_day <- first_time_point
+  # last_time_point <- max(data$time_point)
+  # while (win_beg_day < last_time_point - width) {
+  #
+  #   # determining winow
+  #   win_ind <- as.logical(
+  #     (data$time_point >= win_beg_day) * (data$time_point < win_beg_day + width))
+  #   win <- data$value[win_ind]
+  #
+  #   if (sum(win_ind) >= min_pts_in_win &&
+  #     win_beg_day + width / 2 >= first_time_point) {
+  #
+  #     # saving the values for the win
+  #     med_pts_med[ll] <- stats::median(win)
+  #     med_pts_time_point[ll] <- ceiling(win_beg_day + width / 2)
+  #     med_pts_win_beg[ll] <- win_beg_day
+  #     med_pts_win_end[ll] <- win_beg_day + width - 1
+  #     med_pts_source[ll] <- source
+  #
+  #     ll <- ll + 1
+  #   }
+  #
+  #   win_beg_day <- win_beg_day + 1
+  # }
 
 
   # compile median point data into dataframe

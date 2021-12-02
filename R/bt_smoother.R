@@ -11,7 +11,7 @@ bt_eps <- function(bt_rep, data, smoother, resample_method, smoother_pts, resid,
   bt_eta <- numeric(nrow(data))
   bt_epsilon <- numeric(nrow(data))
   if (smoother == "mov_med") {
-    width <- list(...)$width
+    med_win <- list(...)$med_win
   }
 
   # fit autoregression model on residuals
@@ -47,8 +47,8 @@ bt_eps <- function(bt_rep, data, smoother, resample_method, smoother_pts, resid,
       time_points_non_na <- data$time_point[which(!is.na(ar_resid$resid))]
       for (ii in 1:length(ar_resid_non_na)) {
         ii_time_point <- time_points_non_na[ii]
-        resample_win_ind <- as.logical((time_points_non_na <= ii_time_point + width/2) *
-                                         (time_points_non_na >= ii_time_point - width/2))
+        resample_win_ind <- as.logical((time_points_non_na <= ii_time_point + med_win[2]) *
+                                       (time_points_non_na >= ii_time_point + med_win[1]))
         bt_epsilon[ii] <- sample(ar_resid_non_na[resample_win_ind], 1)
       }
     }
@@ -81,14 +81,14 @@ bt_eps <- function(bt_rep, data, smoother, resample_method, smoother_pts, resid,
     last_data_time_point <- max(data$time_point)
 
     if (smoother == "mov_med") {
-      width <- list(...)$width
+      med_win <- list(...)$med_win
 
-      if (last_data_time_point > win_beg_day + width) {
+      if (last_data_time_point > win_beg_day + med_win[2]) {
         S_star_one_bt <-
           mov_med(data.frame(source = rep(data$source[1], length(bt_Y)),
                              time_point = data$time_point[which(data$time_point <= max(smoother_pts$time_point))],
                              value = bt_Y),
-                  width)
+                  med_win)
         S_star_one_bt <- S_star_one_bt[, c("source", "time_point", "value")]
         S_star_one_bt$bt_rep <- rep(bt_rep, nrow(S_star_one_bt))
         return(S_star_one_bt)

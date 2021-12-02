@@ -28,7 +28,7 @@ Calculate the confidence bounds of the smoother function using the bootstrap.
 \details{
 The procedure is as follows:
 \enumerate{
-\item We compute the quantiles i0FtDqtXn2ZRTR1UNDJNdDnissKNtaFG-1\deqn{qₓ(tᵢ) = inf {u; P*[S(tᵢ)*ᵦ - S(tᵢ) \le u] \ge x} } is a
+\item We compute the quantiles jtop2eEyOXS04hpnIexY7nXmL2rHGoij-1\deqn{qₓ(tᵢ) = inf {u; P*[S(tᵢ)*ᵦ - S(tᵢ) \le u] \ge x} } is a
     pointwise bootstrap quantile, \eqn{S(tᵢ)*ᵦ the bootstrapped smoother},
     and \eqn{N} the number of measurements.
 \item We vary the pointwise error \eqn{2x} until \deqn{P*[qₓ(tᵢ) \le S(tᵢ)*ᵦ - S(tᵢ) \le q₁₋ₓ(tᵢ) ⩝ i = 1,\dots, N] ≈ 1-\alpha.}
