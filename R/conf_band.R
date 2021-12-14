@@ -19,7 +19,6 @@ ratio_in_ci <- function(alpha_p,
 
   # calculate quantiles
   for (ii in 1:length(uniq_time_point)) {
-    # print(bt_smoother$init_est[bt_smoother$time_point == uniq_time_point[[ii]]])
     my_quantile_lower[ii] <-
       stats::quantile(bt_smoother$init_est[bt_smoother$time_point == uniq_time_point[ii]], alpha_p)
     my_quantile_upper[ii] <-
@@ -56,8 +55,7 @@ find_ptw_conf_band_lvl <- function(bt_smoother,
                            smoother_pts,
                            bt_tot_rep,
                            conf_band_lvl){
-  # print(ratio_in_ci(0, bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl))
-  # print(ratio_in_ci(0.05, bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl))
+
   if (nrow(bt_smoother) > bt_tot_rep &&
       nrow(bt_smoother[!is.na(bt_smoother$value), ]) > 0 &&
       sign(ratio_in_ci(0, bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)) !=
@@ -70,15 +68,11 @@ find_ptw_conf_band_lvl <- function(bt_smoother,
              nrow(bt_smoother[!is.na(bt_smoother$value), ]) > 0 &&
              sign(ratio_in_ci(0, bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)) ==
              sign(ratio_in_ci(0.05, bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl))) {
-    # print(2)
     return(NA)
-    # print("sign same")
   } else if (nrow(bt_smoother) > bt_tot_rep &&
              nrow(bt_smoother[!is.na(bt_smoother$value), ]) == 0) {
     return(NA)
-    # print("many NA")
   } else {
-    # print(3)
     return(NA)
   }
 }
@@ -117,7 +111,7 @@ find_ptw_conf_band_lvl <- function(bt_smoother,
 #' @references Bühlmann, P. (1998). Sieve Bootstrap for Smoothing in
 #'   Nonstationary Time Series. \emph{The Annals of Statistics}, 26(1), 48-83.
 #'
-#' 
+#'
 conf_band <- function(bt_smoother,
                       smoother_pts,
                       bt_tot_rep,

@@ -31,7 +31,7 @@ the confidence bounds drop below a threshold) then the upper or lower detection
 bound can be chosen to be Inf or -Inf respectively.}
 
 \item{smoother}{A string specifying which smoother is to be used. Use \code{mov_med} for the
-moving median. When using the moving median, the parameter \code{width} must
+moving median. When using the moving median, the parameter \code{med_win} must
 be given to specify the size of the window over which the moving median is
 to be taken. Defaults to the moving median.}
 
@@ -55,7 +55,7 @@ run time, it is recommended to keep this number below 500. Defaults to 100.}
 
 \item{...}{Additional parameters to be given to the function. Possible
 parameters for the model are \code{order} and \code{min_pts_in_win}. For
-the moving median, a \code{width} is required.
+the moving median, a \code{med_win} is required.
 
 The parameter \code{min_pts_in_win}
 defines the minimal number of
@@ -67,8 +67,8 @@ order of the autoregressive model. If no \code{order} is given, it will be
 determined using the Akaike information criterion.
 
 When the moving
-median is used as the smoother, \code{width} is expected. If no \code{width} is
-given, it will default to 84.}
+median is used as the smoother, \code{med_win} is expected. If no \code{med_win} is
+given, it will default to \code{c(-42, 42)}.}
 }
 \value{
 A data frame containing the bootstrap repetitions of the smoother.

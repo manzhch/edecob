@@ -30,6 +30,8 @@
 #' @importFrom graphics plot.new
 plot.edecob <- function(x, ...) {
 
+  stopifnot("Cannot plot data for multiple sources. Please choose one source to plot using \"$\"." = !("event_info" %in% names(x)))
+
   event_data <- x
 
   # if ggplot2 was not imported
@@ -71,18 +73,11 @@ plot.edecob <- function(x, ...) {
     conf_band <- event_data$conf_band
     event <- event_data$event
     source <- event_data$data$source[1]
-    # basel_start <- event_data$basel_start
-    # basel_end <- event_data$basel_end
-    # width <- event_data$width
 
     subj_data <- data.frame(
       time_point = data[data$source == source, 2],
       data = data[data$source == source, 3]
     )
-
-
-    # conf_band_text <- paste("Confidence Band (", event_data$conf_band_lvl*100, "%)", sep = "")
-    # conf_band_text <- "Confidence Band"
 
     # plotting data points, baseline, and threshold
     plot_colors <- character()
@@ -100,27 +95,9 @@ plot.edecob <- function(x, ...) {
         size = dot_size,
         alpha = 0.8
       ) +
-      # ggplot2::geom_point(
-      #   data = subj_data[which(subj_data$time_point < basel_start), ],
-      #   ggplot2::aes(x = .data$time_point, y = .data$data),
-      #   color = "grey70",
-      #   size = dot_size*0.9
-      # ) +
       ggplot2::labs(x = xlab, y = ylab) +
       ggplot2::geom_hline(ggplot2::aes(yintercept = detec_lower, color = "Detection Bounds")) +
-      # geom_hline(aes(yintercept = threshold, color = "threshold")) +
       ggplot2::geom_hline(ggplot2::aes(yintercept = detec_upper, color = "Detection Bounds")) +
-      # ggplot2::geom_vline(ggplot2::aes(xintercept = min(subj_data$time_point) + learn_dur,
-      #                                  color = "Baseline Period"),
-      #                     linetype = "dashed", key_glyph = "path") +
-      # ggplot2::geom_vline(ggplot2::aes(xintercept = basel_start,
-      #                                  linetype = "Baseline Period"),
-      #                     color = "blue") +
-      # ggplot2::geom_vline(ggplot2::aes(xintercept = basel_end
-      #                                  ),
-      #                     color = "blue", show.legend = F, linetype = "dashed") +
-      # ggplot2::geom_vline(ggplot2::aes(xintercept = my_patient_devices$RETDT),
-      #            color = "grey75") +
       ggplot2::scale_color_manual(
         "",
         aesthetics  = "color",
@@ -128,9 +105,6 @@ plot.edecob <- function(x, ...) {
                    "Detection Bounds" = "red",
                    "Smoother" = "orange")
       ) +
-      # ggplot2::scale_color_manual("",
-      #                             aesthetics = "linetype",
-      #                             values = c("Baseline Period" = "dashed")) +
       ggplot2::scale_color_manual("",
         aesthetics = "fill",
         values = c("Confidence Band" = "blue")
@@ -158,12 +132,6 @@ plot.edecob <- function(x, ...) {
                        color = "Smoother"),
           size = smo_size, linetype = "solid"
         )
-
-      # plot_colors <- append(plot_colors, "orange")
-      # plot_shape <- append(plot_shape, 16)
-      # plot_fill <- append(plot_fill, "orange")
-      # plot_size <- append(plot_size, smo_size + 1)
-
     }
 
     # draw event point
@@ -190,10 +158,6 @@ plot.edecob <- function(x, ...) {
                                     override.aes = list(color = plot_colors, size = plot_size, fill = plot_fill)
                                   )) +
       ggplot2::geom_hline(ggplot2::aes(yintercept = detec_upper), color = "red") #+
-      # ggplot2::geom_hline(ggplot2::aes(yintercept = basel), color = "black") #+
-      # ggplot2::theme(text = ggplot2::element_text(size = txt_size),
-      #                axis.title.y.right = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 0, b = 0, l = 20)),
-      #                axis.title.y.left = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 10, b = 0, l = 0)))
 
 
     # CI
@@ -322,13 +286,16 @@ plot.edecob <- function(x, ...) {
                                    ymax = max(c(data$value, detec_finite, conf_band_na$upper), na.rm = TRUE) + 0.045*(max(data$value) - min(data$value)))
     }
 
+    # draw moving mean
+    # patient_plot <- patient_plot +
+    #   ggplot2::geom_line(
+    #     data = mov_mean(event_data$data),
+    #     ggplot2::aes(x = .data$time_point,
+    #                  y = .data$value),
+    #                 color = "green",
+    #     size = 1, linetype = "solid"
+    # )
 
-    #   ggplot2::labs(tag = paste("Minimal duration of change for event detection:", event_data$min_change_dur)) +
-    #   ggplot2::theme(plot.tag.position = c(min(data$time_point), min(data$value) + 0.05*(max(data$value) - min(data$value))))
-    # grid::grid.text((paste("Minimal duration of change for event detection:", event_data$min_change_dur)),
-    #           x = grid::unit(0, "npc"), y = grid::unit(0, "npc"), just = c("left", "bottom"),
-    #           gp = grid::gpar(fontsize = 12, col = "black"))
-    # return(patient_plot)
 
     # Code to override clipping
     patient_plot <- ggplot2::ggplotGrob(patient_plot)

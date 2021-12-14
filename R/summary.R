@@ -20,7 +20,7 @@ summary.edecob <- function(object, ...) {
   cat("\n")
   cat("Event detected:", object$event$event_detected, "\n")
   if (object$event$event_detected) {
-    cat("Event ", object$colnames[2], ": ", object$event$event_onset, "\n", sep = "")
+    cat("Event onset ", object$time_unit, ": ", object$event$event_onset, "\n", sep = "")
     if (object$event$event_duration == 1) {
       cat("Event duration: ", object$event$event_duration, " ", object$time_unit, "\n", sep = "")
     } else {
@@ -35,7 +35,7 @@ summary.edecob <- function(object, ...) {
       }
   }
   cat("---\n")
-  cat(object$colnames[1], ": ", object$source, "\n", sep = "")
+  cat("Source", ": ", object$source, "\n", sep = "")
   cat("Lower detection bound:", object$detec_lower, "\n")
   cat("Upper detection bound:", object$detec_upper, "\n")
   if (object$min_change_dur == 1) {

@@ -284,7 +284,6 @@ edecob <- function(data,
   stopifnot(
     "Data not a data frame" = is.data.frame(data),
     "Data empty" = nrow(data) > 0,
-    # "source not character" = is.character(data[,1]),
     "Time points not numeric" = is.numeric(data[,2]),
     "Measurements not numeric" = is.numeric(data[,3]),
     "Upper bound of detection interval not numeric" = is.numeric(data[,5]),
@@ -351,7 +350,6 @@ edecob <- function(data,
     return(patients_event_data)
   }
 
-  # print(data[1,1])
   data <- data[order(data$time_point), ]
 
   # calculate the smoother

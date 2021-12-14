@@ -4,7 +4,7 @@
 \alias{mov_med}
 \title{Moving Median over a Time Window}
 \usage{
-mov_med(data, width = 12 * 7, min_pts_in_win = 1)
+mov_med(data, med_win = c(-42, 42), min_pts_in_win = 1)
 }
 \arguments{
 \item{data}{A data frame in long format containing the data for which events
@@ -22,8 +22,12 @@ In case detection is wanted for a one sided change (e.g. give an event if
 the confidence bounds drop below a threshold) then the upper or lower detection
 bound can be chosen to be Inf or -Inf respectively.}
 
-\item{width}{The width of the window over which the moving median is taken in
-number of days.}
+\item{med_win}{A vector containing two numbers specifying the window over
+which the moving median is to be taken. More specifically, when given a
+certain time point, the numbers specify the maximum number of time units
+difference that a time point can have such that that data point will be
+considered for the moving median. Note that the first number must be smaller
+than the second number. The numbers may be negative.}
 
 \item{min_pts_in_win}{The minimal number of measurements required to be in
 the time window in order for the median to be calculated.}

@@ -32,7 +32,7 @@ the confidence bounds drop below a threshold) then the upper or lower detection
 bound can be chosen to be Inf or -Inf respectively.}
 
 \item{smoother}{A string specifying which smoother is to be used. Use \code{mov_med} for the
-moving median. When using the moving median, the parameter \code{width} must
+moving median. When using the moving median, the parameter \code{med_win} must
 be given to specify the size of the window over which the moving median is
 to be taken. Defaults to the moving median.}
 
@@ -48,7 +48,8 @@ need to stay inside the detection bounds in order for an event to be
 detected. Defaults to 84, i.e. 12 weeks.}
 
 \item{conf_band_lvl}{The confidence level for the simultaneous confidence
-bands. Defaults to 0.95.}
+bands. Defaults to 0.95. When detection of events using only the smoother
+is desired, \code{conf_band_lvl} can be chosen to be 0.}
 
 \item{bt_tot_rep}{The number of iterations for the bootstrap computation. Because of
 run time, it is recommended to keep this number below 500. Defaults to 100.}
@@ -58,7 +59,7 @@ Defaults to day.}
 
 \item{...}{Additional parameters to be given to the function. Possible
 parameters for the model are \code{order} and \code{min_pts_in_win}. For
-the moving median, a \code{width} is required.
+the moving median, a \code{med_win} is required.
 
 The parameter \code{min_pts_in_win}
 defines the minimal number of
@@ -70,8 +71,8 @@ order of the autoregressive model. If no \code{order} is given, it will be
 determined using the Akaike information criterion.
 
 When the moving
-median is used as the smoother, \code{width} is expected. If no \code{width} is
-given, it will default to 84.}
+median is used as the smoother, \code{med_win} is expected. If no \code{med_win} is
+given, it will default to \code{c(-42, 42)}.}
 }
 \value{
 If \code{data} contains only a single source, the function returns
@@ -127,12 +128,12 @@ multiple sources is provided, the calculation will be done separately for
 each source.
 }
 \details{
-For the moving median, the width is the total size of the window, meaning
+For the moving median, the med_win is the total size of the window, meaning
 that for the value corresponding to day x, the data points from day
-x - \code{width}/2 to x + \code{width}/2 will be used for the calculation
+x + \code{med_win[1]} to x + \code{med_win[2]} will be used for the calculation
 of the median.
 
-If there is no data for two times \code{width} consecutive time units, there
+If there is no data for two times \code{med_win[2]-med_win[1]} consecutive time units, there
 will be time points at which no confidence bound can be calculated. In this
 case, it will be assumed that the confidence bound is outside of the
 detection interval when detecting sustained change.
@@ -230,7 +231,7 @@ and \eqn{N} the number of measurements or rows in \code{data}, in our case the n
 \examples{
 # Let us examine the example_data dataset
 head(example_data)
-example_event <- edecob(example_data, width = 49)
+example_event <- edecob(example_data, med_win = c(-21,21))
 names(example_event)
 
 # example_event contains the event data for each source
