@@ -9,8 +9,6 @@
 #'
 #' @return A vector of the same length as \code{data} containing the residuals.
 #' @export
-#'
-#' @examples
 smoother_resid <- function(data, smoother_pts) {
 
   resid <- numeric(nrow(data))

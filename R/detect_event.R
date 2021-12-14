@@ -19,7 +19,7 @@
 #'   }
 #' @export
 #'
-#' @examples
+#'
 detect_event <- function(conf_band,
                          detec_lower,
                          detec_upper,

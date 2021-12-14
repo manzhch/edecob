@@ -5,13 +5,13 @@
 \alias{example_data}
 \title{Artificially generated data for examples}
 \format{
-A dataframe with 2100 rows and 5 variables:
+A dataframe with 317 rows and 5 variables:
 \describe{
 \item{subject}{The subject identifier}
 \item{time_point}{The point in time from which the data is collected, in days}
 \item{jump_height}{The jump height, in cm}
-\item{baseline}{The baseline for the subject}
-\item{threshold}{The threshold for the subject}
+\item{detect_lower}{The lower detection bound for the subject}
+\item{detect_upper}{The upper detection bound for the subject}
 }
 }
 \usage{
@@ -19,6 +19,6 @@ example_data
 }
 \description{
 A dataset in the long format containing the jump height
-of 5 subjects over 350 days.
+of 3 subjects over 300 days.
 }
 \keyword{datasets}

@@ -215,7 +215,7 @@ bt_eps <- function(bt_rep, data, smoother, resample_method, smoother_pts, resid,
 #' @references Bühlmann, P. (1998). Sieve Bootstrap for Smoothing in
 #'   Nonstationary Time Series. \emph{The Annals of Statistics}, 26(1), 48-83.
 #'
-#' @examples
+#'
 bt_smoother <- function(data, smoother, resample_method, smoother_pts, resid, bt_tot_rep, ...) {
 
   bt_eta <- numeric(nrow(data))
