@@ -10,10 +10,13 @@
 \item{x}{The output of the \code{edecob} function for one subject. It is an object
 of class \code{edecob} containing the data and the event information.}
 
-\item{...}{Other arguments like \code{title}, \code{xlab}, or \code{ylab}.}
+\item{...}{Other arguments like \code{title}, \code{xlab}, or \code{ylab}. If the
+plot should be returned, write \code{output = TRUE}.}
 }
 \value{
-A \code{ggplot2} object that visualizes the data.
+None. If \code{output = TRUE} was written in function call, a \code{ggplot}
+object that visualizes the data will be returned. The returned plot will not
+contain the the text at the bottom.
 }
 \description{
 Generates a ggplot2 visualizing the data and event if any detected.
@@ -25,7 +28,7 @@ by two vertical blue lines. The smoother is plotted in orange. The confidence
 bound  is the blue area. If an event is detected, a red triangle will mark
 the detection day.
 
-Since the output is a ggplot, it can be manipulated using the usual functions
-from the ggplot2 package like \code{xlim}, \code{ylim}, \code{scale_x_continuous},
-and many more.
+If the parameter \code{output = TRUE} is given to the function, the function
+will output the ggplot. The plot can then be manipulated using the usual functions
+from the ggplot2 package.
 }

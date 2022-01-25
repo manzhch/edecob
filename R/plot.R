@@ -13,15 +13,18 @@
 #' bound  is the blue area. If an event is detected, a red triangle will mark
 #' the detection day.
 #'
-#' Since the output is a ggplot, it can be manipulated using the usual functions
-#' from the ggplot2 package like \code{xlim}, \code{ylim}, \code{scale_x_continuous},
-#' and many more.
+#' If the parameter \code{output = TRUE} is given to the function, the function
+#' will output the ggplot. The plot can then be manipulated using the usual functions
+#' from the ggplot2 package.
 #'
 #' @param x The output of the \code{edecob} function for one subject. It is an object
 #'   of class \code{edecob} containing the data and the event information.
-#' @param ... Other arguments like \code{title}, \code{xlab}, or \code{ylab}.
+#' @param ... Other arguments like \code{title}, \code{xlab}, or \code{ylab}. If the
+#'   plot should be returned, write \code{output = TRUE}.
 #'
-#' @return A `ggplot2` object that visualizes the data.
+#' @return None. If \code{output = TRUE} was written in function call, a `ggplot`
+#'   object that visualizes the data will be returned. The returned plot will not
+#'   contain the the text at the bottom.
 #' @export
 #'
 #'
@@ -55,6 +58,11 @@ plot.edecob <- function(x, ...) {
       ylab <- list(...)$ylab
     } else {
       ylab <- event_data$col_names[3]
+    }
+
+    outputt = FALSE
+    if ("output" %in% names(list(...))) {
+      outputt <- list(...)$output
     }
 
     oldpar <- graphics::par(no.readonly = TRUE)
@@ -192,6 +200,7 @@ plot.edecob <- function(x, ...) {
         )
     }
 
+    plot_without_text <- patient_plot
 
     # annotation below plot
     detec_finite <- min(data$value)
@@ -306,8 +315,10 @@ plot.edecob <- function(x, ...) {
     patient_plot$layout$clip[patient_plot$layout$name == "panel"] <- "off"
 
     grid::grid.draw(patient_plot)
-    graphics::par(mar = c(5, 4, 4, 2) + 0.1)
-
-    invisible(capture.output(return(patient_plot)))
+    # invisible(capture.output(return(patient_plot)))
+    #print(plot_without_text)
+    if (outputt == TRUE) {
+      return(plot_without_text)
+    }
   }
 }
