@@ -126,10 +126,11 @@ conf_band <- function(bt_smoother,
   ptw_conf_band_lvl <- find_ptw_conf_band_lvl(bt_smoother, smoother_pts, bt_tot_rep, conf_band_lvl)
   init_est <- bt_smoother$value -
     rep(smoother_pts$value[smoother_pts$time_point %in% bt_smoother$time_point], bt_tot_rep)
-  names(init_est) <- bt_smoother$time_point
+
 
   # calculate quantiles
-  if (nrow(bt_smoother) > 0) {
+  if (nrow(bt_smoother[!is.na(bt_smoother$value),]) > 0) {
+    names(init_est) <- bt_smoother$time_point
     both_quantiles <-
       sapply(split(init_est, factor(unique(names(init_est)), unique(names(init_est)))),
              function(x){
