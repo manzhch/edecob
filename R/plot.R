@@ -260,8 +260,9 @@ plot.edecob <- function(x, ...) {
     if (is.infinite(detec_lower)) {
 
       inf_text <- grid::textGrob(
-        paste("-", rawToChar(as.raw(c(226, 136, 158))), sep = ""),
-        gp = grid::gpar(fontsize = 12, col = "red"),
+        # paste("-", rawToChar(as.raw(c(226, 136, 158))), sep = ""),
+        paste("-", "Inf", sep = ""),
+        gp = grid::gpar(fontsize = 9, col = "red"),
         just = c("right", "top"))
 
       patient_plot <- patient_plot +
@@ -276,8 +277,9 @@ plot.edecob <- function(x, ...) {
     if (is.infinite(detec_upper)) {
 
       inf_text <- grid::textGrob(
-        rawToChar(as.raw(c(226, 136, 158))),
-        gp = grid::gpar(fontsize = 12, col = "red"),
+        #rawToChar(as.raw(c(226, 136, 158))),
+        "Inf",
+        gp = grid::gpar(fontsize = 9, col = "red"),
         just = c("right", "bottom"))
 
       patient_plot <- patient_plot +
