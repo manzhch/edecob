@@ -86,22 +86,22 @@ simultaneous confidence bounds). For details see below.
 \details{
 An autoregressive (AR) model is used for the residuals of the smoother:
 \deqn{Y(t) = S(t) + \eta(t)}
-\deqn{\eta(t) = \sum^{p}_{j = 1} \phiⱼ \eta(t - j) + \epsilon}
+\deqn{\eta(t) = \sum^{p}_{j = 1} \phi_j \eta(t - j) + \epsilon}
 where \eqn{t} is the point in time, \eqn{Y(t)} the data point,
 \eqn{S(t)} a smoother, \eqn{\eta(t)} the residual of the smoother, \eqn{p}
-the order of the AR model, \eqn{\phiⱼ} the coefficients of the AR model, and
+the order of the AR model, \eqn{\phi_j} the coefficients of the AR model, and
 \eqn{\epsilon} the error of the AR model.
 
 The bootstrap procedure is as follows:
 \enumerate{
 \item Compute the smoother \eqn{S(t)}.
-\item Compute the residuals \eqn{\eta(tᵢ) = Y(tᵢ) - S(tᵢ)}.
-  \item Fit an AR(p) model to \eqn{\eta(tᵢ)} to obtain the coefficients
-\eqn{\phi₁, \dots, \phiₚ} and residuals \eqn{\epsilon(tᵢ) = \eta(tᵢ) -
-    \sum^{p}_{j = 1} \phiⱼ \eta(tᵢ - tᵢ₋ⱼ)}.
-  \item Resample \eqn{\epsilon(tᵢ)*} from \eqn{\epsilon(tₚ₊₁), \dots,
-    \epsilon(tₙ)} to obtain \deqn{Y(tᵢ)* = S(tᵢ) + \eta(tᵢ)*,} where  \deqn{\eta(tᵢ)* = \sum^{p}_{j=1} \phiⱼ \eta(tᵢ₋ⱼ)*+ \epsilon(tᵢ₋ⱼ)*.}
-  \item Compute \eqn{S(.)* = g(Y(t₁), \dots, Y(tₙ))} where \eqn{g} is the
+\item Compute the residuals \eqn{\eta(t_i) = Y(t_i) - S(t_i)}.
+\item Fit an AR(p) model to \eqn{\eta(t_i)} to obtain the coefficients
+\eqn{\phi_1, \dots, \phi_p} and residuals \eqn{\epsilon(t_i) = \eta(t_i) -
+    \sum^{p}_{j = 1} \phi_j \eta(t_i - t_{i-j})}.
+\item Resample \eqn{\epsilon(t_i)*} from \eqn{\epsilon(t_{p+1}), \dots,
+    \epsilon(t_n)} to obtain \deqn{Y(t_i)* = S(t_i) + \eta(t_i)*,} where  \deqn{\eta(t_i)* = \sum^{p}_{j=1} \phi_j \eta(t_{i-j})*+ \epsilon(t_{i-j})*.}
+\item Compute \eqn{S(.)* = g(Y(t_1), \dots, Y(t_n))} where \eqn{g} is the
 function with which the smoother is calculated.
 \item Repeat steps 4 and 5 \code{bt_tot_rep} times.
 }

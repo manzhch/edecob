@@ -85,16 +85,16 @@ find_ptw_conf_band_lvl <- function(bt_smoother,
 #'
 #' The procedure is as follows:
 #' \enumerate{
-#'   \item We compute the quantiles \deqn{ qₓ(tᵢ), q₁₋ₓ(tᵢ) i = 1,\dots, N}
-#'     where \deqn{qₓ(tᵢ) = inf {u; P*[S(tᵢ)*ᵦ - S(tᵢ) \le u] \ge x} } is a
-#'     pointwise bootstrap quantile, \eqn{S(tᵢ)*ᵦ the bootstrapped smoother},
-#'     and \eqn{N} the number of measurements.
-#'   \item We vary the pointwise error \eqn{2x} until \deqn{P*[qₓ(tᵢ) \le S(tᵢ)*ᵦ - S(tᵢ) \le q₁₋ₓ(tᵢ) ⩝ i = 1,\dots, N] ≈ 1-\alpha.}
+#'   \item We compute the quantiles \deqn{ q_x(t_i), q_{1-x}(t_i) i = 1,\dots, N}
+#'     where \deqn{q_x(t_i) = inf\left\{u; P^*[S(t_i)^*_b - S(t_i) \le u] \ge x\right\} } is a
+#'     pointwise bootstrap quantile, \eqn{S(t_i)^*_b} the bootstrapped smoother,
+#'     and \eqn{N} the number of measurements or rows in \code{data}, in our case the number of rows.
+#'   \item We vary the pointwise error \eqn{x} until \deqn{P^*[q_x(t_i) \le S(t_i)^*_b - S(t_i) \le q_{1-x}(t_i) \forall i = 1,\dots, N] \approx 1-\alpha.}
 #'     In other words, until the ratio of bootstrap curves that have all their points within
-#'     \eqn{[qₓ(tᵢ), q₁₋ₓ(tᵢ)]} is approximately \eqn{1-\alpha}.
-#'   \item We let
-#'   \deqn{ Iₙ(tᵢ) = [S(tᵢ) +  qₓ(tᵢ), S(tᵢ) + q₁₋ₓ(tᵢ)] ⩝ i = 1, \dots, N}
-#'   confidence bounds. Then \eqn{{Iₙ(tᵢ); i = 1,\dots, N}} is a consistent simultaneous confidence band of level \eqn{1-\alpha}.
+#'     \eqn{[q_x(t_i), q_{1-x}(t_i)]} is approximately \eqn{1-\alpha}.
+#'   \item We define
+#'   \deqn{ I_n(t_i) = [S(t_i) +  q_x(t_i), S(t_i) + q_{1-x}(t_i)] \forall i = 1,\dots, N}
+#'   the confidence bounds. Then \eqn{{I_n(t_i); i = 1,\dots, N}} is a consistent simultaneous confidence band of level \eqn{1-\alpha}.
 #'
 #'}
 #'

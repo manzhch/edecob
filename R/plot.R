@@ -57,6 +57,8 @@ plot.edecob <- function(x, ...) {
       ylab <- event_data$col_names[3]
     }
 
+    oldpar <- graphics::par(no.readonly = TRUE)
+    on.exit(graphics::par(oldpar))
     graphics::par(mar = c(1,1,1,1))
     graphics::plot.new()
 

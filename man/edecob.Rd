@@ -163,29 +163,29 @@ The mathematical background will be explained in the following sections.
 
 \section{Moving Median}{
 
-Consider a sample \eqn{X₁,\dots, Xₙ} of size \eqn{n} and the
-reordering \eqn{X₍₁₎,\dots, X₍ₙ₎} such
-  that \eqn{X₍₁₎ \le X₍₂₎ \le \dots \le X₍ₙ₎}, commonly
-  called the order statistic. Then for \eqn{n} even the median usually
-defined as \deqn{median(X₁,\dots, Xₙ) = X₍ₖ₎, where k = n/2.} In the
-  case where \eqn{n} is odd the median is
-defined as \deqn{median(X₁,\dots, Xₙ) = 1/2(X₍ₖ₎ + X₍ₖ₊₁₎), where k = n/2.} Let the
-  time points at which the measurements \eqn{X₁, \dots, Xₙ} were taken
-be \eqn{t₁, \dots, tₙ}.
-  Let \eqn{T} a fixed positive amount of time. Then
-\deqn{S(t) = median({Xⱼ | t - T/2 \le tⱼ \le t + T/2})}
-  is defined as the moving median at time point \eqn{t} with window size \eqn{T}.
+Consider a sample \eqn{X_1,\dots, X_n} of size \eqn{n} and the
+reordering \eqn{X_{(1)},\dots, X_{(n)}} such
+that \eqn{X_{(1)} \le X_{(2)} \le \dots \le X_{(n)}}, commonly
+called the order statistic. Then for \eqn{n} even the median usually
+defined as \deqn{median(X_1,\dots, X_n) = X_{(k)}, \mathrm{where} \; k = n/2.} In the
+case where \eqn{n} is odd the median is
+defined as \deqn{median(X_1,\dots, X_n) = 1/2(X_{(k)} + X_{(k+1)}), \mathrm{where} \; k = n/2.} Let the
+study days at which the measurements \eqn{X_1, \dots, X_n} were taken
+be \eqn{t_1, \dots, t_n}.
+Let \eqn{T} a fixed positive amount of time. Then the moving median at time
+point \eqn{t} with window size \eqn{T} is defined as
+\deqn{S(t) = median({X_j | t - T/2 \le t_j \le t + T/2}).}
 }
 
 \section{The Model}{
 
 An autoregressive (AR) model is used to model the residuals of the smoother \eqn{\eta}:
 \deqn{Y(t) = S(t) + \eta(t)}
-\deqn{\eta(t) = \sumᵖⱼ₌₁ \phiⱼ \eta(t - j) + \epsilon} where
-variable \eqn{t} is the time point, \eqn{Y(t)} the data point at time point \eqn{t},
+\deqn{\eta(t) = \sum^p_{j = 1} \phi_j \eta(t - j) + \epsilon} where
+variable \eqn{t} is the study day, \eqn{Y(t)} the data point at study day \eqn{t},
 \eqn{S(t)} a smoother, \eqn{\eta(t)} the difference between the smoother
-and the measurement at time point \eqn{t}, \eqn{p}
-the order of the AR model, \eqn{\phiⱼ} the coefficients of the AR model, and
+and the measurement at study day \eqn{t}, \eqn{p}
+the order of the AR model, \eqn{\phi_j} the coefficients of the AR model, and
 \eqn{\epsilon} the error of the AR model. The order is calculated using the
 Akaike information criterion (AIC) if it was not given in the function call.
 }
@@ -196,16 +196,16 @@ In the following, the star * denotes a bootstrapped value. The bootstrap
 procedure is as follows:
 \enumerate{
 \item Compute the smoother \eqn{S(t)}.
-\item Compute the residuals \eqn{\eta(tᵢ) = Y(tᵢ) - S(tᵢ)}.
-  \item Fit an AR(p) model to \eqn{\eta(tᵢ)} to obtain the coefficients
-\eqn{\phi₁,\dots, \phiₚ} and \eqn{\epsilon(tᵢ) = \eta(tᵢ) -
-    \sumᵖⱼ₌₁ \phiⱼ \eta(tᵢ - tᵢ₋ⱼ)} the error of the AR model.
-\item Randomly choose a \eqn{\epsilon(tᵢ)*} with replacement from \eqn{\epsilon(tₚ₊₁),\dots,
-    \epsilon(tₙ)} to obtain \deqn{Y(tᵢ)* = S(tᵢ) + \eta(tᵢ)*,} where  \deqn{\eta(tᵢ)* = \sumᵖⱼ₌₁ \phiⱼ \eta(tᵢ₋ⱼ)*+ \epsilon(tᵢ₋ⱼ)*} the bootstrapped residuals of the smoother.
-\item Compute \eqn{S(.)* = g(Y(t₁),\dots, Y(tₙ))} where \eqn{g} is the
+\item Compute the residuals \eqn{\eta(t_i) = Y(t_i) - S(t_i)}.
+\item Fit an AR(p) model to \eqn{\eta(t_i)} to obtain the coefficients
+\eqn{\phi_1,\dots, \phi_p} and \eqn{\epsilon(t_i) = \eta(t_i) -
+    \sum^p_{j = 1} \phi_j \eta(t_i - t_{i-j})} the error of the AR model.
+\item Randomly choose a \eqn{\epsilon(t_i)^*} with replacement from \eqn{\epsilon(t_{p+1}),\dots,
+    \epsilon(t_n)} to obtain \deqn{Y(t_i)^* = S(t_i) + \eta(t_i)^*,} where  \deqn{\eta(t_i)^* = \sum^p_{j = 1} \phi_j \eta(t_{i-j})^*+ \epsilon(t_{i-j})^*} the bootstrapped residuals of the smoother.
+\item Compute \eqn{S(.)^* = g(Y(t_1),\dots, Y(t_n))} where \eqn{g} is the
 function with which the smoother is calculated.
-\item Repeat steps 4 and 5 \code{bt_tot_rep} times to obtain \eqn{S(tᵢ)*ᵦ} for \eqn{β = 1,\dots,}
-  \code{bt_tot_rep}.
+\item Repeat steps 4 and 5 \code{bt_tot_rep} times to obtain \eqn{S(t_i)^*_b} for \eqn{\beta = 1,\dots,}
+\code{bt_tot_rep}.
 }
 }
 
@@ -213,17 +213,16 @@ function with which the smoother is calculated.
 
 The confidence bounds are calculated as follows:
 \enumerate{
-\item We compute the quantiles \deqn{ qₓ(tᵢ), q₁₋ₓ(tᵢ) i = 1,\dots, N}
-
-    where \deqn{qₓ(tᵢ) = inf{u; P*[S(tᵢ)*ᵦ - S(tᵢ) \le u] \ge x} } is a
-    pointwise bootstrap quantile, \eqn{S(tᵢ)*ᵦ} the bootstrapped smoother,
+\item We compute the quantiles \deqn{ q_x(t_i), q_{1-x}(t_i) i = 1,\dots, N}
+where \deqn{q_x(t_i) = inf\left\{u; P^*[S(t_i)^*_b - S(t_i) \le u] \ge x\right\} } is a
+pointwise bootstrap quantile, \eqn{S(t_i)^*_b} the bootstrapped smoother,
 and \eqn{N} the number of measurements or rows in \code{data}, in our case the number of rows.
-\item We vary the pointwise error \eqn{x} until \deqn{P*[qₓ(tᵢ) \le S(tᵢ)*ᵦ - S(tᵢ) \le q₁₋ₓ(tᵢ) ⩝ i = 1,\dots, N] ≈ 1-\alpha.}
-    In other words, until the ratio of bootstrap curves that have all their points within
-\eqn{[qₓ(tᵢ), q₁₋ₓ(tᵢ)]} is approximately \eqn{1-\alpha}.
+\item We vary the pointwise error \eqn{x} until \deqn{P^*[q_x(t_i) \le S(t_i)^*_b - S(t_i) \le q_{1-x}(t_i) \forall i = 1,\dots, N] \approx 1-\alpha.}
+In other words, until the ratio of bootstrap curves that have all their points within
+\eqn{[q_x(t_i), q_{1-x}(t_i)]} is approximately \eqn{1-\alpha}.
 \item We define
-\deqn{ Iₙ(tᵢ) = [S(tᵢ) +  qₓ(tᵢ), S(tᵢ) + q₁₋ₓ(tᵢ)] ⩝ i = 1,\dots, N}
-  the confidence bounds. Then \eqn{{Iₙ(tᵢ); i = 1,\dots, N}} is a consistent simultaneous confidence band of level \eqn{1-\alpha}.
+\deqn{ I_n(t_i) = [S(t_i) +  q_x(t_i), S(t_i) + q_{1-x}(t_i)] \forall i = 1,\dots, N}
+the confidence bounds. Then \eqn{{I_n(t_i); i = 1,\dots, N}} is a consistent simultaneous confidence band of level \eqn{1-\alpha}.
 
 }
 }
@@ -242,9 +241,9 @@ head(example_data)
 #> 6 Subject 1        16    60.17763         -Inf     54.41227
 
 # We apply the main fuction of the package onto our example_data
-example_event <- edecob(example_data, med_win = c(-21,21), bt_tot_rep = 50,
+example_event <- edecob(example_data, med_win = c(-21,21), bt_tot_rep = 40,
                         min_change_dur = 50)
-#> Warning in edecob(example_data, med_win = c(-21, 21), bt_tot_rep = 50,
+#> Warning in edecob(example_data, med_win = c(-21, 21), bt_tot_rep = 40,
 #> min_change_dur = 50) :
 #>   Removing rows where value is NA
 names(example_event)
