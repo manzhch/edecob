@@ -242,19 +242,16 @@ NULL
 #' library(edecob)
 #'
 #' # Let us examine the example_data dataset
-#' head(example_data)
+#' head(example_data, 3)
 #' #>     subject study_day jump_height detect_lower detect_upper
 #' #> 1 Subject 1         1    55.60844         -Inf     54.41227
 #' #> 2 Subject 1         4    57.77688         -Inf     54.41227
 #' #> 3 Subject 1         7    57.59584         -Inf     54.41227
-#' #> 4 Subject 1        10    59.92832         -Inf     54.41227
-#' #> 5 Subject 1        13    53.33169         -Inf     54.41227
-#' #> 6 Subject 1        16    60.17763         -Inf     54.41227
 #'
 #' # We apply the main fuction of the package onto our example_data
-#' example_event <- edecob(example_data, med_win = c(-21,21), bt_tot_rep = 40,
+#' example_event <- edecob(example_data, med_win = c(-21,21), bt_tot_rep = 20,
 #'                         min_change_dur = 50)
-#' #> Warning in edecob(example_data, med_win = c(-21, 21), bt_tot_rep = 40,
+#' #> Warning in edecob(example_data, med_win = c(-21, 21), bt_tot_rep = 20,
 #' #> min_change_dur = 50) :
 #' #>   Removing rows where value is NA
 #' names(example_event)
@@ -285,6 +282,9 @@ edecob <- function(data,
                    conf_band_lvl = 0.95,
                    bt_tot_rep = 100,
                    time_unit = "day",
+                   detect = "below",
+                   detect_perc = 10,
+                   # resample_win = c(-42, 42),
                    ...) {
 
   data_raw <- data

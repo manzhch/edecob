@@ -241,9 +241,9 @@ head(example_data)
 #> 6 Subject 1        16    60.17763         -Inf     54.41227
 
 # We apply the main fuction of the package onto our example_data
-example_event <- edecob(example_data, med_win = c(-21,21), bt_tot_rep = 40,
+example_event <- edecob(example_data, med_win = c(-21,21), bt_tot_rep = 20,
                         min_change_dur = 50)
-#> Warning in edecob(example_data, med_win = c(-21, 21), bt_tot_rep = 40,
+#> Warning in edecob(example_data, med_win = c(-21, 21), bt_tot_rep = 20,
 #> min_change_dur = 50) :
 #>   Removing rows where value is NA
 names(example_event)

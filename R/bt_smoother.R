@@ -107,11 +107,14 @@ bt_eps <- function(bt_rep, data, smoother, resample_method, smoother_pts, resid,
 
   if (resample_method == "window") {
     bt_epsilon <- numeric(length(ar_resid_non_na))
+    if ("resample_win" %in% names(list(...))) {
+      resample_win <- list(...)$resample_win
+    }
     time_points_non_na <- data$time_point[which(!is.na(ar_resid$resid))]
     for (ii in 1:length(ar_resid_non_na)) {
       ii_time_point <- time_points_non_na[ii]
-      resample_win_ind <- as.logical((time_points_non_na <= ii_time_point + med_win[2]) *
-                                     (time_points_non_na >= ii_time_point + med_win[1]))
+      resample_win_ind <- as.logical((time_points_non_na <= ii_time_point + resample_win[2]) *
+                                     (time_points_non_na >= ii_time_point + resample_win[1]))
       bt_epsilon[ii] <- sample(ar_resid_non_na[resample_win_ind], 1)
     }
   }
