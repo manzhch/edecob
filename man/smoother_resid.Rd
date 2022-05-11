@@ -10,8 +10,9 @@ smoother_resid(data, smoother_pts)
 \item{data}{A data frame in long format containing the data for which events
 is to be detected. This means that each measurement corresponds to a row
 and the columns are (in order): source (the device or person from which the
-data was collected), point in time,
-measurement value, lower detection bound, and upper detection bound.
+data was collected), point in time, and
+measurement value. If custom detection bounds are chosen, the folloing two
+columns must be added: lower detection bound, and upper detection bound.
 
 The source is expected to
 be a string; the time point, measurements, and detection bounds are expected to be numerical.

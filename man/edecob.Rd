@@ -12,6 +12,9 @@ edecob(
   conf_band_lvl = 0.95,
   bt_tot_rep = 100,
   time_unit = "day",
+  detect = "below",
+  detect_perc = 10,
+  detect_period = 14,
   ...
 )
 }
@@ -19,8 +22,9 @@ edecob(
 \item{data}{A data frame in long format containing the data for which events
 is to be detected. This means that each measurement corresponds to a row
 and the columns are (in order): source (the device or person from which the
-data was collected), point in time,
-measurement value, lower detection bound, and upper detection bound.
+data was collected), point in time, and
+measurement value. If custom detection bounds are chosen, the folloing two
+columns must be added: lower detection bound, and upper detection bound.
 
 The source is expected to
 be a string; the time point, measurements, and detection bounds are expected to be numerical.
@@ -57,9 +61,24 @@ run time, it is recommended to keep this number below 500. Defaults to 100.}
 \item{time_unit}{A string containing the unit of time used, in singular form.
 Defaults to day.}
 
+\item{detect}{A string specifying how the detection bounds are to be chosen.
+\code{below}, \code{above}, and \code{custom} can be chosen. \code{below}
+detects decreases in value, \code{above} detects increases in value, and
+\code{custom} can be used to manually add detection bounds for each subject.
+When \code{above} or \code{below} are used, the detection bound will be x percent
+above or below the median of the first y days, where x is \code{detect_perc}
+and y is \code{detect period}.}
+
+\item{detect_perc}{A number specifying how many percent the detection bound is
+to be above or below the median of the fist \code{detect_period} days.}
+
+\item{detect_period}{A number specifying the number of time units from which
+the median should be taken to obtain the detection bounds.}
+
 \item{...}{Additional parameters to be given to the function. Possible
 parameters for the model are \code{order} and \code{min_pts_in_win}. For
-the moving median, a \code{med_win} is required.
+the moving median, a \code{med_win} is required. When resampling from
+window, a \code{resample_win} may be given.
 
 The parameter \code{min_pts_in_win}
 defines the minimal number of
@@ -72,7 +91,10 @@ determined using the Akaike information criterion.
 
 When the moving
 median is used as the smoother, \code{med_win} is expected. If no \code{med_win} is
-given, it will default to \code{c(-42, 42)}.}
+given, it will default to \code{c(-42, 42)}.
+
+When resampling from window, one can choose the window size for the
+resampling window with \code{resample_win} by giving a window like e.g. \code{c(-14,14)}..}
 }
 \value{
 If \code{data} contains only a single source, the function returns
@@ -231,14 +253,11 @@ the confidence bounds. Then \eqn{{I_n(t_i); i = 1,\dots, N}} is a consistent sim
 library(edecob)
 
 # Let us examine the example_data dataset
-head(example_data)
+head(example_data, 3)
 #>     subject study_day jump_height detect_lower detect_upper
 #> 1 Subject 1         1    55.60844         -Inf     54.41227
 #> 2 Subject 1         4    57.77688         -Inf     54.41227
 #> 3 Subject 1         7    57.59584         -Inf     54.41227
-#> 4 Subject 1        10    59.92832         -Inf     54.41227
-#> 5 Subject 1        13    53.33169         -Inf     54.41227
-#> 6 Subject 1        16    60.17763         -Inf     54.41227
 
 # We apply the main fuction of the package onto our example_data
 example_event <- edecob(example_data, med_win = c(-21,21), bt_tot_rep = 20,

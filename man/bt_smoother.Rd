@@ -18,8 +18,9 @@ bt_smoother(
 \item{data}{A data frame in long format containing the data for which events
 is to be detected. This means that each measurement corresponds to a row
 and the columns are (in order): source (the device or person from which the
-data was collected), point in time,
-measurement value, lower detection bound, and upper detection bound.
+data was collected), point in time, and
+measurement value. If custom detection bounds are chosen, the folloing two
+columns must be added: lower detection bound, and upper detection bound.
 
 The source is expected to
 be a string; the time point, measurements, and detection bounds are expected to be numerical.
@@ -55,7 +56,8 @@ run time, it is recommended to keep this number below 500. Defaults to 100.}
 
 \item{...}{Additional parameters to be given to the function. Possible
 parameters for the model are \code{order} and \code{min_pts_in_win}. For
-the moving median, a \code{med_win} is required.
+the moving median, a \code{med_win} is required. When resampling from
+window, a \code{resample_win} may be given.
 
 The parameter \code{min_pts_in_win}
 defines the minimal number of
@@ -68,7 +70,10 @@ determined using the Akaike information criterion.
 
 When the moving
 median is used as the smoother, \code{med_win} is expected. If no \code{med_win} is
-given, it will default to \code{c(-42, 42)}.}
+given, it will default to \code{c(-42, 42)}.
+
+When resampling from window, one can choose the window size for the
+resampling window with \code{resample_win} by giving a window like e.g. \code{c(-14,14)}..}
 }
 \value{
 A data frame containing the bootstrap repetitions of the smoother.
