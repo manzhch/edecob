@@ -221,6 +221,7 @@ bt_eps <- function(bt_rep, data, smoother, resample_method, smoother_pts, resid,
 #'
 bt_smoother <- function(data, smoother, resample_method, smoother_pts, resid, bt_tot_rep, ...) {
 
+  colnames(data) <- c("source", "time_point", "value")
   bt_eta <- numeric(nrow(data))
   bt_epsilon <- numeric(nrow(data))
   if (smoother == "mov_med") {

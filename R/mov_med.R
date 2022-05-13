@@ -49,6 +49,7 @@ mov_med <- function(data,
                     med_win= c(-42, 42),
                     min_pts_in_win = 1) {
 
+  colnames(data) <- c("source", "time_point", "value")
   source <- data$source[1]
   # the number of days for which the moving median will be calculated
   dur <- max(data$time_point) - min(data$time_point) + 1 - med_win[2]

@@ -11,6 +11,7 @@
 #' @export
 smoother_resid <- function(data, smoother_pts) {
 
+  colnames(data) <- c("source", "time_point", "value")
   resid <- numeric(nrow(data))
 
   if (nrow(data) > 0 && nrow(smoother_pts) > 0) {
