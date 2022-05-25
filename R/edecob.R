@@ -79,12 +79,14 @@ NULL
 #'   detects decreases in value, \code{above} detects increases in value, and
 #'   \code{custom} can be used to manually add detection bounds for each subject.
 #'   When \code{above} or \code{below} are used, the detection bound will be x percent
-#'   above or below the median of the first y days, where x is \code{detect_perc}
+#'   above or below the median of the first y days, where x is \code{detect_factor}
 #'   and y is \code{detect period}.
-#' @param detect_perc A number specifying how many percent the detection bound is
-#' to be above or below the median of the fist \code{detect_period} days.
-#' @param detect_period A number specifying the number of time units from which
-#' the median should be taken to obtain the detection bounds.
+#' @param detect_factor A number specifying the factor by which the median of
+#'   the fist \code{bline_period} days is to be multiplied to obtain the
+#'   detection bounds. E.g. 0.9 sets the detection bound 10 percent below the
+#'   said median.
+#' @param bline_period A number specifying the number of time units from which
+#'   data should be taken to calculate the median to obtain the detection bounds.
 #' @param ... Additional parameters to be given to the function. Possible
 #'   parameters for the model are \code{order} and \code{min_pts_in_win}. For
 #'   the moving median, a \code{med_win} is required. When resampling from
@@ -137,6 +139,11 @@ NULL
 #' that the confidence bounds don't change in case we obtain new measurements
 #' with time points later than the latest time point at which we have a measurement.
 #'
+#' The \code{edecob} function runs the functions \code{mov_med}, \code{smoother_resid},
+#' \code{bt_smoother}, \code{conf_band}, and \code{detect_event} in this order
+#' for all subjects given. If desired, the functions can also manually be
+#' applied for the data to obtain e.g. the confidence bands. Note that in order
+#' to run one of these functions, the output of the previous functions are needed.
 #'
 #' @return If \code{data} contains only a single source, the function returns
 #'   a list of 13 variables: \describe{
@@ -298,9 +305,9 @@ edecob <- function(data,
                    conf_band_lvl = 0.95,
                    bt_tot_rep = 100,
                    time_unit = "day",
-                   detect = "below", #custom below above
-                   detect_perc = 10, #percentage
-                   detect_period = 14,
+                   detect = "below",
+                   detect_factor = 1,
+                   bline_period = 14,
                    ...) {
 
   data_raw <- data
@@ -369,12 +376,16 @@ edecob <- function(data,
     warning("Removing rows where time point is NA", immediate. = TRUE)
     data <- data[!is.na(data$time_point), ]
   }
+  if (!all(data[,2] == floor(data[,2]))) {
+    warning("Time points not integer. Rounding time points down to closest integer.", immediate. = TRUE)
+    data[,2] <- floor(data[,2])
+  }
 
 
 
   # making sure that width is not repeated in future function calls
   no_width_given <- FALSE
-  if ((smoother == "mov_med" || smoother == "mov_mean") && !("med_win" %in% names(list(...)))) {
+  if (!("med_win" %in% names(list(...)))) { # (smoother == "mov_med" || smoother == "mov_mean") &&
     warning("Parameter med_win not given after choosing the moving median as smoother. Defaulting to c(-42,42)", immediate. = TRUE)
     med_win <- c(-42, 42)
     no_width_given <- TRUE
@@ -388,7 +399,8 @@ edecob <- function(data,
     patients_event_data <-
       lapply(split(data, factor(data$source)), edecob,
              smoother, resample_method, min_change_dur,conf_band_lvl,
-             bt_tot_rep, time_unit, "col_names" = col_names, ...)
+             bt_tot_rep, time_unit, detect, detect_factor, bline_period,
+             "col_names" = col_names, "med_win" = med_win, ...)
     patients_event_data$event_info <- as.data.frame(do.call(rbind,
       lapply(patients_event_data, function(x) {
         return(list(x$event$source, x$event$event_detected, x$event$event_onset, x$event$event_duration, x$event$event_stop))
@@ -413,12 +425,12 @@ edecob <- function(data,
     detection_bound_upper <- data$detec_upper[1]
   } else if (detect == "below") {
     detection_bound_lower <- -Inf
-    bound_data <- data$value[data$time_point <= data$time_point[1] + detect_period]
-    detection_bound_upper <- median(bound_data)
-  } else if (detect == "upper") {
+    bound_data <- data$value[data$time_point <= data$time_point[1] + bline_period]
+    detection_bound_upper <- median(bound_data)*detect_factor
+  } else if (detect == "above") {
     detection_bound_upper <- Inf
-    bound_data <- data$value[data$time_point <= data$time_point[1] + detect_period]
-    detection_bound_lower <- median(bound_data)
+    bound_data <- data$value[data$time_point <= data$time_point[1] + bline_period]
+    detection_bound_lower <- median(bound_data)*detect_factor
   }
 
 
