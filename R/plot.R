@@ -85,9 +85,10 @@ plot.edecob <- function(x, ...) {
     source <- event_data$data$source[1]
 
     subj_data <- data.frame(
-      time_point = data[data$source == source, 2],
-      data = data[data$source == source, 3]
+      "time_point" = data[data$source == source, 2],
+      "data" = data[data$source == source, 3]
     )
+    colnames(subj_data) <- c("time_point", "data")
 
     # plotting data points, baseline, and threshold
     plot_colors <- character()
