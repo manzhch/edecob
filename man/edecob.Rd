@@ -13,8 +13,8 @@ edecob(
   bt_tot_rep = 100,
   time_unit = "day",
   detect = "below",
-  detect_perc = 10,
-  detect_period = 14,
+  detect_factor = 1,
+  bline_period = 14,
   ...
 )
 }
@@ -27,7 +27,7 @@ measurement value. If custom detection bounds are chosen, the folloing two
 columns must be added: lower detection bound, and upper detection bound.
 
 The source is expected to
-be a string; the time point, measurements, and detection bounds are expected to be numerical.
+be a string; the time point are integers; measurements, and detection bounds are expected to be numerical.
 The detection bounds are in absolute value in the same unit as the
 values and each is expected to be identical for the same source.
 
@@ -66,14 +66,16 @@ Defaults to day.}
 detects decreases in value, \code{above} detects increases in value, and
 \code{custom} can be used to manually add detection bounds for each subject.
 When \code{above} or \code{below} are used, the detection bound will be x percent
-above or below the median of the first y days, where x is \code{detect_perc}
+above or below the median of the first y days, where x is \code{detect_factor}
 and y is \code{detect period}.}
 
-\item{detect_perc}{A number specifying how many percent the detection bound is
-to be above or below the median of the fist \code{detect_period} days.}
+\item{detect_factor}{A number specifying the factor by which the median of
+the fist \code{bline_period} days is to be multiplied to obtain the
+detection bounds. E.g. 0.9 sets the detection bound 10 percent below the
+said median.}
 
-\item{detect_period}{A number specifying the number of time units from which
-the median should be taken to obtain the detection bounds.}
+\item{bline_period}{A number specifying the number of time units from which
+data should be taken to calculate the median to obtain the detection bounds.}
 
 \item{...}{Additional parameters to be given to the function. Possible
 parameters for the model are \code{order} and \code{min_pts_in_win}. For
@@ -177,6 +179,12 @@ The censoring date is based on the last date where the confidence bounds can be
 calculated. We do not extend the confidence bounds to the last data point so
 that the confidence bounds don't change in case we obtain new measurements
 with time points later than the latest time point at which we have a measurement.
+
+The \code{edecob} function runs the functions \code{mov_med}, \code{smoother_resid},
+\code{bt_smoother}, \code{conf_band}, and \code{detect_event} in this order
+for all subjects given. If desired, the functions can also manually be
+applied for the data to obtain e.g. the confidence bands. Note that in order
+to run one of these functions, the output of the previous functions are needed.
 }
 \section{Mathematical background}{
 

@@ -23,7 +23,7 @@ measurement value. If custom detection bounds are chosen, the folloing two
 columns must be added: lower detection bound, and upper detection bound.
 
 The source is expected to
-be a string; the time point, measurements, and detection bounds are expected to be numerical.
+be a string; the time point are integers; measurements, and detection bounds are expected to be numerical.
 The detection bounds are in absolute value in the same unit as the
 values and each is expected to be identical for the same source.
 
