@@ -3,6 +3,9 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./
     steps:
       - name: Open Journals PDF Generator
         # You may pin to the exact commit or the version.
