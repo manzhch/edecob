@@ -51,9 +51,13 @@ head(example_data, 3)
 ```
 
 The data frame constitutes the first argument of the main edecob function. We can then specify the following:
+
 * `min_change_dur` specifies the minimal number of time units the confidence bounds need to stay within the detection range to detect an event.
-* `detect` specifies how the detection range is determined. When using `above` or `below`, one of the detection bounds will be the median over the data points in the first `bline_period` time units, then multiplied with detect_factor. The other detection bound will be `Inf` when choosing `above` or `-Inf` when choosing `below`. Detect can also be chosen to be `custom`, in which case the detection range will be provided by the user for every subject.
+
+* `detect` specifies how the detection range is determined. When using `above` or `below`, one of the detection bounds will be the median over the data points in the first `bline_period` time units, then multiplied with `detect_factor`. The other detection bound will be `Inf` when choosing `above` or `-Inf` when choosing `below`. `detect` can also be chosen to be `custom`, in which case the detection range will be provided by the user for every subject.
+
 * `resample_method` specifies whether resampling should be done over all residuals `all` or only over a window `window`. If a window is chosen, the window from which residuals should be resampled from can be specified with `resample_win`.
+
 The use of other variables is described in the documentation. If the user wants the confidence range to reflect the local frequency of the data, resampling from all data may be more appropriate. However, if the user wants the confidence range to reflect the local variation of the data rather than the global variation, restricting the resampling over a window may be the right choice. This is especially relevant when analyzing time-dependent data.
 ```
 # We apply the main fuction of the package onto our example_data
@@ -81,7 +85,7 @@ plot(example_event$`Subject 1`)
 ```
 ![CaptionCaptionCaption.\label{fig:plot}](plot.png){width=80%}
 
-The event information is summarized and accessible in a table called event_info. It contains the information about whether an event was detected, the time point of onset of the event, how long the change is sustained, and whether the event is sustained until the end of available observations for the subject.
+The event information is summarized and accessible in a table called `event_info`. It contains the information about whether an event was detected, the time point of onset of the event, how long the change is sustained, and whether the event is sustained until the end of available observations for the subject.
 
 ```
 example_event$event_info
