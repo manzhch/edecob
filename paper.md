@@ -30,7 +30,7 @@ bibliography: paper.bib
 
 # Summary
 
-`edecob` (Event Detection using Confidence Bounds) is an R package that detects sustained change (which we call “event”) in high-frequency, longitudinally-collected-digital biomarker data. We approximate a subject’s performance using a smoother and detect sustained change by constructing confidence bands for the smoother as described in @buhlmann1998. We define an event as the occasion where confidence bands stay within a prespecified range compared to the baseline for a predefined amount of time. Our approach is robust to noise and the increased variability that can result when the digital assessments are performed outside of a controlled setting [@Roussos_2022]. The parameters of the model are adjustable to enable customization of the methodology to specific user’s cases. 
+`edecob` (Event Detection using Confidence Bounds) is an R package that detects sustained change (which we call “event”) in high-frequency, longitudinally-collected-digital biomarker data. We approximate a subject’s performance using a smoother and detect sustained change by constructing confidence bands for the smoother as described in @buhlmann1998. We define an event as the occasion where confidence bands stay within a prespecified range compared to the baseline for a predefined amount of time. Our approach is robust to noise and the increased variability that can result when the digital assessments are performed outside of a controlled setting [@Volodina]. The parameters of the model are adjustable to enable customization of the methodology to specific user’s cases. 
 
 # Statement of need
 
@@ -70,10 +70,10 @@ example_event <- edecob(example_data,
 			 time_unit = "day",
 			 detect = "custom",
 			 detect_factor = 1,
-                        bline_period = 14,
+             bline_period = 14,
 			 resample_win = c(-5,5))
 ```
-The example_event object contains 3 objects, one corresponding to each subject and a data frame summarizing the event information.
+The `example_event` object contains 3 objects, one corresponding to each subject and a data frame summarizing the event information.
 ```
 names(example_event)
 #> [1] "Subject 1"  "Subject 2"  "event_info"
@@ -95,7 +95,7 @@ example_event$event_info
 #> Subject 3          FALSE         306             38      FALSE
 ```
 
-Using this table, we can generate a survival plot using the survival package (citation needed).
+Using this table, we can generate a survival plot using the survival package [@survival-package].
 
 ```
 library("survival")
