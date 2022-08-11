@@ -30,7 +30,7 @@ bibliography: paper.bib
 
 # Summary
 
-`edecob` (Event Detection using Confidence Bounds) is an R package that detects sustained change (which we call “event”) in high-frequency, longitudinally-collected-digital biomarker data. We approximate a subject’s performance using a smoother and detect sustained change by constructing confidence bands for the smoother as described in @buhlmann1998. We define an event as the occasion where confidence bands stay within a prespecified range compared to the baseline for a predefined amount of time. Our approach is robust to noise and the increased variability that can result when the digital assessments are performed outside of a controlled setting [@Volodina]. The parameters of the model are adjustable to enable customization of the methodology to specific user’s cases. 
+`edecob` (Event Detection using Confidence Bounds) is an R package that detects sustained change (which we call “event”) in high-frequency, longitudinally-collected-digital biomarker data. We approximate a subject’s performance using a smoother and detect sustained change by constructing confidence bands for the smoother as described in @buhlmann1998. We define an event as the occasion where confidence bands stay within a prespecified range compared to the baseline for a predefined amount of time. Our approach is robust to noise and the increased variability that can result when the digital assessments are performed outside of a controlled setting [@Roussos_2022]. The parameters of the model are adjustable to enable customization of the methodology to specific user’s cases. 
 
 # Statement of need
 
