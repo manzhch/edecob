@@ -79,7 +79,7 @@ We can then choose a patient and plot the confidence bands.
 ```
 plot(example_event$`Subject 1`)
 ```
-![CaptionCaptionCaption.\label{fig:plot}](plot.png)
+![CaptionCaptionCaption.\label{fig:plot}](plot.png){width=80%}
 
 The event information is summarized and accessible in a table called event_info. It contains the information about whether an event was detected, the time point of onset of the event, how long the change is sustained, and whether the event is sustained until the end of available observations for the subject.
 
@@ -101,6 +101,8 @@ plot(survfit(Surv(time = event_onset, event = event_detected) ~ 1,
      xlab = "Study Day", ylab = "Survival Probability", main = "Survival plot")
 ```
 
-![CaptionCaptionCaption.\label{fig:survplot}](survplot.png)
+![CaptionCaptionCaption.\label{fig:survplot}](survplot.png){width=80%}
 
-In case of a large number of subjects, the main function edecob is parallelizable by separately calling the function for every subject. Note that if the data frame given to edecob contains only one subject, for example only the data from Subject 1 in our example, the output will be a list equal to example_event$`Subject 1` instead of the format specified above.
+In case of a large number of subjects, the main function edecob is parallelizable by separately calling the function for every subject. Note that if the data frame given to edecob contains only one subject, for example only the data from Subject 1 in our example, the output will be a list equal to `` example_event$`Subject 1` `` instead of the format specified above.
+
+# References
