@@ -6,11 +6,12 @@ tags:
 authors:
   - name: Zheng Chen Man
     orcid: 0000-0001-5025-3960
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
+    affiliation: "3" # (Multiple affiliations must be quoted)
   - name: Fabian Model
     corresponding: true # (This is how you can denote equal contributions between multiple authors)
     affiliation: 3
   - name: Frank Dondelinger
+    orcid: 0000-0003-1816-6300
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 3
   - name: Stanislas Hubeaux
