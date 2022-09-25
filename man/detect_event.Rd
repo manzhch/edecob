@@ -13,7 +13,7 @@ detect_event(conf_band, detec_lower, detec_upper, min_change_dur)
 
 \item{detec_upper}{The upper detection bound in the same units as the values in data.}
 
-\item{min_change_dur}{The minimal number of days that the confidence bounds
+\item{min_change_dur}{The minimal number of time units that the confidence bounds
 need to stay inside the detection bounds in order for an event to be
 detected. Defaults to 84, i.e. 12 weeks.}
 }

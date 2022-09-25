@@ -62,11 +62,11 @@ NULL
 #'   autoregression for the bootstrap. Default is \code{all}, meaning that the epsilon of a
 #'   certain time point are resampled from all time points. \code{past} only
 #'   considers epsilon corresponding to a time point prior to the one being
-#'   resampled. \code{window} resamples the epsilon from the window from which
-#'   the moving median is taken.
+#'   resampled. \code{window} resamples the epsilon from the window given by
+#'   \code{resample_win}.
 #' @param bt_tot_rep The number of iterations for the bootstrap computation. Because of
 #'   run time, it is recommended to keep this number below 500. Defaults to 100.
-#' @param min_change_dur The minimal number of days that the confidence bounds
+#' @param min_change_dur The minimal number of time units that the confidence bounds
 #'   need to stay inside the detection bounds in order for an event to be
 #'   detected. Defaults to 84, i.e. 12 weeks.
 #' @param conf_band_lvl The confidence level for the simultaneous confidence
@@ -145,8 +145,10 @@ NULL
 #' applied for the data to obtain e.g. the confidence bands. Note that in order
 #' to run one of these functions, the output of the previous functions are needed.
 #'
-#' @return If \code{data} contains only a single source, the function returns
-#'   a list of 13 variables: \describe{
+#' @return The output \code{data} is a list containing as many elements as
+#'   the number of sources in \code{data} plus one. Every element in this list
+#'   will again be a list named after the corresponding sources. Each of
+#'   these lists contains the following elements: \describe{
 #'   \item{\code{event}}{gives a list with four values: \code{event_detected},
 #'     \code{event_onset}, \code{event_duration}, and \code{event_stop}.
 #'     \describe{\item{\code{event_detected}}{gives
@@ -179,14 +181,11 @@ NULL
 #'   \item{\code{call}}{gives the function call.}
 #'   \item{\code{col_names}}{gives the original column names of the data.}
 #'   \item{\code{time_unit}}{gives the unit of time used.}}
-#'   If \code{data} contains more than one source, the output will be a list
-#'   with one more element than the number of sources in \code{data}. Every
-#'   element in this list will again be a list named after the corresponding sources
-#'   with 13 items as described above except for the last one. The last element
-#'   in the list is called \code{event_info} and is a data frame containing the
-#'   information from \code{event} from each patient. \code{event_info} will thus
-#'   have the following columns: \code{source}, \code{event_detected},
-#'   \code{event_onset}, \code{event_duration}, and \code{event_stop}.
+#'   The last element in the output \code{data} is called \code{event_info} and
+#'   is a data frame containing the information from \code{event} from each
+#'   patient. \code{event_info} will thus have the following columns:
+#'   \code{source}, \code{event_detected}, \code{event_onset},
+#'   \code{event_duration}, and \code{event_stop}.
 #'
 #'
 #' @section Mathematical background:
@@ -266,31 +265,29 @@ NULL
 #'
 #' # Let us examine the example_data dataset
 #' head(example_data, 3)
-#' #>     subject study_day jump_height detect_lower detect_upper
-#' #> 1 Subject 1         1    55.60844         -Inf     54.41227
-#' #> 2 Subject 1         4    57.77688         -Inf     54.41227
-#' #> 3 Subject 1         7    57.59584         -Inf     54.41227
+#' #>     subject study_day jump_height
+#' #> 1 Subject 1         1    55.60844
+#' #> 2 Subject 1         4    57.77688
+#' #> 3 Subject 1         7    57.59584
 #'
 #' # We apply the main fuction of the package onto our example_data
-#' example_event <- edecob(example_data, med_win = c(-21,21), bt_tot_rep = 20,
-#'                         min_change_dur = 50)
-#' #> Warning in edecob(example_data, med_win = c(-21, 21), bt_tot_rep = 20,
-#' #> min_change_dur = 50) :
+#' example_event <- edecob(example_data, med_win = c(-21,21), bt_tot_rep = 10,
+#'                         min_change_dur = 70)
+#' #> Warning in edecob(example_data, med_win = c(-21, 21), bt_tot_rep = 10,
+#' #> min_change_dur = 70) :
 #' #>   Removing rows where value is NA
 #' names(example_event)
-#' #> [1] "Subject 1"  "Subject 2"  "Subject 3"  "event_info"
+#' #> [1] "Subject 1"  "Subject 2"  "event_info"
 #'
 #' # example_event contains the event data for each source
 #' plot(example_event$`Subject 1`)
 #' plot(example_event$`Subject 2`)
-#' plot(example_event$`Subject 3`)
 #'
 #' # example_event also contains a data frame containing the event information for all patients
 #' example_event$event_info
 #' #>           event_detected event_onset event_duration event_stop
-#' #> Subject 1           TRUE         169             87       TRUE
-#' #> Subject 2           TRUE         205             51       TRUE
-#' #> Subject 3          FALSE         306             38      FALSE
+#' #> Subject 1           TRUE         115            138       TRUE
+#' #> Subject 2          FALSE         306             68      FALSE
 #'
 #' # Using this data frame, we can draw a survival plot
 #' library("survival")
@@ -395,7 +392,7 @@ edecob <- function(data,
   }
 
   # multiple patients
-  if (length(unique(data$source)) > 1) {
+  if (!("col_names" %in% names(match.call()))) { #(length(unique(data$source)) > 1) {
     patients_event_data <-
       lapply(split(data, factor(data$source)), edecob,
              smoother, resample_method, min_change_dur,conf_band_lvl,
@@ -426,11 +423,11 @@ edecob <- function(data,
   } else if (detect == "below") {
     detection_bound_lower <- -Inf
     bound_data <- data$value[data$time_point <= data$time_point[1] + bline_period]
-    detection_bound_upper <- median(bound_data)*detect_factor
+    detection_bound_upper <- stats::median(bound_data)*detect_factor
   } else if (detect == "above") {
     detection_bound_upper <- Inf
     bound_data <- data$value[data$time_point <= data$time_point[1] + bline_period]
-    detection_bound_lower <- median(bound_data)*detect_factor
+    detection_bound_lower <- stats::median(bound_data)*detect_factor
   }
 
 

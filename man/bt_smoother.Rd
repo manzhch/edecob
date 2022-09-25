@@ -40,8 +40,8 @@ to be taken. Defaults to the moving median.}
 autoregression for the bootstrap. Default is \code{all}, meaning that the epsilon of a
 certain time point are resampled from all time points. \code{past} only
 considers epsilon corresponding to a time point prior to the one being
-resampled. \code{window} resamples the epsilon from the window from which
-the moving median is taken.}
+resampled. \code{window} resamples the epsilon from the window given by
+\code{resample_win}.}
 
 \item{smoother_pts}{A data frame containing the smoother with columns time_point
 and value. Preferably the output of one of the smoother functions within
