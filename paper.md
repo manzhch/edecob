@@ -11,7 +11,7 @@ authors:
     corresponding: true # (This is how you can denote equal contributions between multiple authors)
     affiliation: 3
   - name: Frank Dondelinger
-    orcid: 0000-0003-1816-6300
+	orcid: 0000-0003-1816-6300
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 3
   - name: Stanislas Hubeaux
@@ -31,7 +31,7 @@ bibliography: paper.bib
 
 # Summary
 
-`edecob` (**E**vent **De**tection using **Co**fidence **B**ounds) is an R package that detects sustained change (denoted “event” in this paper and in the package documentation) in high-frequency, longitudinally-collected data. We approximate the data using a smoother (e.g. moving median). The residuals of this smoother are then modelled using an autoregressive model and the corresponding error is bootstrapped to obtain pointwise confidence intervals. These confidence intervals are then used to construct simultaneous confidence bands for the smoothed data [@buhlmann1998]. We define an event as the occasion where confidence bands stay within a prespecified range compared to a reference (e.g. the baseline) for a predefined amount of time. Our approach takes into account the increased variability and variations in data density that can occur when digital assessments are performed outside of a controlled setting [@Roussos_2022]. Formally, the methodology assumes that the measurements are equally spaced and the time series remains stationary. In practice, we observed that the method provides meaningful results under a variety of conditions. The parameters of the model are adjustable to enable customization of the methodology to specific use cases. 
+`edecob` (**E**vent **De**tection using **Co**fidence **B**ounds) is an R package that detects sustained change (denoted “event” in this paper and in the package documentation) in high-frequency, longitudinally-collected data. We approximate the data using a smoother (e.g. moving median). The residuals of this smoother are then modelled using an autoregressive model and the corresponding error is bootstrapped to obtain pointwise confidence intervals. These confidence intervals are then used to construct simultaneous confidence bands for the smoothed data [@buhlmann1998]. We define an event as the occasion where confidence bands stay within a prespecified range compared to a reference (e.g. the baseline) for a predefined amount of time. Our approach takes into account the increased variability and variations in data density that can occur when convenience measurements are performed outside of a controlled setting, e.g. patients performing self-assessments using digital health technology at home instead of in a controlled clinical environment [@Roussos_2022]. Formally, the methodology assumes that the measurements are equally spaced and the time series remains stationary. In practice, we observed that the method provides meaningful results under a variety of conditions. The parameters of the model are adjustable to enable customization of the methodology to specific use cases. 
 
 
 # Statement of need
