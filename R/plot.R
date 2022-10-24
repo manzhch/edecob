@@ -250,7 +250,7 @@ plot.edecob <- function(x, ...) {
               event_data$min_change_dur, " ", event_data$time_unit, "s", sep = "")
     }
 
-    text_below_plot_CI <- paste("Level of confidence band: ", 100*event_data$conf_band_lvl, "%", sep = "")
+    text_below_plot_CI <- paste("Nominal level for confidence band: ", 100*event_data$conf_band_lvl, "%", sep = "")
 
     text_below_plot <- grid::textGrob(
       paste(text_below_plot_event, text_below_plot_min_dur, text_below_plot_CI, sep = "\n"),
