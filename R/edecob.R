@@ -295,6 +295,7 @@ NULL
 #'              data = example_event$event_info),
 #'      conf.int = FALSE, xlim = c(0,350), ylim = c(0,1), mark.time = TRUE,
 #'      xlab = "Study Day", ylab = "Survival Probability", main = "Survival plot")
+##
 edecob <- function(data,
                    smoother = "mov_med",
                    resample_method = "all",
@@ -411,6 +412,7 @@ edecob <- function(data,
     patients_event_data$event_info$event_onset <- unlist(patients_event_data$event_info$event_onset)
     patients_event_data$event_info$event_duration  <- unlist(patients_event_data$event_info$event_duration)
     patients_event_data$event_info$event_stop  <- unlist(patients_event_data$event_info$event_stop)
+    class(patients_event_data) <- "edecob"
     return(patients_event_data)
   }
 
