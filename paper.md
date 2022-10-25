@@ -82,7 +82,7 @@ The `example_event` object contains 3 objects, one corresponding to each subject
 names(example_event)
 #> [1] "Subject 1"  "Subject 2"  "event_info"
 ```
-We can then choose a subject and plot the corresponding confidence bands.
+We can then choose a subject and plot the corresponding confidence bands \autoref{fig:example}.
 
 ```
 plot(example_event$`Subject 1`)
@@ -109,7 +109,7 @@ plot(survfit(Surv(time = event_onset, event = event_detected) ~ 1,
      xlab = "Study Day", ylab = "Survival Probability", main = "Survival plot")
 ```
 
-![The survival plot generated using the code above.\label{fig:survplot}](survplot.png){width=80%}
+![The results obtained using the package can be easily further analyzed using the survival package. Here, we generate a survival plot using the example data provided with the package. \label{fig:survplot}](survplot.png){width=80%}
 
 In case of a large number of subjects, the main function edecob can trivially be parallelized by separately calling the function for every subject. In fact, the method of edecob uses one time series from a single subject to detect events for this particular subject.
 
