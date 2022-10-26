@@ -17,6 +17,7 @@ authors:
   - name: Peter Bühlmann
     orcid: 0000-0002-1782-6015
     affiliation: "1"
+affiliations:
  - name: ETH Zurich, Switzerland
    index: 1
  - name: F. Hoffmann-La Roche AG, Switzerland
