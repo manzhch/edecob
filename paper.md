@@ -83,7 +83,7 @@ The `example_event` object contains 3 objects, one corresponding to each subject
 names(example_event)
 #> [1] "Subject 1"  "Subject 2"  "event_info"
 ```
-We can then choose a subject and plot the corresponding confidence bands \autoref{fig:plot}.
+We can then choose a subject and plot the corresponding confidence bands as in \autoref{fig:plot}.
 
 ```
 plot(example_event$`Subject 1`)
