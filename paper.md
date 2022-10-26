@@ -100,7 +100,7 @@ example_event$event_info
 #> Subject 3          FALSE         306             38      FALSE
 ```
 
-Using this table, we can generate a survival plot using the survival package [@survival-package].
+Using this table, we can generate a survival plot (\autoref{fig:survplot}) using the survival package [@survival-package].
 
 ```
 library("survival")
