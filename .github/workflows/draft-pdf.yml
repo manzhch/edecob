@@ -1,6 +1,5 @@
 on: [push]
 
-jon: [push]
 
 jobs:
   paper:
