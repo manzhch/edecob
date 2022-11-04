@@ -97,7 +97,6 @@ example_event$event_info
 #>           event_detected event_onset event_duration event_stop
 #> Subject 1           TRUE         169             87       TRUE
 #> Subject 2           TRUE         205             51       TRUE
-#> Subject 3          FALSE         306             38      FALSE
 ```
 
 Using this table, we can generate a survival plot (\autoref{fig:survplot}) using the survival package [@survival-package].
@@ -110,8 +109,8 @@ plot(survfit(Surv(time = event_onset, event = event_detected) ~ 1,
      xlab = "Study Day", ylab = "Survival Probability", main = "Survival plot")
 ```
 
-![The results obtained using the package can be easily further analyzed using the survival package. Here, we generate a survival plot using the example data provided with the package. \label{fig:survplot}](survplot.png){width=80%}
+![The Kaplan-Meier curve of the proportion of events detected over time. The results obtained using the package can easily be further analyzed using the survival package. \label{fig:survplot}](survplot.png){width=80%}
 
-In case of a large number of subjects, the main function edecob can trivially be parallelized by separately calling the function for every subject. In fact, the method of edecob uses one time series from a single subject to detect events for this particular subject.
+In case of a large number of subjects, the main function edecob can trivially be parallelized by separately calling the function for every subject. In fact, even when multiple subjects are passed to the edecob function, the methodology will be applied to each subject one by one. 
 
 # References
