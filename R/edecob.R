@@ -291,7 +291,7 @@ NULL
 #' plot(survfit(Surv(time = event_onset, event = event_detected) ~ 1,
 #'              data = example_event$event_info),
 #'      conf.int = FALSE, xlim = c(0,350), ylim = c(0,1), mark.time = TRUE,
-#'      xlab = "Study Day", ylab = "Survival Probability", main = "Survival plot")
+#'      xlab = "Time point", ylab = "Survival probability", main = "Survival plot")
 ##
 edecob <- function(data,
                    smoother = "mov_med",

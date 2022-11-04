@@ -54,7 +54,7 @@ plot.edecob <- function(x, ...) {
       xlab <- event_data$col_names[2]
     }
 
-    if (!("ylab" %in% names(list(...)))) {
+    if ("ylab" %in% names(list(...))) {
       ylab <- list(...)$ylab
     } else {
       ylab <- event_data$col_names[3]
