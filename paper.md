@@ -63,7 +63,7 @@ The data frame constitutes the first argument of the main edecob function. The u
 
 * `resample_method` specifies whether bootstrapping for simultaneous confidence should be done over all residuals `all` or only over a window `window`. If a window is chosen, the window from which residuals should be bootstrapped from can be specified with `resample_win`.
 
-The use of other variables is described in the documentation. If the user wants the confidence band to reflect the local frequency of the data, resampling from all data may be more appropriate. However, if the user wants the confidence band to reflect the local variation of the data rather than the global variation, restricting the resampling over a window may be the right choice. This is especially relevant when analyzing data exhibiting varying density of occurences.
+The use of other variables is described in the documentation. If the user wants the confidence band to reflect the global frequency of the data, resampling from all data may be more appropriate. However, if the user wants the confidence band to reflect the local variation of the data rather than the global variation, restricting the resampling over a window may be the right choice. This is especially relevant when analyzing data exhibiting varying density of occurences.
 ```
 # We apply the main function of the package onto our example_data
 example_event <- edecob(example_data, 
@@ -109,8 +109,8 @@ plot(survfit(Surv(time = event_onset, event = event_detected) ~ 1,
      xlab = "Study Day", ylab = "Survival Probability", main = "Survival plot")
 ```
 
-![The Kaplan-Meier curve of the proportion of events detected over time. The results obtained using the package can easily be further analyzed using the survival package. \label{fig:survplot}](survplot.png){width=80%}
+![The Kaplan-Meier curve of the proportion of events detected over time in the example dataset. The results obtained using the package can easily be further analyzed using the survival package. \label{fig:survplot}](survplot.png){width=80%}
 
-In case of a large number of subjects, the main function edecob can trivially be parallelized by separately calling the function for every subject. In fact, even when multiple subjects are passed to the edecob function, the methodology will be applied to each subject one by one. 
+In case of a large number of subjects, the main function `edecob` can trivially be parallelized by separately calling the function for every subject. In fact, even when multiple subjects are passed to the `edecob` function, the methodology will be applied to each subject one by one. 
 
 # References
