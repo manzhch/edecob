@@ -113,4 +113,13 @@ plot(survfit(Surv(time = event_onset, event = event_detected) ~ 1,
 
 In case of a large number of subjects, the main function `edecob` can trivially be parallelized by separately calling the function for every subject. In fact, even when multiple subjects are passed to the `edecob` function, the methodology will be applied to each subject one by one. 
 
+
+
+# Disclosures
+
+The author(s) declared the following potential conflicts of interest with respect to the research, authorship, and/or publication of this article:
+Z.C.M. completed an internship at F. Hoffmann-La Roche Ltd. while researching the submitted work. During completion of the work related to this manuscript, Z.C.M. was an MSc student at the ETH Zurich, Rämistrasse 101, 8092 Zurich. S.H. is an employee and shareholder of F. Hoffmann-La Roche Ltd. F.M. is an employee and shareholder of Denali Therapeutics. During completion of the work related to this manuscript, F.M. was an employee of F. Hoffmann-La Roche Ltd.  F.D. is an employee and shareholder of Novartis. During completion of the work related to this manuscript, F.D. was an employee of F. Hoffmann-La Roche Ltd.
+
+
+
 # References
